@@ -5,7 +5,32 @@
   "projects": {
     "sigae-front": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "type": "component",
+          "skipTests": true
+        },
+        "@schematics/angular:directive": {
+          "type": "directive",
+          "skipTests": true
+        },
+        "@schematics/angular:service": {
+          "type": "service",
+          "skipTests": true
+        },
+        "@schematics/angular:guard": {
+          "typeSeparator": ".",
+          "skipTests": true
+        },
+        "@schematics/angular:interceptor": {
+          "typeSeparator": ".",
+          "skipTests": true
+        },
+        "@schematics/angular:pipe": {
+          "typeSeparator": ".",
+          "skipTests": true
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -81,5 +106,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

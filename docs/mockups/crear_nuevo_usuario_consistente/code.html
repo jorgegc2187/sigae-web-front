@@ -1,0 +1,258 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Nuevo Usuario - SIGAE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f2f4f6",
+                        "on-primary-fixed-variant": "#0039b5",
+                        "inverse-surface": "#2d3133",
+                        "primary-container": "#1d4ed8",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "tertiary-container": "#a73400",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#fefcff",
+                        "on-primary-fixed": "#001551",
+                        "surface-variant": "#e0e3e5",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary-fixed": "#00174b",
+                        "on-tertiary-fixed-variant": "#832700",
+                        "on-surface": "#191c1e",
+                        "on-secondary": "#ffffff",
+                        "outline": "#747686",
+                        "inverse-primary": "#b7c4ff",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-tertiary-fixed": "#390c00",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d8dadc",
+                        "surface": "#f7f9fb",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#dce1ff",
+                        "on-surface-variant": "#434655",
+                        "on-background": "#191c1e",
+                        "secondary": "#0051d5",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbcf",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c4c5d7",
+                        "background": "#f7f9fb",
+                        "secondary-container": "#316bf3",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#ffffff",
+                        "primary": "#0037b0",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#7f2500",
+                        "tertiary-fixed-dim": "#ffb59c",
+                        "on-tertiary-container": "#ffc9b7",
+                        "surface-container": "#eceef0",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container-high": "#e6e8ea",
+                        "on-primary-container": "#cad3ff",
+                        "surface-tint": "#2151da"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen">
+<!-- Shell: SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[240px] z-50 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col py-6 px-4">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: &quot;FILL&quot; 1;">account_balance</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-blue-700 dark:text-blue-400 leading-tight" style="">SIGAE</h1>
+<p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500" style="">Gestión Global</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="grid_view" style="color: rgb(100, 116, 139);">grid_view</span>
+<span class="text-sm" style="">Dashboard</span>
+</a>
+<a class="flex items-center px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-[#1D4ED8] dark:text-blue-400 border-l-[3px] border-[#1D4ED8] font-semibold cursor-pointer active:scale-95 transition-all duration-200" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="inventory_2" style="color: rgb(29, 78, 216);">inventory_2</span>
+<span class="text-sm" style="">Inventario</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="location_on" style="color: rgb(100, 116, 139);">location_on</span>
+<span class="text-sm" style="">Ubicaciones</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="swap_horiz" style="color: rgb(100, 116, 139);">swap_horiz</span>
+<span class="text-sm flex-1" style="">Préstamos</span>
+<span class="bg-[#B91C1C] text-white text-[11px] font-bold px-2 py-0.5 rounded-full" style="">3</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="group" style="color: rgb(100, 116, 139);">group</span>
+<span class="text-sm" style="">Docentes</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" style="color: rgb(100, 116, 139);">person</span>
+<span class="text-sm" style="">Usuarios</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="bar_chart" style="color: rgb(100, 116, 139);">bar_chart</span>
+<span class="text-sm" style="">Reportes</span>
+</a>
+<div class="my-2 border-t border-[#E2E8F0]"></div>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="settings" style="color: rgb(100, 116, 139);">settings</span>
+<span class="text-sm" style="">Configuración</span>
+</a>
+</nav>
+</aside>
+<!-- Shell: TopNavBar -->
+<header class="fixed top-0 right-0 left-[240px] h-16 z-40 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none flex justify-between items-center px-8">
+<div class="flex-1"></div>
+<div class="flex items-center gap-6">
+<button class="w-9 h-9 flex items-center justify-center text-[#64748B] hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" style="">
+<span class="material-symbols-outlined !text-[20px]" style="">search</span>
+</button>
+<div class="flex items-center gap-3">
+<button class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" style="">
+<span class="material-symbols-outlined" style="">notifications</span>
+<span class="absolute top-1 right-1 w-4 h-4 bg-[#B91C1C] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white" style="">5</span>
+</button>
+<button class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" style="">
+<span class="material-symbols-outlined" style="">settings</span>
+</button>
+</div>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-[13px] font-medium text-slate-900 leading-none" style="">Admin Principal</p>
+<p class="text-[11px] text-slate-400 leading-none mt-1" style="">Gestión Global</p>
+</div>
+<button class="flex items-center gap-2 cursor-pointer transition-all" style="">
+<img alt="Avatar" class="w-9 h-9 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhSpeB-0zdwNAlwwa2GSVzRA0K6w-s_fIFAiZkl7llNZbHyhqA0pi2d8KP8X9WggBUDjwYca6DhkH5WiJEQUq-A03jS18qqIvK_SdzRWANDFfLTnG83tGZcC8EKQgX03tFmh-AVbst2vUj0M95_3AsXZXKTbJYwUnKt3stjNKgSCLyoEQRXSbaayq1INRWrvp6AHsFtesL4TNSyCF_WHpO3At0eIo67lcnf9guSVw73mF9nQ93YWOCabwnKxxrOpEomakjOte9sLjM" style="">
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[240px] mt-16 p-6 min-h-[calc(100vh-4rem)] pb-24">
+<div class="max-w-[640px] mx-auto">
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant mb-2">
+<a class="hover:text-primary transition-colors" href="#" style="">Usuarios</a>
+<span class="material-symbols-outlined text-[16px]" style="">chevron_right</span>
+<span class="text-on-surface font-medium" style="">Crear Usuario</span>
+</div>
+<h2 class="text-[24px] font-bold text-on-surface" style="">Crear Usuario</h2>
+</div>
+</div>
+<!-- Form Card -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-sm p-6">
+<form>
+<!-- Información Personal Section -->
+<h3 class="text-[16px] font-semibold text-on-surface mb-6 border-b border-surface-variant pb-3 flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-primary text-[20px]" style="">person</span>
+                        Información Personal
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-8">
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" for="firstName" style="">Nombre <span class="text-error" style="">*</span></label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="firstName" name="firstName" placeholder="Ej. Juan" required="" type="text">
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" for="lastName" style="">Apellido <span class="text-error" style="">*</span></label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="lastName" name="lastName" placeholder="Ej. Pérez" required="" type="text">
+</div>
+<div class="col-span-1 md:col-span-2">
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" for="email" style="">Correo electrónico <span class="text-error" style="">*</span></label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="email" name="email" placeholder="ejemplo@institucion.edu.pe" required="" type="email">
+</div>
+</div>
+<!-- Rol y Acceso Section -->
+<h3 class="text-[16px] font-semibold text-on-surface mb-6 border-b border-surface-variant pb-3 flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-primary text-[20px]" style="">badge</span>
+                        Rol y Acceso
+                    </h3>
+<div class="grid grid-cols-1 gap-y-5 mb-8">
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" for="role" style="">Rol <span class="text-error" style="">*</span></label>
+<select class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow appearance-none" id="role" name="role" required="">
+<option disabled="" selected="" value="">Selecciona un rol</option>
+<option value="Administrador">Administrador</option>
+<option value="Encargado">Encargado</option>
+<option value="Director">Director</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Ubicaciones asignadas</label>
+<div class="w-full min-h-9 p-1.5 bg-surface-container-low border border-outline-variant rounded-md focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-shadow flex flex-wrap gap-2 items-center cursor-text">
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-surface-variant text-on-surface" style="">
+                                    Laboratorio Principal
+                                    <button class="ml-1 text-on-surface-variant hover:text-on-surface focus:outline-none" type="button" style="">
+<span class="material-symbols-outlined text-[14px] leading-none" style="">close</span>
+</button>
+</span>
+<input class="flex-1 min-w-[120px] bg-transparent border-none focus:ring-0 text-sm p-0 h-[24px] outline-none" placeholder="Añadir ubicación..." type="text">
+</div>
+</div>
+</div>
+<!-- Seguridad Section -->
+<h3 class="text-[16px] font-semibold text-on-surface mb-6 border-b border-surface-variant pb-3 flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-primary text-[20px]" style="">security</span>
+                        Seguridad
+                    </h3>
+<div class="mb-8">
+<label class="flex items-center cursor-pointer" style="">
+<div class="relative">
+<input class="sr-only" type="checkbox">
+<div class="block w-10 h-6 rounded-full bg-slate-300"></div>
+<div class="dot absolute top-1 bg-white w-4 h-4 rounded-full transition left-1"></div>
+</div>
+<div class="ml-3 text-sm text-on-surface font-medium" style="">
+                                Enviar invitación por correo
+                            </div>
+</label>
+<p class="text-xs text-on-surface-variant mt-1 ml-[52px]" style="">El usuario recibirá un enlace para establecer su contraseña.</p><div class="mt-6 ml-[52px]">
+<label class="block text-sm font-medium text-secondary mb-1.5" for="password" style="">Contraseña <span class="text-error" style="">*</span></label>
+<input class="w-full h-9 px-3 bg-white border border-[#E2E8F0] rounded-[6px] text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="password" name="password" placeholder="••••••••" required="" type="password">
+<p class="text-xs text-slate-500 mt-1.5" style="">Mínimo 8 caracteres, incluye letras y números.</p>
+</div>
+</div>
+</form>
+</div>
+</div>
+<!-- Sticky Footer -->
+<div class="fixed bottom-0 left-[240px] right-0 bg-white border-t border-slate-200 p-4 px-6 flex justify-end gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30">
+<button class="px-5 h-9 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors" style="">
+        Cancelar
+    </button>
+<button class="px-6 h-9 rounded-lg bg-[#1D4ED8] text-white text-sm font-medium hover:bg-[#1D4ED8]/90 transition-colors shadow-sm flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-[18px]" style="">save</span>
+        Crear Usuario
+    </button>
+</div>
+</main>
+</body></html>

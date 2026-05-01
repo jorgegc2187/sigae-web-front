@@ -1,0 +1,33 @@
+<div class="p-8">
+  <div class="flex justify-between items-center mb-8">
+    <h2 class="text-2xl font-bold text-base-content">Ubicaciones</h2>
+
+    <div class="flex items-center gap-4">
+      <label
+        class="input border border-base-300 flex items-center gap-2 w-[320px] bg-base-100 rounded-lg focus-within:border-primary transition-all"
+      >
+        <span class="material-symbols-outlined text-base-content/50 text-lg">search</span>
+        <input
+          type="text"
+          class="grow placeholder-shown:opacity-50 focus:outline-none"
+          placeholder="Buscar ubicación..."
+        />
+      </label>
+      <a routerLink="/locations/new" class="btn btn-primary shadow-sm">
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        Nueva Ubicación
+      </a>
+    </div>
+  </div>
+
+  <!-- Grid Layout -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (location of mockLocations(); track location.id) {
+      <app-location-card
+        [location]="location"
+        (edit)="onEdit($event)"
+        (delete)="onDelete($event)"
+      />
+    }
+  </div>
+</div>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SIGAE - Registrar Activo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f2f4f6",
+                        "on-primary-fixed-variant": "#0039b5",
+                        "inverse-surface": "#2d3133",
+                        "primary-container": "#1d4ed8",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "tertiary-container": "#a73400",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#fefcff",
+                        "on-primary-fixed": "#001551",
+                        "surface-variant": "#e0e3e5",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary-fixed": "#00174b",
+                        "on-tertiary-fixed-variant": "#832700",
+                        "on-surface": "#191c1e",
+                        "on-secondary": "#ffffff",
+                        "outline": "#747686",
+                        "inverse-primary": "#b7c4ff",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-tertiary-fixed": "#390c00",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d8dadc",
+                        "surface": "#f7f9fb",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#dce1ff",
+                        "on-surface-variant": "#434655",
+                        "on-background": "#191c1e",
+                        "secondary": "#0051d5",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbcf",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c4c5d7",
+                        "background": "#f7f9fb",
+                        "secondary-container": "#316bf3",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "on-error": "#ffffff",
+                        "primary": "#0037b0",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#7f2500",
+                        "tertiary-fixed-dim": "#ffb59c",
+                        "on-tertiary-container": "#ffc9b7",
+                        "surface-container": "#eceef0",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container-high": "#e6e8ea",
+                        "on-primary-container": "#cad3ff",
+                        "surface-tint": "#2151da"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen">
+<!-- Shell: SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[240px] z-50 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col py-6 px-4">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style='font-variation-settings: "FILL" 1;'>account_balance</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-blue-700 dark:text-blue-400 leading-tight" style="">SIGAE</h1>
+<p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500" style="">Gestión Global</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="grid_view" style="color: rgb(100, 116, 139);">grid_view</span>
+<span class="text-sm" style="">Dashboard</span>
+</a>
+<a class="flex items-center px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-[#1D4ED8] dark:text-blue-400 border-l-[3px] border-[#1D4ED8] font-semibold cursor-pointer active:scale-95 transition-all duration-200" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="inventory_2" style="color: rgb(29, 78, 216);">inventory_2</span>
+<span class="text-sm" style="">Inventario</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="location_on" style="color: rgb(100, 116, 139);">location_on</span>
+<span class="text-sm" style="">Ubicaciones</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="swap_horiz" style="color: rgb(100, 116, 139);">swap_horiz</span>
+<span class="text-sm flex-1" style="">Préstamos</span>
+<span class="bg-[#B91C1C] text-white text-[11px] font-bold px-2 py-0.5 rounded-full" style="">3</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="group" style="color: rgb(100, 116, 139);">group</span>
+<span class="text-sm" style="">Docentes</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" style="color: rgb(100, 116, 139);">person</span>
+<span class="text-sm" style="">Usuarios</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="bar_chart" style="color: rgb(100, 116, 139);">bar_chart</span>
+<span class="text-sm" style="">Reportes</span>
+</a>
+<div class="my-2 border-t border-[#E2E8F0]"></div>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#" style="">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="settings" style="color: rgb(100, 116, 139);">settings</span>
+<span class="text-sm" style="">Configuración</span>
+</a>
+</nav>
+</aside>
+<!-- Shell: TopNavBar -->
+<header class="fixed top-0 right-0 left-[240px] h-16 z-40 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none flex justify-between items-center px-8">
+<div class="flex-1"></div>
+<div class="flex items-center gap-6">
+<button class="w-9 h-9 flex items-center justify-center text-[#64748B] hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" style="">
+<span class="material-symbols-outlined !text-[20px]" style="">search</span>
+</button>
+<div class="flex items-center gap-3">
+<button class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" style="">
+<span class="material-symbols-outlined" style="">notifications</span>
+<span class="absolute top-1 right-1 w-4 h-4 bg-[#B91C1C] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white" style="">5</span>
+</button>
+<button class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer" style="">
+<span class="material-symbols-outlined" style="">settings</span>
+</button>
+</div>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-[13px] font-medium text-slate-900 leading-none" style="">Admin Principal</p>
+<p class="text-[11px] text-slate-400 leading-none mt-1" style="">Gestión Global</p>
+</div>
+<button class="flex items-center gap-2 cursor-pointer transition-all" style="">
+<img alt="Avatar" class="w-9 h-9 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhSpeB-0zdwNAlwwa2GSVzRA0K6w-s_fIFAiZkl7llNZbHyhqA0pi2d8KP8X9WggBUDjwYca6DhkH5WiJEQUq-A03jS18qqIvK_SdzRWANDFfLTnG83tGZcC8EKQgX03tFmh-AVbst2vUj0M95_3AsXZXKTbJYwUnKt3stjNKgSCLyoEQRXSbaayq1INRWrvp6AHsFtesL4TNSyCF_WHpO3At0eIo67lcnf9guSVw73mF9nQ93YWOCabwnKxxrOpEomakjOte9sLjM" style=""/>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[240px] mt-16 p-6 min-h-[calc(100vh-4rem)]">
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between max-w-4xl mx-auto w-full">
+<div>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant mb-2">
+<a class="hover:text-primary transition-colors" href="#" style="">Inventario</a>
+<span class="material-symbols-outlined text-[16px]" style="">chevron_right</span>
+<span class="text-on-surface font-medium" style="">Registrar Activo</span>
+</div>
+<h2 class="text-[24px] font-bold text-on-surface" style="">Registrar Activo</h2>
+</div>
+</div>
+<div class="max-w-4xl mx-auto w-full space-y-6">
+<!-- Form Content -->
+<div class="space-y-6">
+<!-- General Information Card -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-sm p-6">
+<h3 class="text-[16px] font-semibold text-on-surface mb-6 border-b border-surface-variant pb-3 flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-primary text-[20px]" style="">info</span>
+                        Información General
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+<div class="col-span-1 md:col-span-2">
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Nombre del Activo <span class="text-error" style="">*</span></label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" placeholder="Ej. Proyector Epson EB-X51" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Código SIGAE</label>
+<div class="relative">
+<input class="w-full h-9 pl-3 pr-10 bg-surface-container border border-surface-variant rounded-md text-sm text-on-surface-variant cursor-not-allowed" disabled="" type="text" value="ACT-2023-0894"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" style="">lock</span>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-1" style="">Autogenerado por el sistema.</p>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Categoría <span class="text-error" style="">*</span></label>
+<select class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow appearance-none">
+<option disabled="" selected="" value="">Seleccione una categoría</option>
+<option>Equipos Tecnológicos</option>
+<option>Mobiliario Escolar</option>
+<option>Material de Laboratorio</option>
+<option>Instrumentos Musicales</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Tipo <span class="text-error" style="">*</span></label>
+<select class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow appearance-none">
+<option disabled="" selected="" value="">Seleccione un tipo</option>
+<option>Proyector</option>
+<option>Computadora</option>
+<option>Laptop</option>
+<option>Monitor</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Ubicación Actual <span class="text-error" style="">*</span></label>
+<select class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow appearance-none">
+<option disabled="" selected="" value="">Asignar ubicación</option>
+<option>Aula 101 - Pabellón A</option>
+<option>Laboratorio de Cómputo 1</option>
+<option>Biblioteca Central</option>
+<option>Almacén General</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Número de Serie</label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" placeholder="Escribir número de serie" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Código de Barras (Opcional)</label>
+<div class="relative">
+<input class="w-full h-9 pl-3 pr-10 bg-surface-container-low border-2 border-dashed border-primary/50 rounded-md text-sm text-on-surface focus:outline-none focus:border-solid focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/70" placeholder="Escanear código..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-primary text-[20px]" style="">barcode_scanner</span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Proveedor</label>
+<select class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow appearance-none">
+<option disabled="" selected="" value="">Seleccionar proveedor</option>
+<option>TechCorp Perú S.A.C</option>
+<option>Muebles Educativos S.R.L.</option>
+<option>Ministerio de Educación</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Fecha de Adquisición</label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" type="date"/>
+</div>
+<div class="col-span-1 md:col-span-2 pt-4 border-t border-surface-variant grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" style="">Cantidad <span class="text-error" style="">*</span></label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" type="number" value="1"/>
+<p class="text-[11px] text-on-surface-variant/80 mt-1.5 leading-tight" style="">Si registras más de 1 unidad, se generarán códigos SIGAE correlativos automáticamente (ej: ACT-2023-0894 al ACT-2023-0913).</p>
+</div>
+<div class="bg-[#DBEAFE] border border-[#BFDBFE] rounded-[6px] p-3 flex gap-2.5">
+<span class="material-symbols-outlined text-[#1D4ED8] text-[20px]" style="">info</span>
+<p class="text-[12px] text-[#1D4ED8] leading-tight mt-0.5" style="">En registros múltiples, el Número de Serie y el Código de Barras se pueden completar individualmente desde el detalle de cada activo.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Type Attributes Grid -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-sm p-6">
+<div class="flex items-center justify-between mb-6 border-b border-surface-variant pb-3">
+<h3 class="text-[16px] font-semibold text-on-surface flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-primary text-[20px]" style="">tune</span>
+                            Atributos Específicos</h3>
+<span class="text-xs font-medium text-primary bg-primary-container/10 px-2.5 py-1 rounded-full" style="">Tipo: Proyector</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="p-4 rounded-lg bg-surface-container-low border border-surface-variant hover:border-outline-variant transition-colors group">
+<label class="block text-xs font-medium text-on-surface-variant uppercase tracking-wider mb-2" style="">Marca</label>
+<input class="w-full h-8 bg-surface-container-lowest border border-outline-variant/50 rounded-md text-sm px-3 focus:outline-none focus:border-primary group-hover:border-outline-variant transition-colors" placeholder="Ej. Epson" type="text"/>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low border border-surface-variant hover:border-outline-variant transition-colors group">
+<label class="block text-xs font-medium text-on-surface-variant uppercase tracking-wider mb-2" style="">Modelo</label>
+<input class="w-full h-8 bg-surface-container-lowest border border-outline-variant/50 rounded-md text-sm px-3 focus:outline-none focus:border-primary group-hover:border-outline-variant transition-colors" placeholder="Ej. PowerLite W49" type="text"/>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low border border-surface-variant hover:border-outline-variant transition-colors group">
+<label class="block text-xs font-medium text-on-surface-variant uppercase tracking-wider mb-2" style="">Lúmenes</label>
+<input class="w-full h-8 bg-surface-container-lowest border border-outline-variant/50 rounded-md text-sm px-3 focus:outline-none focus:border-primary group-hover:border-outline-variant transition-colors" placeholder="Ej. 3800" type="text"/>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low border border-surface-variant hover:border-outline-variant transition-colors group">
+<label class="block text-xs font-medium text-on-surface-variant uppercase tracking-wider mb-2" style="">Resolución Nativa</label>
+<input class="w-full h-8 bg-surface-container-lowest border border-outline-variant/50 rounded-md text-sm px-3 focus:outline-none focus:border-primary group-hover:border-outline-variant transition-colors" placeholder="Ej. 1920 x 1080" type="text"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Footer Actions -->
+<div class="fixed bottom-0 left-[240px] right-0 bg-surface-container-lowest border-t border-surface-variant p-4 px-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30">
+<div class="max-w-4xl mx-auto flex justify-between items-center w-full">
+<div class="text-[13px] text-[#475569] font-medium" style="">
+    Se registrarán 3 activos · Códigos: ACT-2023-0894 al ACT-2023-0896
+</div>
+<div class="flex gap-3">
+<button class="px-5 h-9 rounded-lg border border-outline text-sm font-medium text-on-surface hover:bg-surface-container-low transition-colors" style="">
+                Cancelar
+            </button>
+<button class="px-6 h-9 rounded-lg bg-[#1D4ED8] text-white text-sm font-medium hover:bg-blue-800 transition-colors shadow-sm flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-[18px]" style="">save</span>
+                Registrar 3 activos
+            </button>
+</div>
+</div>
+</div>
+<!-- Add padding to bottom to account for fixed footer -->
+<div class="h-20"></div>
+</main>
+</body></html>

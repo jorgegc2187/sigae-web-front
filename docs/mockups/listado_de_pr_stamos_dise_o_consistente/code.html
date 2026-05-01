@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Préstamos de Activos - SIGAE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#dbe1ff",
+                        "on-primary-container": "#cad3ff",
+                        "on-surface": "#191c1e",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f2f4f6",
+                        "inverse-primary": "#b7c4ff",
+                        "surface-container-highest": "#e0e3e5",
+                        "tertiary": "#7f2500",
+                        "surface-tint": "#2151da",
+                        "on-tertiary-container": "#ffc9b7",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#832700",
+                        "primary-container": "#1d4ed8",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-fixed": "#001551",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#0039b5",
+                        "on-tertiary-fixed": "#390c00",
+                        "surface-container": "#eceef0",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "secondary": "#0051d5",
+                        "on-surface-variant": "#434655",
+                        "inverse-on-surface": "#eff1f3",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#00174b",
+                        "on-secondary-container": "#fefcff",
+                        "tertiary-fixed-dim": "#ffb59c",
+                        "surface-variant": "#e0e3e5",
+                        "surface-dim": "#d8dadc",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "tertiary-fixed": "#ffdbcf",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "secondary-container": "#316bf3",
+                        "primary": "#0037b0",
+                        "tertiary-container": "#a73400",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c4c5d7",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e6e8ea",
+                        "primary-fixed": "#dce1ff",
+                        "outline": "#747686",
+                        "on-secondary": "#ffffff",
+                        "background": "#f7f9fb",
+                        "surface": "#f7f9fb",
+                        "on-background": "#191c1e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-on-surface antialiased overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[240px] z-50 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col py-6 px-4">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style='font-variation-settings: "FILL" 1;'>account_balance</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-blue-700 dark:text-blue-400 leading-tight">SIGAE</h1>
+<p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500">Gestión Global</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="grid_view" style="color: #64748B;">grid_view</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="inventory_2" style="color: #64748B;">inventory_2</span>
+<span class="text-sm">Inventario</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="location_on" style="color: #64748B;">location_on</span>
+<span class="text-sm">Ubicaciones</span>
+</a>
+<a class="flex items-center px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-[#1D4ED8] dark:text-blue-400 border-l-[3px] border-[#1D4ED8] font-semibold cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="swap_horiz" style="color: #1D4ED8;">swap_horiz</span>
+<span class="text-sm flex-1">Préstamos</span>
+<span class="bg-[#B91C1C] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">3</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="group" style="color: #64748B;">group</span>
+<span class="text-sm">Docentes</span>
+</a><a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" style="color: #64748B;">person</span>
+<span class="text-sm">Usuarios</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="bar_chart" style="color: #64748B;">bar_chart</span>
+<span class="text-sm">Reportes</span>
+</a>
+<div class="my-2 border-t border-[#E2E8F0]"></div>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="settings" style="color: #64748B;">settings</span>
+<span class="text-sm">Configuración</span>
+</a>
+</nav>
+</aside>
+<!-- TopAppBar -->
+<header class="h-16 bg-white border-b border-slate-200 flex justify-between items-center px-8 flex-shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold text-slate-900 font-headline">Préstamos</h2>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-slate-500 hover:text-slate-700 transition-colors cursor-pointer">
+<span class="material-symbols-outlined !text-[22px]">search</span>
+</button>
+<button class="relative text-slate-500 hover:text-slate-700 transition-colors cursor-pointer">
+<span class="material-symbols-outlined !text-[22px]">notifications</span>
+<span class="absolute -top-1 -right-1 w-4 h-4 bg-[#B91C1C] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white box-content">5</span>
+</button>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="flex items-center gap-3 cursor-pointer">
+<div class="text-right">
+<p class="text-sm font-medium text-slate-900 leading-none">Admin Principal</p>
+<p class="text-xs text-slate-400 leading-none mt-1">Gestión Global</p>
+</div>
+<img alt="Avatar" class="w-9 h-9 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhSpeB-0zdwNAlwwa2GSVzRA0K6w-s_fIFAiZkl7llNZbHyhqA0pi2d8KP8X9WggBUDjwYca6DhkH5WiJEQUq-A03jS18qqIvK_SdzRWANDFfLTnG83tGZcC8EKQgX03tFmh-AVbst2vUj0M95_3AsXZXKTbJYwUnKt3stjNKgSCLyoEQRXSbaayq1INRWrvp6AHsFtesL4TNSyCF_WHpO3At0eIo67lcnf9guSVw73mF9nQ93YWOCabwnKxxrOpEomakjOte9sLjM"/>
+</div>
+</div>
+</header>
+<!-- Main Content Wrapper -->
+<main class="ml-[240px] mt-16 p-8 min-h-[calc(100vh-64px)] overflow-y-auto">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Page Header -->
+<div class="mb-8">
+<h2 class="text-[24px] font-[700] text-slate-900 dark:text-white leading-tight">Préstamos de Activos</h2>
+<p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Seguimiento y control de activos entregados a docentes y personal.</p>
+</div>
+<!-- Top Actions Bar -->
+<div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<!-- Filters -->
+<div class="flex space-x-1 rounded-lg bg-surface-container-low p-1 border border-slate-200 dark:border-slate-800 dark:bg-slate-900/50">
+<button class="rounded-md px-3 py-1.5 text-sm font-medium bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white">Todos</button>
+<button class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-white/50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50">Activos</button>
+<button class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-white/50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50 flex items-center gap-1">
+            Vencidos <span class="flex h-4 w-4 items-center justify-center rounded-full bg-error/10 text-[10px] text-error font-bold">3</span>
+</button>
+<button class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-white/50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50">Devueltos</button>
+</div>
+<div class="flex w-full sm:w-auto items-center gap-3">
+<!-- Search -->
+<div class="relative w-full sm:w-64">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-slate-400 text-[18px]" data-icon="search">search</span>
+</div>
+<input class="block w-full rounded-lg border-slate-300 pl-10 pr-3 py-2 text-sm focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white" placeholder="Buscar préstamo..." type="text"/>
+</div>
+<!-- Primary Action -->
+<button class="flex items-center justify-center gap-2 rounded-lg bg-[#1D4ED8] px-4 py-2 text-sm font-medium text-white hover:bg-[#2563EB] transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex-shrink-0 h-[36px]">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+            Nuevo Préstamo
+          </button>
+</div>
+</div>
+<!-- Data Table Card -->
+<div class="rounded-xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+<thead class="bg-slate-100 text-xs uppercase text-slate-500 font-[600] dark:bg-slate-800/50 dark:text-slate-400">
+<tr>
+<th class="w-10 px-4 py-3" scope="col">
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700" type="checkbox"/>
+</div>
+</th>
+<th class="px-4 py-3" scope="col">Docente</th>
+<th class="px-4 py-3" scope="col">Activos</th><th class="px-4 py-3" scope="col">Ubicación</th>
+<th class="px-4 py-3" scope="col">Fecha Préstamo</th>
+<th class="px-4 py-3" scope="col">Fecha Límite</th>
+<th class="px-4 py-3" scope="col">Estado</th>
+<th class="px-4 py-3 text-right" scope="col">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-body">
+<!-- Row 1: Active -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-4 py-3">
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700" type="checkbox"/>
+</div>
+</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-xs dark:bg-blue-900/50 dark:text-blue-300">
+                      MP
+                    </div>
+<div>
+<p class="font-medium text-slate-900 dark:text-slate-100">María Pérez</p>
+<p class="text-xs text-slate-500">Matemáticas</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-2">
+<span>Laptop HP ProBook</span>
+</div>
+</td><td class="px-4 py-3 text-slate-500">Aula de Cómputo</td>
+<td class="px-4 py-3 text-slate-500">12 Oct 2023</td>
+<td class="px-4 py-3 text-slate-500">15 Dic 2023</td>
+<td class="px-4 py-3">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-[#DCFCE7] px-2.5 py-0.5 text-xs font-medium text-[#15803D] dark:bg-green-900/20 dark:text-green-400">
+<span class="h-1.5 w-1.5 rounded-full bg-[#15803D]"></span>
+                    Activo
+                  </span>
+</td>
+<td class="px-4 py-3 text-right">
+<a class="text-primary-container font-medium hover:text-[#2563EB] text-sm flex items-center justify-end gap-1" href="#">
+                    Ver <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</td>
+</tr>
+<!-- Row 2: Overdue (Vencido) -->
+<tr class="bg-[#FEF2F2]/50 hover:bg-[#FEF2F2] dark:bg-red-900/10 dark:hover:bg-red-900/20 transition-colors">
+<td class="px-4 py-3">
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700" type="checkbox"/>
+</div>
+</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden dark:bg-slate-700">
+<img alt="Avatar Juan" class="h-full w-full object-cover" data-alt="portrait of a smiling man with short hair and glasses wearing a grey sweater" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBcRgB8V7tMD_pm0gkFZB1iM5JzeLNpcdZOFxFLLfqq4OT8vEHw6UZPN59c7bfib4HoXZrBoTi_CSDc8ZhhcYl7KwQhic0IMD2tJYtEmROJ6sTN2Z4AnAum7RTQsdeskEKZjavUd5uh0PuHZNy7P84m0BgImYGvG_BUxnr4OON94wXoSBabCUw7ErLvOKd9FU9WMCr7iC3VsR_qx0r4drrPhHEWvj2Xmik7qXHxbblx7xvNpLIXPBYcS_FOJI4RKluGsEfsa8niNc8"/>
+</div>
+<div>
+<p class="font-medium text-slate-900 dark:text-slate-100">Juan Carlos Ramírez</p>
+<p class="text-xs text-slate-500">Ciencias</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span>Proyector Epson</span>
+</div>
+<span class="inline-flex w-fit items-center rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                      +2 más
+                    </span>
+</div>
+</td><td class="px-4 py-3 text-slate-500">Biblioteca</td>
+<td class="px-4 py-3 text-slate-500">01 Sep 2023</td>
+<td class="px-4 py-3 text-error font-medium">30 Sep 2023</td>
+<td class="px-4 py-3">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-[#FEE2E2] px-2.5 py-0.5 text-xs font-medium text-[#B91C1C] dark:bg-red-900/20 dark:text-red-400">
+<span class="h-1.5 w-1.5 rounded-full bg-[#B91C1C]"></span>
+                    Vencido
+                  </span>
+</td>
+<td class="px-4 py-3 text-right">
+<a class="text-primary-container font-medium hover:text-[#2563EB] text-sm flex items-center justify-end gap-1" href="#">
+                    Ver <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</td>
+</tr>
+<!-- Row 3: Returned -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors opacity-75">
+<td class="px-4 py-3">
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-slate-600 dark:bg-slate-700" type="checkbox"/>
+</div>
+</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-semibold text-xs dark:bg-purple-900/50 dark:text-purple-300">
+                      LC
+                    </div>
+<div>
+<p class="font-medium text-slate-900 dark:text-slate-100">Laura Castillo</p>
+<p class="text-xs text-slate-500">Historia</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<div class="flex items-center gap-2">
+<span>Tablet Samsung Galaxy</span>
+</div>
+</td><td class="px-4 py-3 text-slate-500">Dirección</td>
+<td class="px-4 py-3 text-slate-500">15 Ago 2023</td>
+<td class="px-4 py-3 text-slate-500">15 Sep 2023</td>
+<td class="px-4 py-3">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-[#F1F5F9] px-2.5 py-0.5 text-xs font-medium text-[#475569] dark:bg-slate-800 dark:text-slate-400">
+<span class="h-1.5 w-1.5 rounded-full bg-[#64748B]"></span>
+                    Devuelto
+                  </span>
+</td>
+<td class="px-4 py-3 text-right">
+<a class="text-primary-container font-medium hover:text-[#2563EB] text-sm flex items-center justify-end gap-1" href="#">
+                    Ver <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6 dark:border-slate-800 dark:bg-slate-900">
+<div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+<div>
+<p class="text-sm text-slate-700 dark:text-slate-300">
+                Mostrando <span class="font-medium">1</span> a <span class="font-medium">3</span> de <span class="font-medium">45</span> resultados
+              </p>
+</div>
+<div>
+<nav aria-label="Pagination" class="isolate inline-flex -space-x-px rounded-md shadow-sm">
+<a class="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 dark:ring-slate-700 dark:hover:bg-slate-800" href="#">
+<span class="sr-only">Anterior</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_left">chevron_left</span>
+</a>
+<a aria-current="page" class="relative z-10 inline-flex items-center bg-[#1D4ED8] px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" href="#">1</a>
+<a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 dark:text-white dark:ring-slate-700 dark:hover:bg-slate-800" href="#">2</a>
+<a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 dark:text-white dark:ring-slate-700 dark:hover:bg-slate-800" href="#">3</a>
+<span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-inset ring-slate-300 dark:text-slate-300 dark:ring-slate-700">...</span>
+<a class="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 dark:ring-slate-700 dark:hover:bg-slate-800" href="#">
+<span class="sr-only">Siguiente</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_right">chevron_right</span>
+</a>
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

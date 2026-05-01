@@ -1,0 +1,45 @@
+<header class="fixed top-0 right-0 left-[240px] h-16 z-40 bg-base-100 border-b border-base-300 shadow-sm flex justify-between items-center px-8">
+  <div class="flex items-center gap-4">
+    <h2 class="text-xl font-bold text-base-content tracking-tight font-headline">Dashboard</h2>
+    <div class="h-6 w-px bg-base-300 mx-2"></div>
+    <div class="flex items-center gap-2 text-xs font-medium text-base-content/60">
+      <span class="text-primary font-bold">Resumen Operativo Global</span>
+    </div>
+  </div>
+  
+  <div class="flex items-center gap-6">
+    <!-- 1. Search -->
+    <button class="w-9 h-9 flex items-center justify-center text-base-content/60 hover:text-primary hover:bg-base-200 rounded-lg transition-colors cursor-pointer">
+      <span class="material-symbols-outlined !text-[20px]">search</span>
+    </button>
+
+    <!-- 2. Notifications -->
+    <button class="w-9 h-9 relative flex items-center justify-center text-base-content/60 hover:text-primary hover:bg-base-200 rounded-lg transition-colors cursor-pointer">
+      <span class="material-symbols-outlined">notifications</span>
+      <span class="absolute top-1 right-1 w-4 h-4 bg-error text-error-content text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-base-100">5</span>
+    </button>
+
+    <!-- 3. Theme toggle (contrast) -->
+    <button class="w-9 h-9 flex items-center justify-center text-base-content/60 hover:text-primary hover:bg-base-200 rounded-lg transition-colors cursor-pointer"
+            (click)="themeService.toggle()"
+            title="Alternar tema">
+      <span class="material-symbols-outlined !text-[20px]">contrast</span>
+    </button>
+
+    <div class="h-8 w-px bg-base-300"></div>
+
+    <!-- 4. Soporte -->
+    <button class="text-sm text-base-content/60 hover:text-primary transition-colors cursor-pointer">Soporte</button>
+
+    <!-- 5+6. Nombre + rol + avatar -->
+    <div class="flex items-center gap-3 cursor-pointer group">
+      <div class="text-right">
+        <p class="text-[13px] font-medium text-base-content leading-none group-hover:text-primary transition-colors">Admin Principal</p>
+        <p class="text-[11px] text-base-content/50 leading-none mt-1">Administrador</p>
+      </div>
+      <div class="w-9 h-9 rounded-full border-2 border-base-200 shadow-sm overflow-hidden flex items-center justify-center bg-base-300">
+        <span class="material-symbols-outlined text-base-content/50">person</span>
+      </div>
+    </div>
+  </div>
+</header>

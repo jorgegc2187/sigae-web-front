@@ -1,0 +1,235 @@
+<div class="h-[calc(100vh-100px)] flex gap-6 px-8 pb-8 pt-4">
+  <!-- Left Panel: Categorías (30%) -->
+  <section class="w-[30%] flex flex-col bg-base-100 border border-base-300 rounded-xl shadow-sm overflow-hidden flex-shrink-0">
+    <!-- Header & Action -->
+    <div class="p-5 border-b border-base-300 flex justify-between items-center bg-base-100">
+      <h2 class="text-xl font-bold text-base-content">Categorías</h2>
+      <button class="btn btn-primary btn-sm rounded-lg" (click)="onCreateCategory()">
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        Nueva
+      </button>
+    </div>
+
+    <!-- Search Filter -->
+    <div class="p-4 border-b border-base-300 bg-base-200/50">
+      <label class="input input-sm border border-base-300 flex items-center gap-2 bg-base-100 rounded-lg shadow-sm focus-within:border-primary transition-all">
+        <span class="material-symbols-outlined text-base-content/50 text-[18px]">search</span>
+        <input
+          type="text"
+          class="grow placeholder-shown:opacity-50 focus:outline-none"
+          placeholder="Filtrar categorías..."
+          [ngModel]="categorySearchQuery()"
+          (ngModelChange)="categorySearchQuery.set($event)"
+        />
+      </label>
+    </div>
+
+    <!-- List -->
+    <div class="flex-1 overflow-y-auto">
+      <ul class="flex flex-col">
+        @if (filteredCategories().length === 0) {
+          <li class="px-5 py-8 text-center text-sm text-base-content/50">
+            No se encontraron categorías.
+          </li>
+        }
+
+        @for (category of filteredCategories(); track category.id) {
+          <li>
+            <button
+              class="w-full text-left px-5 py-4 border-b border-base-200 flex items-center justify-between group transition-colors"
+              [class.bg-primary]="selectedCategoryId() === category.id"
+              [class.bg-opacity-10]="selectedCategoryId() === category.id"
+              [class.hover:bg-base-200]="selectedCategoryId() !== category.id"
+              (click)="selectCategory(category.id)"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                  [class.bg-primary]="selectedCategoryId() === category.id"
+                  [class.text-primary-content]="selectedCategoryId() === category.id"
+                  [class.bg-base-200]="selectedCategoryId() !== category.id"
+                  [class.text-base-content]="selectedCategoryId() !== category.id"
+                  [class.text-opacity-60]="selectedCategoryId() !== category.id"
+                  [class.group-hover:bg-base-300]="selectedCategoryId() !== category.id"
+                >
+                  <span class="material-symbols-outlined">{{ category.icon }}</span>
+                </div>
+                <div>
+                  <span
+                    class="block text-sm font-semibold transition-colors"
+                    [class.text-base-content]="true"
+                    [class.group-hover:text-primary]="selectedCategoryId() !== category.id"
+                  >
+                    {{ category.name }}
+                  </span>
+                  <span class="block text-xs text-base-content/60 mt-0.5">
+                    {{ category.typesCount }} Tipos • {{ category.assetsCount }} Activos
+                  </span>
+                </div>
+              </div>
+
+              <span
+                class="material-symbols-outlined transition-colors"
+                [class.text-primary]="selectedCategoryId() === category.id"
+                [class.text-base-content]="selectedCategoryId() !== category.id"
+                [class.text-opacity-40]="selectedCategoryId() !== category.id"
+                >chevron_right</span
+              >
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Right Panel: Tipos de Activos (70%) -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto pr-2 pb-6">
+    @if (selectedCategory(); as cat) {
+      <!-- Header & Breadcrumb -->
+      <div class="mb-6 flex justify-between items-end flex-shrink-0">
+        <div>
+          <div class="flex items-center gap-2 text-sm text-base-content/60 mb-1">
+            <span>Categorías</span>
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            <span class="font-medium text-base-content/80">{{ cat.name }}</span>
+          </div>
+          <h1 class="text-[24px] font-bold text-base-content">
+            {{ cat.name }}
+          </h1>
+        </div>
+        <button class="btn btn-primary btn-sm h-[36px] px-4 rounded-lg shadow-sm" (click)="onCreateAssetType(cat)">
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          Nuevo tipo de activo
+        </button>
+      </div>
+
+      <!-- List of Asset Types -->
+      <div class="space-y-4">
+        @if (cat.types.length === 0) {
+          <div
+            class="flex flex-col items-center justify-center h-48 bg-base-100 border border-base-300 border-dashed rounded-xl text-base-content/50"
+          >
+            <span class="material-symbols-outlined text-[48px] mb-3">category</span>
+            <p class="font-medium">No hay tipos de activos configurados</p>
+            <p class="text-sm mt-1">Crea el primer tipo para esta categoría.</p>
+          </div>
+        }
+
+        @for (type of cat.types; track type.id) {
+          <div
+            class="bg-base-100 border border-base-300 rounded-xl shadow-sm transition-shadow cursor-pointer"
+            [class.hover:shadow-md]="!isTypeExpanded(type.id)"
+          >
+            <!-- Card Header (Toggle) -->
+            <div
+              class="p-4 flex justify-between items-center"
+              [class.border-b]="isTypeExpanded(type.id)"
+              [class.border-base-200]="isTypeExpanded(type.id)"
+              [class.bg-base-200]="isTypeExpanded(type.id)"
+              [class.bg-opacity-50]="isTypeExpanded(type.id)"
+              (click)="toggleType(type.id)"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-base-content/50">{{ type.icon }}</span>
+                <div>
+                  <h3 class="text-[16px] font-semibold text-base-content">{{ type.name }}</h3>
+                  <p class="text-xs text-base-content/60">
+                    {{ type.attributes.length }} atributos configurados
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                @if (isTypeExpanded(type.id)) {
+                  <button
+                    class="p-1.5 text-base-content/50 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+                    (click)="onEditAssetType(type, $event)"
+                    aria-label="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                  </button>
+                }
+                <button class="p-1.5 text-base-content/50 hover:text-base-content/80 rounded-lg transition-colors">
+                  <span
+                    class="material-symbols-outlined text-[24px] transition-transform duration-200"
+                    [class.rotate-180]="isTypeExpanded(type.id)"
+                  >
+                    expand_more
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Attributes Table (Expanded Content) -->
+            @if (isTypeExpanded(type.id)) {
+              <div class="p-0">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-base-200/50 border-b border-base-200">
+                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider w-1/3">
+                        Atributo
+                      </th>
+                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider w-1/3">
+                        Descripción
+                      </th>
+                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider text-center w-1/6">
+                        Obligatorio
+                      </th>
+                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider text-right w-1/6">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-base-200 text-sm">
+                    @for (attr of type.attributes; track attr.id) {
+                      <tr class="hover:bg-base-200/30 transition-colors">
+                        <td class="px-4 py-3 font-medium text-base-content">{{ attr.name }}</td>
+                        <td class="px-4 py-3 text-base-content/70">{{ attr.description }}</td>
+                        <td class="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            class="toggle toggle-primary"
+                            [checked]="attr.isRequired"
+                            (change)="onToggleAttributeRequired(attr)"
+                          />
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                          <button
+                            class="text-base-content/40 hover:text-error transition-colors p-1"
+                            (click)="onDeleteAttribute(attr)"
+                          >
+                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                    @if (type.attributes.length === 0) {
+                      <tr>
+                        <td
+                          colspan="4"
+                          class="px-4 py-4 text-center text-base-content/50 text-sm italic"
+                        >
+                          No hay atributos configurados para este tipo.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+
+                <!-- Add Attribute Action -->
+                <div class="p-4 bg-base-100 border-t border-base-200">
+                  <button
+                    class="text-primary hover:text-primary-focus text-sm font-medium flex items-center gap-1"
+                    (click)="onAddAttribute(type)"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    Agregar atributo
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

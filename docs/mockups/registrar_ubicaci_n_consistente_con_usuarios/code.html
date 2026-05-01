@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SIGAE - Registrar Ubicación</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#832700",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#cad3ff",
+                        "background": "#f7f9fb",
+                        "surface-container-high": "#e6e8ea",
+                        "primary-fixed": "#dce1ff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#0039b5",
+                        "outline": "#747686",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#b7c4ff",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#316bf3",
+                        "primary": "#0037b0",
+                        "surface-bright": "#f7f9fb",
+                        "on-background": "#191c1e",
+                        "on-primary-fixed": "#001551",
+                        "surface-container-low": "#f2f4f6",
+                        "inverse-surface": "#2d3133",
+                        "tertiary-container": "#a73400",
+                        "secondary": "#0051d5",
+                        "tertiary-fixed": "#ffdbcf",
+                        "tertiary": "#7f2500",
+                        "outline-variant": "#c4c5d7",
+                        "on-secondary-container": "#fefcff",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#b7c4ff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d8dadc",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-tertiary-fixed": "#390c00",
+                        "on-tertiary-container": "#ffc9b7",
+                        "tertiary-fixed-dim": "#ffb59c",
+                        "surface-container": "#eceef0",
+                        "on-surface-variant": "#434655",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "surface-variant": "#e0e3e5",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface": "#f7f9fb",
+                        "on-secondary-fixed": "#00174b",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-tint": "#2151da",
+                        "primary-container": "#1d4ed8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen">
+<!-- Shell: SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[240px] z-50 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col py-6 px-4">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style='font-variation-settings: "FILL" 1;'>account_balance</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-blue-700 dark:text-blue-400 leading-tight">SIGAE</h1>
+<p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500">Gestión Global</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="grid_view" style="color: rgb(100, 116, 139);">grid_view</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="inventory_2" style="color: rgb(100, 116, 139);">inventory_2</span>
+<span class="text-sm">Inventario</span>
+</a>
+<a class="flex items-center px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-[#1D4ED8] dark:text-blue-400 border-l-[3px] border-[#1D4ED8] font-semibold cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="location_on" style="color: rgb(29, 78, 216);">location_on</span>
+<span class="text-sm">Ubicaciones</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="swap_horiz" style="color: rgb(100, 116, 139);">swap_horiz</span>
+<span class="text-sm flex-1">Préstamos</span>
+<span class="bg-[#B91C1C] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">3</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="group" style="color: rgb(100, 116, 139);">group</span>
+<span class="text-sm">Docentes</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" style="color: rgb(100, 116, 139);">person</span>
+<span class="text-sm">Usuarios</span>
+</a>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="bar_chart" style="color: rgb(100, 116, 139);">bar_chart</span>
+<span class="text-sm">Reportes</span>
+</a>
+<div class="my-2 border-t border-[#E2E8F0]"></div>
+<a class="flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined mr-4 !text-[18px]" data-icon="settings" style="color: rgb(100, 116, 139);">settings</span>
+<span class="text-sm">Configuración</span>
+</a>
+</nav>
+</aside>
+<!-- Shell: TopNavBar -->
+<header class="fixed top-0 right-0 left-[240px] h-16 z-40 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none flex justify-between items-center px-8">
+<div class="flex-1"></div>
+<div class="flex items-center gap-6">
+<button class="w-9 h-9 flex items-center justify-center text-[#64748B] hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+<span class="material-symbols-outlined !text-[20px]">search</span>
+</button>
+<div class="flex items-center gap-3">
+<button class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1 right-1 w-4 h-4 bg-[#B91C1C] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">5</span>
+</button>
+<button class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="h-8 w-px bg-slate-200"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-[13px] font-medium text-slate-900 leading-none">Admin Principal</p>
+<p class="text-[11px] text-slate-400 leading-none mt-1">Gestión Global</p>
+</div>
+<button class="flex items-center gap-2 cursor-pointer transition-all">
+<img alt="Avatar" class="w-9 h-9 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhSpeB-0zdwNAlwwa2GSVzRA0K6w-s_fIFAiZkl7llNZbHyhqA0pi2d8KP8X9WggBUDjwYca6DhkH5WiJEQUq-A03jS18qqIvK_SdzRWANDFfLTnG83tGZcC8EKQgX03tFmh-AVbst2vUj0M95_3AsXZXKTbJYwUnKt3stjNKgSCLyoEQRXSbaayq1INRWrvp6AHsFtesL4TNSyCF_WHpO3At0eIo67lcnf9guSVw73mF9nQ93YWOCabwnKxxrOpEomakjOte9sLjM"/>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[240px] mt-16 p-6 min-h-[calc(100vh-4rem)] pb-24">
+<div class="max-w-[640px] mx-auto">
+<!-- Page Header -->
+<div class="mb-8 flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant mb-2">
+<a class="hover:text-primary transition-colors" href="#">Ubicaciones</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface font-medium">Registrar Ubicación</span>
+</div>
+<h2 class="text-[24px] font-bold text-on-surface">Registrar Ubicación</h2>
+</div>
+</div>
+<!-- Form Card -->
+<div class="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-sm p-6">
+<form>
+<!-- Información de la Ubicación Section -->
+<h3 class="text-[16px] font-semibold text-on-surface mb-6 border-b border-surface-variant pb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">location_on</span>
+    Información de la Ubicación
+</h3>
+<div class="grid grid-cols-1 gap-y-5 mb-8">
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" for="locationName">Nombre <span class="text-error">*</span></label>
+<input class="w-full h-9 px-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="locationName" name="locationName" placeholder="Ej. Laboratorio de Cómputo 1" required="" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5" for="locationDescription">Descripción</label>
+<textarea class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow resize-y" id="locationDescription" name="locationDescription" placeholder="Detalles adicionales sobre la ubicación..." rows="4"></textarea>
+</div>
+</div>
+<!-- Asignación de Encargados Section -->
+<h3 class="text-[16px] font-semibold text-on-surface mb-6 border-b border-surface-variant pb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">group</span>
+    Asignación de Encargados
+</h3>
+<div class="mb-8">
+<label class="block text-sm font-medium text-on-surface-variant mb-1.5">Encargados Asignados</label>
+<div class="w-full min-h-9 p-1.5 bg-surface-container-low border border-outline-variant rounded-md focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-shadow flex flex-wrap gap-2 items-center cursor-text relative">
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-surface-variant text-on-surface">
+            Juan Pérez
+            <button class="ml-1 text-on-surface-variant hover:text-on-surface focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[14px] leading-none">close</span>
+</button>
+</span>
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-surface-variant text-on-surface">
+            María Gómez
+            <button class="ml-1 text-on-surface-variant hover:text-on-surface focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[14px] leading-none">close</span>
+</button>
+</span>
+<input class="flex-1 min-w-[120px] bg-transparent border-none focus:ring-0 text-sm p-0 h-[24px] outline-none" placeholder="Buscar usuario..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-[8px] text-on-surface-variant text-[18px] pointer-events-none" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1.5">Seleccione uno o más usuarios responsables de esta ubicación.</p>
+</div>
+</form>
+</div>
+</div>
+<!-- Sticky Footer -->
+<div class="fixed bottom-0 left-[240px] right-0 bg-white border-t border-slate-200 p-4 px-6 flex justify-end gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30">
+<button class="px-5 h-9 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors" type="button">
+        Cancelar
+    </button>
+<button class="px-6 h-9 rounded-lg bg-[#1D4ED8] text-white text-sm font-medium hover:bg-[#1D4ED8]/90 transition-colors shadow-sm flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[18px]">save</span>
+        Guardar Ubicación
+    </button>
+</div>
+</main>
+</body></html>

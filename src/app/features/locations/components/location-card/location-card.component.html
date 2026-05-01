@@ -1,0 +1,68 @@
+<div
+  class="card h-full bg-base-100 card-border shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+>
+  <!-- Colored top bar -->
+  <div class="h-2 bg-primary/20 w-full"></div>
+
+  <div class="card-body p-6 flex-grow">
+    <h3 class="card-title text-lg">{{ location().name }}</h3>
+    <p class="text-sm text-base-content/60 mt-2 line-clamp-2">{{ location().description }}</p>
+
+    <div class="divider my-2"></div>
+
+    <div class="space-y-4">
+      <span class="text-[11px] font-bold text-base-content/40 uppercase tracking-widest"
+        >Encargados:</span
+      >
+
+      <div class="flex items-center gap-3">
+        @if (location().managers.length > 0) {
+          <div class="avatar-group -space-x-3">
+            @for (manager of location().managers; track manager.id) {
+              <div class="avatar placeholder border-2 border-base-100">
+                <div
+                  class="{{
+                    manager.colorClass
+                  }} text-primary-content w-8 flex items-center justify-center"
+                >
+                  <span class="text-[10px] font-bold leading-none">{{ manager.initials }}</span>
+                </div>
+              </div>
+            }
+            @if (location().additionalManagersCount) {
+              <div class="avatar placeholder border-2 border-base-100">
+                <div class="bg-base-200 text-base-content/70 w-8 flex items-center justify-center">
+                  <span class="text-[10px] font-bold leading-none"
+                    >+{{ location().additionalManagersCount }}</span
+                  >
+                </div>
+              </div>
+            }
+          </div>
+          <span class="text-sm text-base-content/70 italic">{{ location().managersText }}</span>
+        } @else {
+          <span class="text-sm text-base-content/50 italic">{{ location().managersText }}</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="px-6 py-4 bg-base-200/50 flex justify-end gap-1 border-t border-base-200">
+    <button
+      class="btn btn-ghost btn-sm btn-square text-base-content/50 hover:text-primary hover:bg-primary/10"
+      (click)="onEdit()"
+      type="button"
+      aria-label="Editar ubicación"
+    >
+      <span class="material-symbols-outlined text-[20px]">edit</span>
+    </button>
+    <button
+      class="btn btn-ghost btn-sm btn-square text-base-content/50 hover:text-error hover:bg-error/10"
+      (click)="onDelete()"
+      type="button"
+      aria-label="Eliminar ubicación"
+    >
+      <span class="material-symbols-outlined text-[20px]">delete</span>
+    </button>
+  </div>
+</div>

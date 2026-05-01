@@ -1,1 +1,103 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: sigae-light --default, sigae-dark --prefersdark;
+}
+
+/* ─── TEMA CLARO ──────────────────────────────────── */
+@plugin "daisyui/theme" {
+  name: "sigae-light";
+  default: true;
+  color-scheme: light;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Primario: azul derivado del escudo (hue 261°) */
+  --color-primary:          oklch(47% 0.22 261);
+  --color-primary-content:  oklch(98% 0.01 261);
+
+  /* Secondary: azul medio para acciones secundarias */
+  --color-secondary:        oklch(55% 0.18 261);
+  --color-secondary-content:oklch(98% 0.01 261);
+
+  /* Accent: sin uso fuerte — reservado para highlights */
+  --color-accent:           oklch(60% 0.15 261);
+  --color-accent-content:   oklch(98% 0.01 261);
+
+  /* Neutral: grises fríos */
+  --color-neutral:          oklch(35% 0.02 261);
+  --color-neutral-content:  oklch(95% 0.01 261);
+
+  /* Base: fondos y superficies */
+  --color-base-100:         oklch(98.5% 0.005 261);
+  --color-base-200:         oklch(95% 0.008 261);
+  --color-base-300:         oklch(91% 0.012 261);
+  --color-base-content:     oklch(15% 0.03 261);
+
+  /* Feedback del sistema */
+  --color-info:             oklch(52% 0.19 261);
+  --color-info-content:     oklch(98% 0.01 261);
+  --color-success:          oklch(45% 0.17 145);
+  --color-success-content:  oklch(98% 0.01 145);
+  --color-warning:          oklch(55% 0.18 65);
+  --color-warning-content:  oklch(98% 0.01 65);
+  --color-error:            oklch(45% 0.2 25);
+  --color-error-content:    oklch(98% 0.01 25);
+}
+
+/* ─── TEMA OSCURO ─────────────────────────────────── */
+@plugin "daisyui/theme" {
+  name: "sigae-dark";
+  prefersdark: true;
+  color-scheme: dark;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --color-primary:          oklch(65% 0.2 261);
+  --color-primary-content:  oklch(15% 0.03 261);
+  --color-secondary:        oklch(72% 0.16 261);
+  --color-secondary-content:oklch(15% 0.03 261);
+  --color-accent:           oklch(70% 0.14 261);
+  --color-accent-content:   oklch(15% 0.03 261);
+  --color-neutral:          oklch(75% 0.02 261);
+  --color-neutral-content:  oklch(20% 0.02 261);
+
+  --color-base-100:         oklch(16% 0.025 261);
+  --color-base-200:         oklch(21% 0.028 261);
+  --color-base-300:         oklch(28% 0.03 261);
+  --color-base-content:     oklch(93% 0.01 261);
+
+  --color-info:             oklch(65% 0.18 261);
+  --color-info-content:     oklch(15% 0.03 261);
+  --color-success:          oklch(68% 0.2 145);
+  --color-success-content:  oklch(15% 0.03 145);
+  --color-warning:          oklch(78% 0.18 80);
+  --color-warning-content:  oklch(20% 0.05 80);
+  --color-error:            oklch(68% 0.2 25);
+  --color-error-content:    oklch(15% 0.03 25);
+}
+
+/* ─── TOKENS DE ESTADOS DE ACTIVOS ───────────────── */
+@theme {
+  --color-estado-bueno:      oklch(45% 0.17 145);
+  --color-estado-bueno-bg:   oklch(95% 0.05 145);
+  --color-estado-regular:    oklch(55% 0.18 65);
+  --color-estado-regular-bg: oklch(96% 0.06 80);
+  --color-estado-malo:       oklch(45% 0.2 25);
+  --color-estado-malo-bg:    oklch(95% 0.04 25);
+  --color-estado-mant:       oklch(45% 0.2 300);
+  --color-estado-mant-bg:    oklch(95% 0.04 300);
+  --color-estado-baja:       oklch(45% 0.02 261);
+  --color-estado-baja-bg:    oklch(93% 0.01 261);
+}
+
+[data-theme="sigae-dark"] {
+  --color-estado-bueno:      oklch(68% 0.2 145);
+  --color-estado-bueno-bg:   oklch(22% 0.06 145);
+  --color-estado-regular:    oklch(78% 0.18 80);
+  --color-estado-regular-bg: oklch(20% 0.05 65);
+  --color-estado-malo:       oklch(68% 0.2 25);
+  --color-estado-malo-bg:    oklch(20% 0.05 25);
+  --color-estado-mant:       oklch(70% 0.18 300);
+  --color-estado-mant-bg:    oklch(20% 0.05 300);
+  --color-estado-baja:       oklch(60% 0.02 261);
+  --color-estado-baja-bg:    oklch(22% 0.02 261);
+}

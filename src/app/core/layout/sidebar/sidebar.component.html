@@ -1,0 +1,120 @@
+<aside class="fixed left-0 top-0 h-full w-[240px] z-50 bg-base-200 border-r border-base-300 flex flex-col py-6 px-4">
+  <!-- Logo -->
+  <div class="mb-8 px-2 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+      <span class="material-symbols-outlined text-primary-content" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+    </div>
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-primary leading-tight">SIGAE</h1>
+      <p class="text-[10px] uppercase font-semibold tracking-wider text-base-content/60">Gestión Educativa</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 space-y-1">
+    <!-- 1. Dashboard -->
+    <a routerLink="/dashboard" routerLinkActive="!bg-primary/10 !text-primary !border-primary font-semibold" [routerLinkActiveOptions]="{exact: true}"
+       class="flex items-center px-3 py-2.5 text-base-content/70 hover:bg-base-300 transition-all duration-200 cursor-pointer border-l-[3px] border-transparent active:scale-95">
+      <span class="material-symbols-outlined mr-4 !text-[18px]">dashboard</span>
+      <span class="text-sm">Panel Principal</span>
+    </a>
+
+    <!-- 2. Inventario -->
+    <a routerLink="/inventory" routerLinkActive="!bg-primary/10 !text-primary !border-primary font-semibold"
+       class="flex items-center px-3 py-2.5 text-base-content/70 hover:bg-base-300 transition-all duration-200 cursor-pointer border-l-[3px] border-transparent active:scale-95">
+      <span class="material-symbols-outlined mr-4 !text-[18px]">inventory_2</span>
+      <span class="text-sm">Inventario</span>
+    </a>
+
+    <!-- 3. Préstamos (con badge de vencidos) -->
+    <a routerLink="/loans" routerLinkActive="!bg-primary/10 !text-primary !border-primary font-semibold"
+       class="flex items-center px-3 py-2.5 text-base-content/70 hover:bg-base-300 transition-all duration-200 cursor-pointer border-l-[3px] border-transparent active:scale-95">
+      <span class="material-symbols-outlined mr-4 !text-[18px]">swap_horiz</span>
+      <span class="text-sm flex-1">Préstamos</span>
+      <span class="badge badge-error badge-sm font-bold text-error-content">3</span>
+    </a>
+
+    <!-- 4. Ubicaciones -->
+    <a routerLink="/locations" routerLinkActive="!bg-primary/10 !text-primary !border-primary font-semibold"
+       class="flex items-center px-3 py-2.5 text-base-content/70 hover:bg-base-300 transition-all duration-200 cursor-pointer border-l-[3px] border-transparent active:scale-95">
+      <span class="material-symbols-outlined mr-4 !text-[18px]">location_on</span>
+      <span class="text-sm">Ubicaciones</span>
+    </a>
+
+    <!-- 5. Docentes -->
+    <a routerLink="/teachers" routerLinkActive="!bg-primary/10 !text-primary !border-primary font-semibold"
+       class="flex items-center px-3 py-2.5 text-base-content/70 hover:bg-base-300 transition-all duration-200 cursor-pointer border-l-[3px] border-transparent active:scale-95">
+      <span class="material-symbols-outlined mr-4 !text-[18px]">people</span>
+      <span class="text-sm">Docentes</span>
+    </a>
+
+    <!-- 6. Reportes -->
+    <a routerLink="/reports" routerLinkActive="!bg-primary/10 !text-primary !border-primary font-semibold"
+       class="flex items-center px-3 py-2.5 text-base-content/70 hover:bg-base-300 transition-all duration-200 cursor-pointer border-l-[3px] border-transparent active:scale-95">
+      <span class="material-symbols-outlined mr-4 !text-[18px]">bar_chart</span>
+      <span class="text-sm">Reportes</span>
+    </a>
+
+    <div class="my-2 border-t border-base-300"></div>
+
+    <!-- 7. Configuración (expandible) -->
+    <div>
+      <button
+        type="button"
+        class="w-full flex items-center px-3 py-2.5 text-base-content/70 hover:bg-base-300 transition-all duration-200 cursor-pointer border-l-[3px] border-transparent active:scale-95"
+        [class.!bg-primary/10]="isSettingsOpen()"
+        [class.!text-primary]="isSettingsOpen()"
+        [class.!border-primary]="isSettingsOpen()"
+        (click)="toggleSettings()"
+        aria-haspopup="true"
+        [attr.aria-expanded]="isSettingsOpen()"
+      >
+        <span class="material-symbols-outlined mr-4 !text-[18px]">settings</span>
+        <span class="text-sm flex-1 text-left">Configuración</span>
+        <span class="material-symbols-outlined !text-[18px] transition-transform duration-200"
+              [class.rotate-180]="isSettingsOpen()">
+          expand_more
+        </span>
+      </button>
+
+      <!-- Sub-ítems -->
+      @if (isSettingsOpen()) {
+        <div class="ml-4 mt-1 space-y-0.5 border-l-2 border-base-300 pl-2">
+          <a
+            routerLink="/settings/users"
+            routerLinkActive="!text-primary !bg-primary/5 font-semibold"
+            class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
+          >
+            <span class="material-symbols-outlined mr-3 !text-[16px]">people_alt</span>
+            Usuarios
+          </a>
+          <a
+            routerLink="/settings/categories"
+            routerLinkActive="!text-primary !bg-primary/5 font-semibold"
+            class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
+          >
+            <span class="material-symbols-outlined mr-3 !text-[16px]">category</span>
+            Categorías y Tipos
+          </a>
+          <a
+            routerLink="/settings/locations"
+            routerLinkActive="!text-primary !bg-primary/5 font-semibold"
+            class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
+          >
+            <span class="material-symbols-outlined mr-3 !text-[16px]">location_on</span>
+            Ubicaciones
+          </a>
+          <a
+            routerLink="/settings/suppliers"
+            routerLinkActive="!text-primary !bg-primary/5 font-semibold"
+            class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
+          >
+            <span class="material-symbols-outlined mr-3 !text-[16px]">storefront</span>
+            Proveedores
+          </a>
+        </div>
+      }
+    </div>
+  </nav>
+</aside>
+

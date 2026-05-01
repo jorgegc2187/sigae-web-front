@@ -1,0 +1,45 @@
+<div class="card h-full bg-base-100 card-border shadow-sm hover:shadow-md transition-shadow">
+  <div class="card-body p-5">
+    <div class="flex items-start justify-between mb-2">
+      <div
+        class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-lg select-none"
+      >
+        {{ teacher().initials }}
+      </div>
+      <button class="btn btn-ghost btn-sm btn-square text-base-content/50 hover:text-base-content">
+        <span class="material-symbols-outlined">more_vert</span>
+      </button>
+    </div>
+
+    <div class="mb-4">
+      <h3 class="card-title text-base">{{ teacher().name }}</h3>
+      <p class="text-xs text-base-content/60 mt-0.5">DNI: {{ teacher().dni }}</p>
+      <p class="text-sm font-medium text-base-content/70 mt-2 italic">{{ teacher().specialty }}</p>
+    </div>
+
+    <div class="space-y-2 mb-6">
+      <div class="flex items-center gap-2 text-xs text-base-content/60">
+        <span class="material-symbols-outlined text-[16px]">mail</span>
+        {{ teacher().email }}
+      </div>
+      <div class="flex items-center gap-2 text-xs text-base-content/60">
+        <span class="material-symbols-outlined text-[16px]">phone</span>
+        {{ teacher().phone }}
+      </div>
+    </div>
+
+    <div class="mt-auto pt-4 border-t border-base-200">
+      <button
+        type="button"
+        class="text-sm font-semibold text-primary hover:underline flex items-center gap-1 group w-fit"
+        (click)="onViewHistory()"
+      >
+        Ver historial de préstamos
+        <span
+          class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform"
+          >chevron_right</span
+        >
+      </button>
+    </div>
+  </div>
+</div>
