@@ -7,5 +7,10 @@ export const TEACHERS_ROUTES: Routes = [
       import('./pages/teacher-list/teacher-list.component').then(
         (m) => m.TeacherListComponent
       ),
+    title: 'Docentes - SIGAE',
+    data: {
+      pageTitle: 'Docentes',
+      pageSubtitle: 'Gestión del personal docente',
+    },
   },
 ];

@@ -7,6 +7,11 @@ export const LOCATIONS_ROUTES: Routes = [
       import('./pages/location-list/location-list.component').then(
         (m) => m.LocationListComponent
       ),
+    title: 'Ubicaciones - SIGAE',
+    data: {
+      pageTitle: 'Ubicaciones',
+      pageSubtitle: 'Gestión de espacios y responsables',
+    },
   },
   {
     path: 'new',
@@ -14,6 +19,10 @@ export const LOCATIONS_ROUTES: Routes = [
       import('./pages/location-form/location-form.component').then(
         (m) => m.LocationFormComponent
       ),
+    title: 'Nueva Ubicación - SIGAE',
+    data: {
+      pageTitle: 'Ubicaciones',
+      pageSubtitle: 'Registrar nueva ubicación',
+    },
   },
 ];
-

@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
@@ -8,5 +11,28 @@ import { ThemeService } from '../../services/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
-  themeService = inject(ThemeService);
+  readonly themeService = inject(ThemeService);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+
+  private readonly activeRouteData = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() => this.getDeepestRouteData()),
+    ),
+    { initialValue: this.getDeepestRouteData() },
+  );
+
+  readonly pageTitle = computed(() => this.activeRouteData()?.['pageTitle'] ?? 'SIGAE');
+  readonly pageSubtitle = computed(() => this.activeRouteData()?.['pageSubtitle'] ?? '');
+
+  private getDeepestRouteData() {
+    let route: ActivatedRoute | null = this.activatedRoute;
+
+    while (route?.firstChild) {
+      route = route.firstChild;
+    }
+
+    return route?.snapshot?.data ?? {};
+  }
 }

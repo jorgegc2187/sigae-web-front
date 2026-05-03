@@ -1,10 +1,12 @@
 <header class="fixed top-0 right-0 left-[240px] h-16 z-40 bg-base-100 border-b border-base-300 shadow-sm flex justify-between items-center px-8">
   <div class="flex items-center gap-4">
-    <h2 class="text-xl font-bold text-base-content tracking-tight font-headline">Dashboard</h2>
-    <div class="h-6 w-px bg-base-300 mx-2"></div>
-    <div class="flex items-center gap-2 text-xs font-medium text-base-content/60">
-      <span class="text-primary font-bold">Resumen Operativo Global</span>
-    </div>
+    <h2 class="text-xl font-bold text-primary tracking-tight font-headline">{{ pageTitle() }}</h2>
+    @if (pageSubtitle()) {
+      <div class="h-6 w-px bg-base-300 mx-2"></div>
+      <div class="flex items-center gap-2 text-xs font-medium text-base-content/60">
+        <span class="text-base-content/70">{{ pageSubtitle() }}</span>
+      </div>
+    }
   </div>
   
   <div class="flex items-center gap-6">

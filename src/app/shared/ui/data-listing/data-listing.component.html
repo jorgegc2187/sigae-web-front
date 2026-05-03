@@ -1,0 +1,107 @@
+<section class="space-y-4">
+  @if (title(); as listingTitle) {
+    <div class="flex items-center justify-between gap-3">
+      <h3 class="text-lg font-semibold text-base-content">{{ listingTitle }}</h3>
+      @if (selectionEnabled() && selectedCount() > 0) {
+        <span class="badge badge-soft badge-primary badge-sm">
+          {{ selectedCount() }} seleccionados
+        </span>
+      }
+    </div>
+  }
+
+  <div class="rounded-xl border border-base-300 bg-base-100 shadow-sm overflow-hidden">
+    <div class="border-b border-base-300 bg-base-100 px-4 py-4">
+      <ng-content select="[listing-toolbar]" />
+    </div>
+
+    @if (isLoading()) {
+      <div class="space-y-4 px-6 py-8">
+        <div class="skeleton h-10 w-full"></div>
+        <div class="skeleton h-16 w-full"></div>
+        <div class="skeleton h-16 w-full"></div>
+        <div class="skeleton h-16 w-full"></div>
+      </div>
+    } @else if (isEmpty()) {
+      <div class="px-6 py-16">
+        <ng-content select="[listing-empty]" />
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="table w-full text-left">
+          <thead class="bg-base-200/70 text-[11px] font-bold uppercase tracking-wider text-base-content/55">
+            <tr>
+              @if (selectionEnabled()) {
+                <th class="w-14 px-5 py-4">
+                  <label class="flex justify-center">
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm border border-base-300"
+                      [checked]="allSelected()"
+                      (change)="onSelectAll($event)"
+                      aria-label="Seleccionar todos"
+                    />
+                  </label>
+                </th>
+              }
+              <ng-content select="[listing-head]" />
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-base-200 text-sm text-base-content/75">
+            <ng-content select="[listing-body]" />
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <div class="flex flex-col gap-3 border-t border-base-200 bg-base-200/30 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <p class="text-sm text-base-content/60">
+        {{ resultLabel() }}
+      </p>
+
+      @if (hasMultiplePages()) {
+        <div class="join self-end md:self-auto">
+          <button
+            type="button"
+            class="join-item btn btn-sm border border-base-300 bg-base-100"
+            [disabled]="!canGoPrevious()"
+            (click)="onPreviousPage()"
+            aria-label="Página anterior"
+          >
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+
+          @for (page of pages(); track page; let index = $index) {
+            @if (showLeadingEllipsis(page, index)) {
+              <button type="button" class="join-item btn btn-sm btn-disabled border-none bg-transparent">
+                ...
+              </button>
+            }
+
+            <button
+              type="button"
+              class="join-item btn btn-sm"
+              [class.btn-primary]="page === currentPage()"
+              [class.border]="page !== currentPage()"
+              [class.border-base-300]="page !== currentPage()"
+              [class.bg-base-100]="page !== currentPage()"
+              (click)="pageChange.emit(page)"
+            >
+              {{ page }}
+            </button>
+          }
+
+          <button
+            type="button"
+            class="join-item btn btn-sm border border-base-300 bg-base-100"
+            [disabled]="!canGoNext()"
+            (click)="onNextPage()"
+            aria-label="Página siguiente"
+          >
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</section>

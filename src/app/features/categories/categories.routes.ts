@@ -5,6 +5,10 @@ export const CATEGORIES_ROUTES: Routes = [
   {
     path: '',
     component: CategoriesPanelComponent,
-    title: 'Categorías y Tipos - SIGAE'
-  }
+    title: 'Categorías y Tipos - SIGAE',
+    data: {
+      pageTitle: 'Configuración',
+      pageSubtitle: 'Categorías y tipos',
+    },
+  },
 ];

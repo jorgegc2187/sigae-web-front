@@ -1,0 +1,197 @@
+<div class="space-y-8">
+  <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">Préstamos de Activos</h1>
+      <p class="mt-1 text-sm text-base-content/60">
+        Seguimiento y control de activos entregados a docentes y personal.
+      </p>
+    </div>
+  </div>
+
+  <app-data-listing
+    [isLoading]="false"
+    [isEmpty]="totalResults() === 0"
+    [resultLabel]="resultLabel()"
+    [currentPage]="queryState().page"
+    [totalPages]="totalPages()"
+    [selectionEnabled]="true"
+    [allSelected]="allVisibleSelected()"
+    [selectedCount]="selectedIds().length"
+    (pageChange)="onPageChange($event)"
+    (toggleSelectAll)="onToggleSelectAll($event)"
+  >
+    <div listing-toolbar class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div class="flex flex-wrap items-center gap-2 rounded-xl bg-base-200/70 p-1">
+        <button
+          type="button"
+          class="btn btn-sm border-none shadow-none"
+          [class.btn-active]="isStatusTabActive('all')"
+          [class.bg-base-100]="isStatusTabActive('all')"
+          [class.text-base-content]="isStatusTabActive('all')"
+          [class.btn-ghost]="!isStatusTabActive('all')"
+          (click)="onStatusTabChange('all')"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm border-none shadow-none"
+          [class.btn-active]="isStatusTabActive('active')"
+          [class.bg-base-100]="isStatusTabActive('active')"
+          [class.text-base-content]="isStatusTabActive('active')"
+          [class.btn-ghost]="!isStatusTabActive('active')"
+          (click)="onStatusTabChange('active')"
+        >
+          Activos
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm border-none shadow-none gap-2"
+          [class.btn-active]="isStatusTabActive('overdue')"
+          [class.bg-base-100]="isStatusTabActive('overdue')"
+          [class.text-base-content]="isStatusTabActive('overdue')"
+          [class.btn-ghost]="!isStatusTabActive('overdue')"
+          (click)="onStatusTabChange('overdue')"
+        >
+          Vencidos
+          <span class="badge badge-error badge-xs">{{ overdueCount() }}</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm border-none shadow-none"
+          [class.btn-active]="isStatusTabActive('returned')"
+          [class.bg-base-100]="isStatusTabActive('returned')"
+          [class.text-base-content]="isStatusTabActive('returned')"
+          [class.btn-ghost]="!isStatusTabActive('returned')"
+          (click)="onStatusTabChange('returned')"
+        >
+          Devueltos
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <label class="input border border-base-300 flex w-full items-center gap-2 shadow-sm sm:w-[320px]">
+          <span class="material-symbols-outlined text-base-content/50 text-[20px]">search</span>
+          <input
+            type="text"
+            class="grow placeholder-shown:opacity-50 focus:outline-none text-sm"
+            placeholder="Buscar préstamo..."
+            [value]="queryState().search"
+            (input)="onSearch($event)"
+          />
+        </label>
+
+        <button type="button" class="btn btn-primary shadow-sm" (click)="onCreateLoan()">
+          <span class="material-symbols-outlined text-[20px]">add</span>
+          Nuevo préstamo
+        </button>
+      </div>
+    </div>
+
+    <th listing-head class="px-4 py-4">Docente</th>
+    <th listing-head class="px-4 py-4">Activos</th>
+    <th listing-head class="px-4 py-4">Ubicación</th>
+    <th listing-head class="px-4 py-4">Fecha préstamo</th>
+    <th listing-head class="px-4 py-4">Fecha límite</th>
+    <th listing-head class="px-4 py-4">Estado</th>
+    <th listing-head class="px-4 py-4 text-right">Acciones</th>
+
+    @for (loan of paginatedLoans(); track loan.id) {
+      <tr
+        listing-body
+        class="transition-colors hover:bg-base-200/35"
+        [ngClass]="{ 'bg-error/5': loan.status === 'Vencido' }"
+      >
+          <td class="px-5 py-4 align-middle">
+            <label class="flex justify-center">
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm border border-base-300"
+                [checked]="isSelected(loan.id)"
+                (change)="onToggleLoanSelection(loan.id, $any($event.target).checked)"
+                [attr.aria-label]="'Seleccionar préstamo de ' + loan.teacher"
+              />
+            </label>
+          </td>
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold"
+                [class]="getTeacherAvatarClass(loan.status)"
+              >
+                {{ loan.teacherInitials }}
+              </div>
+              <div class="min-w-0">
+                <p class="truncate font-semibold text-base-content">{{ loan.teacher }}</p>
+                <p class="truncate text-xs text-base-content/55">{{ loan.specialty }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-4">
+            <div class="space-y-1">
+              <p class="font-medium text-base-content">{{ loan.assetsSummary }}</p>
+              @if (loan.extraAssets.length > 0) {
+                <div class="dropdown dropdown-hover dropdown-bottom dropdown-start">
+                  <div
+                    tabindex="0"
+                    role="button"
+                    class="badge badge-soft badge-secondary badge-sm cursor-pointer gap-1.5 transition-colors hover:badge-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    [attr.aria-label]="getExtraAssetsLabel(loan)"
+                  >
+                    +{{ loan.extraAssets.length }} más
+                    <span class="material-symbols-outlined text-[14px]">expand_more</span>
+                  </div>
+                  <ul
+                    tabindex="-1"
+                    class="dropdown-content menu z-20 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-md"
+                  >
+                    <li class="menu-title px-3 py-2 text-[11px] uppercase tracking-wider text-base-content/50">
+                      Activos adicionales
+                    </li>
+                    @for (asset of loan.extraAssets; track asset) {
+                      <li>
+                        <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
+                          <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/40">
+                            inventory_2
+                          </span>
+                          <span class="leading-snug">{{ asset }}</span>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          </td>
+          <td class="px-4 py-4 text-base-content/65">{{ loan.location }}</td>
+          <td class="px-4 py-4 text-base-content/65">{{ loan.loanDate }}</td>
+          <td class="px-4 py-4" [class.text-error]="loan.status === 'Vencido'" [class.font-semibold]="loan.status === 'Vencido'">
+            {{ loan.dueDate }}
+          </td>
+          <td class="px-4 py-4">
+            <span
+              class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"
+              [class]="getStatusBadgeClass(loan.status)"
+            >
+              <span class="h-2 w-2 rounded-full" [class]="getStatusDotClass(loan.status)"></span>
+              {{ loan.status }}
+            </span>
+          </td>
+          <td class="px-4 py-4 text-right">
+            <button type="button" class="btn btn-ghost btn-sm text-primary" (click)="onViewLoan(loan.id)">
+              Ver
+              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </button>
+          </td>
+      </tr>
+    }
+
+    <div listing-empty class="flex flex-col items-center gap-3 text-center text-base-content/50">
+      <span class="material-symbols-outlined text-[48px]">manage_search</span>
+      <p class="text-base font-semibold text-base-content/70">No se encontraron préstamos</p>
+      <p class="max-w-md text-sm">
+        Ajusta la búsqueda o cambia el estado seleccionado para ver otros resultados.
+      </p>
+    </div>
+  </app-data-listing>
+</div>
