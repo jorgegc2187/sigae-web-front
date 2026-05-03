@@ -39,6 +39,7 @@ export class LoanFormComponent {
   private readonly router = inject(Router);
 
   readonly teacherSearchContainer = viewChild<ElementRef>('teacherSearchContainer');
+  readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
   readonly assetSearchContainer = viewChild<ElementRef>('assetSearchContainer');
 
   readonly availableTeachers = signal<TeacherOption[]>([
@@ -106,6 +107,7 @@ export class LoanFormComponent {
   ]);
 
   readonly selectedTeacher = signal<TeacherOption | null>(this.availableTeachers()[0] ?? null);
+  readonly selectedDestination = signal<DestinationOption | null>(null);
   readonly selectedAssets = signal<AssetOption[]>([
     this.availableAssets()[0]!,
     this.availableAssets()[1]!,
@@ -113,8 +115,10 @@ export class LoanFormComponent {
   ]);
 
   readonly teacherQuery = signal(this.selectedTeacher()?.name ?? '');
+  readonly locationQuery = signal('');
   readonly assetQuery = signal('');
   readonly teacherDropdownOpen = signal(false);
+  readonly locationDropdownOpen = signal(false);
   readonly assetDropdownOpen = signal(false);
   readonly showTeacherError = signal(false);
   readonly showAssetsError = signal(false);
@@ -137,6 +141,14 @@ export class LoanFormComponent {
     return this.availableTeachers().filter(
       (teacher) =>
         teacher.name.toLowerCase().includes(query) || teacher.dni.toLowerCase().includes(query),
+    );
+  });
+
+  readonly filteredDestinations = computed(() => {
+    const query = this.locationQuery().toLowerCase().trim();
+
+    return this.destinations().filter((destination) =>
+      destination.name.toLowerCase().includes(query),
     );
   });
 
@@ -174,6 +186,15 @@ export class LoanFormComponent {
       this.teacherDropdownOpen.set(false);
     }
 
+    const locationContainer = this.locationSearchContainer();
+    if (
+      this.locationDropdownOpen() &&
+      locationContainer &&
+      !locationContainer.nativeElement.contains(event.target)
+    ) {
+      this.locationDropdownOpen.set(false);
+    }
+
     const assetContainer = this.assetSearchContainer();
     if (
       this.assetDropdownOpen() &&
@@ -206,6 +227,38 @@ export class LoanFormComponent {
     this.selectedTeacher.set(null);
     this.teacherQuery.set('');
     this.teacherDropdownOpen.set(true);
+  }
+
+  onLocationSearch(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.locationQuery.set(value);
+    this.locationDropdownOpen.set(true);
+    this.selectedDestination.set(null);
+    this.form.controls.destinationId.setValue('');
+    this.form.controls.destinationId.markAsUntouched();
+    this.form.controls.destinationId.updateValueAndValidity();
+  }
+
+  onLocationFocus() {
+    this.locationDropdownOpen.set(true);
+  }
+
+  selectDestination(destination: DestinationOption) {
+    this.selectedDestination.set(destination);
+    this.locationQuery.set(destination.name);
+    this.locationDropdownOpen.set(false);
+    this.form.controls.destinationId.setValue(destination.id);
+    this.form.controls.destinationId.markAsTouched();
+    this.form.controls.destinationId.updateValueAndValidity();
+  }
+
+  clearDestination() {
+    this.selectedDestination.set(null);
+    this.locationQuery.set('');
+    this.locationDropdownOpen.set(true);
+    this.form.controls.destinationId.setValue('');
+    this.form.controls.destinationId.markAsUntouched();
+    this.form.controls.destinationId.updateValueAndValidity();
   }
 
   onAssetSearch(event: Event) {

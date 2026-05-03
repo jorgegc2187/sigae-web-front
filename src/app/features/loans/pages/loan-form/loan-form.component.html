@@ -95,16 +95,58 @@
               <legend class="fieldset-legend">
                 Ubicación de Destino <span class="text-error">*</span>
               </legend>
-              <select
-                formControlName="destinationId"
-                class="select w-full border border-base-300 bg-base-100"
-                [class.select-error]="form.controls.destinationId.invalid && form.controls.destinationId.touched"
-              >
-                <option value="" disabled>Seleccionar ubicación...</option>
-                @for (destination of destinations(); track destination.id) {
-                  <option [value]="destination.id">{{ destination.name }}</option>
+
+              <div #locationSearchContainer class="relative">
+                <label
+                  class="input w-full border border-base-300 bg-base-100 flex items-center gap-2"
+                  [class.input-error]="form.controls.destinationId.invalid && form.controls.destinationId.touched"
+                >
+                  <span class="material-symbols-outlined text-base-content/45 text-[18px]">location_on</span>
+                  <input
+                    type="text"
+                    class="grow placeholder-shown:opacity-50"
+                    placeholder="Seleccionar ubicación..."
+                    [value]="locationQuery()"
+                    (input)="onLocationSearch($event)"
+                    (focus)="onLocationFocus()"
+                  />
+                  @if (selectedDestination()) {
+                    <button
+                      type="button"
+                      class="text-base-content/35 hover:text-base-content/60 transition-colors"
+                      (click)="clearDestination()"
+                      aria-label="Quitar ubicación seleccionada"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                  }
+                  <span class="material-symbols-outlined text-base-content/35 text-[18px]">expand_more</span>
+                </label>
+
+                @if (locationDropdownOpen()) {
+                  <ul class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md">
+                    @if (filteredDestinations().length === 0) {
+                      <li class="px-3 py-3 text-sm text-base-content/50">
+                        No se encontraron ubicaciones con ese criterio.
+                      </li>
+                    } @else {
+                      @for (destination of filteredDestinations(); track destination.id) {
+                        <li>
+                          <button
+                            type="button"
+                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
+                            (click)="selectDestination(destination)"
+                          >
+                            <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+                            <span class="truncate text-sm font-medium text-base-content">{{ destination.name }}</span>
+                          </button>
+                        </li>
+                      }
+                    }
+                  </ul>
                 }
-              </select>
+              </div>
+
               @if (form.controls.destinationId.invalid && form.controls.destinationId.touched) {
                 <p class="fieldset-label mt-1 text-error">Seleccione una ubicación de destino.</p>
               }
