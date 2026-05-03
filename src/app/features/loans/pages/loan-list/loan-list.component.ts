@@ -1,9 +1,9 @@
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
 import { Loan, LoanStatus, LoanStatusTab, MOCK_LOANS } from '../../models/loan.model';
-
 interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
   selectedIds: string[];
 }
@@ -17,6 +17,7 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
 })
 export class LoanListComponent {
   readonly pageSize = 5;
+  private readonly router = inject(Router);
 
   private readonly loans = signal<Loan[]>(MOCK_LOANS);
 
@@ -201,7 +202,7 @@ export class LoanListComponent {
   }
 
   onCreateLoan() {
-    console.log('Nuevo préstamo');
+    this.router.navigate(['/loans/new']);
   }
 
   onViewLoan(loanId: string) {
