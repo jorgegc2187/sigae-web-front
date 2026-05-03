@@ -131,34 +131,41 @@
             <div class="space-y-1">
               <p class="font-medium text-base-content">{{ loan.assetsSummary }}</p>
               @if (loan.extraAssets.length > 0) {
-                <div class="dropdown dropdown-hover dropdown-bottom dropdown-start">
-                  <div
-                    tabindex="0"
-                    role="button"
-                    class="badge badge-soft badge-secondary badge-sm cursor-pointer gap-1.5 transition-colors hover:badge-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                <div class="mt-1">
+                  <button
+                    type="button"
+                    class="inline-flex h-7 items-center gap-1 rounded-full border border-base-300 bg-base-100 px-2.5 text-xs font-medium text-base-content/70 shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     [attr.aria-label]="getExtraAssetsLabel(loan)"
+                    [attr.popovertarget]="getExtraAssetsPopoverId(loan.id)"
+                    [style.anchor-name]="getExtraAssetsAnchorName(loan.id)"
                   >
                     +{{ loan.extraAssets.length }} más
-                    <span class="material-symbols-outlined text-[14px]">expand_more</span>
-                  </div>
-                  <ul
-                    tabindex="-1"
-                    class="dropdown-content menu z-20 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-md"
+                    <span class="material-symbols-outlined text-[13px] text-base-content/45">expand_more</span>
+                  </button>
+                  <div
+                    popover="auto"
+                    [id]="getExtraAssetsPopoverId(loan.id)"
+                    class="dropdown rounded-box border border-base-300 bg-base-100 shadow-md [position-anchor:var(--anchor)]"
+                    [style.position-anchor]="getExtraAssetsAnchorName(loan.id)"
                   >
-                    <li class="menu-title px-3 py-2 text-[11px] uppercase tracking-wider text-base-content/50">
-                      Activos adicionales
-                    </li>
-                    @for (asset of loan.extraAssets; track asset) {
-                      <li>
-                        <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
-                          <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/40">
-                            inventory_2
-                          </span>
-                          <span class="leading-snug">{{ asset }}</span>
-                        </div>
-                      </li>
-                    }
-                  </ul>
+                    <div class="w-64 p-2">
+                      <div class="border-b border-base-200 px-3 py-2">
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-base-content/45">
+                          Activos adicionales
+                        </p>
+                      </div>
+                      <div class="py-1">
+                        @for (asset of loan.extraAssets; track asset) {
+                          <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
+                            <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/35">
+                              inventory_2
+                            </span>
+                            <span class="leading-snug">{{ asset }}</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
                 </div>
               }
             </div>

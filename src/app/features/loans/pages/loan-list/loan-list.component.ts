@@ -192,6 +192,14 @@ export class LoanListComponent {
     return `Ver ${count} activo${count === 1 ? '' : 's'} adicional${count === 1 ? '' : 'es'}`;
   }
 
+  getExtraAssetsPopoverId(loanId: string): string {
+    return `loan-extra-assets-${loanId}`;
+  }
+
+  getExtraAssetsAnchorName(loanId: string): string {
+    return `--loan-extra-assets-${loanId}`;
+  }
+
   onCreateLoan() {
     console.log('Nuevo préstamo');
   }
