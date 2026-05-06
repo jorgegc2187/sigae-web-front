@@ -109,7 +109,7 @@
                 class="checkbox checkbox-sm border border-base-300"
                 [checked]="isSelected(loan.id)"
                 (change)="onToggleLoanSelection(loan.id, $any($event.target).checked)"
-                [attr.aria-label]="'Seleccionar préstamo de ' + loan.teacher"
+                [attr.aria-label]="'Seleccionar préstamo de ' + loan.teacher.name"
               />
             </label>
           </td>
@@ -119,18 +119,18 @@
                 class="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold"
                 [class]="getTeacherAvatarClass(loan.status)"
               >
-                {{ loan.teacherInitials }}
+                {{ loan.teacher.initials }}
               </div>
               <div class="min-w-0">
-                <p class="truncate font-semibold text-base-content">{{ loan.teacher }}</p>
-                <p class="truncate text-xs text-base-content/55">{{ loan.specialty }}</p>
+                <p class="truncate font-semibold text-base-content">{{ loan.teacher.name }}</p>
+                <p class="truncate text-xs text-base-content/55">{{ loan.teacher.specialty }}</p>
               </div>
             </div>
           </td>
           <td class="px-4 py-4">
             <div class="space-y-1">
-              <p class="font-medium text-base-content">{{ loan.assetsSummary }}</p>
-              @if (loan.extraAssets.length > 0) {
+              <p class="font-medium text-base-content">{{ getPrimaryAssetName(loan) }}</p>
+              @if (getExtraAssets(loan).length > 0) {
                 <div class="mt-1">
                   <button
                     type="button"
@@ -139,7 +139,7 @@
                     [attr.popovertarget]="getExtraAssetsPopoverId(loan.id)"
                     [style.anchor-name]="getExtraAssetsAnchorName(loan.id)"
                   >
-                    +{{ loan.extraAssets.length }} más
+                    +{{ getExtraAssets(loan).length }} más
                     <span class="material-symbols-outlined text-[13px] text-base-content/45">expand_more</span>
                   </button>
                   <div
@@ -155,12 +155,12 @@
                         </p>
                       </div>
                       <div class="py-1">
-                        @for (asset of loan.extraAssets; track asset) {
+                        @for (asset of getExtraAssets(loan); track asset.id) {
                           <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
                             <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/35">
                               inventory_2
                             </span>
-                            <span class="leading-snug">{{ asset }}</span>
+                            <span class="leading-snug">{{ asset.name }}</span>
                           </div>
                         }
                       </div>
@@ -170,19 +170,13 @@
               }
             </div>
           </td>
-          <td class="px-4 py-4 text-base-content/65">{{ loan.location }}</td>
-          <td class="px-4 py-4 text-base-content/65">{{ loan.loanDate }}</td>
+          <td class="px-4 py-4 text-base-content/65">{{ loan.destination }}</td>
+          <td class="px-4 py-4 text-base-content/65">{{ formatDate(loan.loanDate) }}</td>
           <td class="px-4 py-4" [class.text-error]="loan.status === 'Vencido'" [class.font-semibold]="loan.status === 'Vencido'">
-            {{ loan.dueDate }}
+            {{ formatDate(loan.dueDate) }}
           </td>
           <td class="px-4 py-4">
-            <span
-              class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"
-              [class]="getStatusBadgeClass(loan.status)"
-            >
-              <span class="h-2 w-2 rounded-full" [class]="getStatusDotClass(loan.status)"></span>
-              {{ loan.status }}
-            </span>
+            <app-loan-status-badge [status]="loan.status" />
           </td>
           <td class="px-4 py-4 text-right">
             <button type="button" class="btn btn-ghost btn-sm text-primary" (click)="onViewLoan(loan.id)">

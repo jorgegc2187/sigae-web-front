@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
 import { Loan, LoanStatus, LoanStatusTab, MOCK_LOANS } from '../../models/loan.model';
+import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
 interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
   selectedIds: string[];
 }
@@ -11,13 +12,19 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
 @Component({
   selector: 'app-loan-list',
   standalone: true,
-  imports: [NgClass, DataListingComponent],
+  imports: [NgClass, DataListingComponent, LoanStatusBadgeComponent],
   templateUrl: './loan-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoanListComponent {
   readonly pageSize = 5;
   private readonly router = inject(Router);
+  private readonly dateFormatter = new Intl.DateTimeFormat('es-PE', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 
   private readonly loans = signal<Loan[]>(MOCK_LOANS);
 
@@ -44,9 +51,15 @@ export class LoanListComponent {
 
       const matchesSearch =
         !normalizedQuery ||
-        loan.teacher.toLowerCase().includes(normalizedQuery) ||
-        loan.assetsSummary.toLowerCase().includes(normalizedQuery) ||
-        loan.location.toLowerCase().includes(normalizedQuery);
+        loan.teacher.name.toLowerCase().includes(normalizedQuery) ||
+        loan.teacher.dni.toLowerCase().includes(normalizedQuery) ||
+        loan.destination.toLowerCase().includes(normalizedQuery) ||
+        loan.code.toLowerCase().includes(normalizedQuery) ||
+        loan.assets.some(
+          (asset) =>
+            asset.name.toLowerCase().includes(normalizedQuery) ||
+            asset.code.toLowerCase().includes(normalizedQuery),
+        );
 
       return matchesStatus && matchesSearch;
     });
@@ -156,26 +169,6 @@ export class LoanListComponent {
     return this.queryState().status === status;
   }
 
-  getStatusBadgeClass(status: LoanStatus): string {
-    const map: Record<LoanStatus, string> = {
-      Activo: 'text-success bg-success/10',
-      Vencido: 'text-error bg-error/10',
-      Devuelto: 'text-base-content/60 bg-base-300/60',
-    };
-
-    return map[status];
-  }
-
-  getStatusDotClass(status: LoanStatus): string {
-    const map: Record<LoanStatus, string> = {
-      Activo: 'bg-success',
-      Vencido: 'bg-error',
-      Devuelto: 'bg-base-content/30',
-    };
-
-    return map[status];
-  }
-
   getTeacherAvatarClass(status: LoanStatus): string {
     if (status === 'Vencido') {
       return 'bg-error/10 text-error';
@@ -188,8 +181,16 @@ export class LoanListComponent {
     return 'bg-primary/10 text-primary';
   }
 
+  getPrimaryAssetName(loan: Loan): string {
+    return loan.assets[0]?.name ?? 'Sin activos registrados';
+  }
+
+  getExtraAssets(loan: Loan) {
+    return loan.assets.slice(1);
+  }
+
   getExtraAssetsLabel(loan: Loan): string {
-    const count = loan.extraAssets.length;
+    const count = this.getExtraAssets(loan).length;
     return `Ver ${count} activo${count === 1 ? '' : 's'} adicional${count === 1 ? '' : 'es'}`;
   }
 
@@ -201,11 +202,15 @@ export class LoanListComponent {
     return `--loan-extra-assets-${loanId}`;
   }
 
+  formatDate(dateIso: string): string {
+    return this.dateFormatter.format(new Date(dateIso));
+  }
+
   onCreateLoan() {
     this.router.navigate(['/loans/new']);
   }
 
   onViewLoan(loanId: string) {
-    console.log('Ver préstamo', loanId);
+    this.router.navigate(['/loans', loanId]);
   }
 }

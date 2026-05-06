@@ -1,0 +1,197 @@
+<div class="space-y-8">
+  @if (loan(); as loanDetail) {
+    <div class="breadcrumbs p-0 text-sm text-base-content/60">
+      <ul>
+        <li><a routerLink="/loans" class="transition-colors hover:text-primary">Préstamos</a></li>
+        <li class="font-medium text-base-content">Detalle de Préstamo</li>
+      </ul>
+    </div>
+
+    <div class="flex flex-col gap-4 border-b border-base-200 pb-6 lg:flex-row lg:items-center lg:justify-between">
+      <div class="space-y-2">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+          <h1 class="text-2xl font-bold text-base-content">{{ pageTitle() }}</h1>
+          <app-loan-status-badge [status]="loanDetail.status" />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button type="button" class="btn border border-base-300 bg-base-100 shadow-sm">
+          Editar
+        </button>
+        <button type="button" class="btn btn-primary shadow-sm">
+          {{ actionLabel() }}
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+      <div class="space-y-6 xl:col-span-4">
+        <section class="card card-border bg-base-100 shadow-sm">
+          <div class="card-body p-5">
+            <h2 class="mb-5 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+              <span class="material-symbols-outlined text-[20px] text-primary">person</span>
+              Datos del Docente
+            </h2>
+
+            <div class="rounded-xl border border-base-200 bg-base-100 p-4">
+              <div class="flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-primary-content">
+                  {{ loanDetail.teacher.initials }}
+                </div>
+                <div class="min-w-0">
+                  <p class="truncate text-lg font-semibold text-base-content">{{ loanDetail.teacher.name }}</p>
+                  <p class="text-sm text-base-content/60">DNI: {{ loanDetail.teacher.dni }}</p>
+                </div>
+              </div>
+
+              <div class="mt-6 grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <p class="text-sm text-base-content/55">Departamento</p>
+                  <p class="font-semibold text-base-content">{{ departmentLabel() }}</p>
+                </div>
+                <div class="space-y-1">
+                  <p class="text-sm text-base-content/55">Especialidad</p>
+                  <p class="font-semibold text-base-content">{{ loanDetail.teacher.specialty }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card card-border bg-base-100 shadow-sm">
+          <div class="card-body p-5">
+            <h2 class="mb-5 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+              <span class="material-symbols-outlined text-[20px] text-primary">calendar_month</span>
+              Detalles del Préstamo
+            </h2>
+
+            <div class="space-y-5">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="space-y-1">
+                  <p class="text-sm text-base-content/55">Fecha de Emisión</p>
+                  <p class="text-lg font-semibold leading-tight text-base-content">
+                    {{ formatCardDate(loanDetail.loanDate) }}
+                  </p>
+                </div>
+                <div class="space-y-1">
+                  <p class="text-sm text-base-content/55">Fecha de Vencimiento</p>
+                  <p class="text-lg font-semibold leading-tight text-base-content">
+                    {{ formatCardDate(loanDetail.dueDate) }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-sm text-base-content/55">Ubicación de Destino</p>
+                <div class="rounded-xl bg-base-200/60 px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">location_on</span>
+                    <span class="text-lg font-medium text-base-content">{{ loanDetail.destination }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-sm text-base-content/55">Observaciones</p>
+                <div class="rounded-xl border border-base-300 bg-base-100 px-4 py-4">
+                  @if (loanDetail.notes?.trim()) {
+                    <p class="text-base leading-8 text-base-content/80">{{ loanDetail.notes }}</p>
+                  } @else {
+                    <p class="text-base text-base-content/55">Sin observaciones registradas.</p>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="space-y-6 xl:col-span-8">
+        <section class="card card-border bg-base-100 shadow-sm">
+          <div class="card-body p-0">
+            <div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
+              <h2 class="flex items-center gap-2 text-base font-semibold text-base-content">
+                <span class="material-symbols-outlined text-[20px] text-primary">inventory_2</span>
+                Activos en este Préstamo
+              </h2>
+              <span class="badge badge-soft badge-neutral">{{ destinationBadgeLabel() }}</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="table w-full text-left">
+                <thead class="bg-base-200/60 text-[11px] font-bold uppercase tracking-wider text-base-content/55">
+                  <tr>
+                    <th class="px-4 py-4">Código</th>
+                    <th class="px-4 py-4">Nombre del Activo</th>
+                    <th class="px-4 py-4">Categoría</th>
+                    <th class="px-4 py-4">Estado Actual</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-base-200 text-sm text-base-content/75">
+                  @for (asset of loanDetail.assets; track asset.id) {
+                    <tr class="transition-colors hover:bg-base-200/35">
+                      <td class="px-4 py-4 font-mono text-base text-base-content">{{ asset.code }}</td>
+                      <td class="px-4 py-4 text-base text-base-content">{{ asset.name }}</td>
+                      <td class="px-4 py-4 text-base text-base-content/80">{{ asset.category }}</td>
+                      <td class="px-4 py-4">
+                        <span class="badge badge-sm {{ getAssetStatusClass(asset.status) }}">{{ asset.status }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="card card-border shadow-sm" [class]="statusPanelClass()">
+          <div class="card-body p-5">
+            <div class="mb-4 flex items-center justify-between gap-3 border-b border-base-200 pb-3">
+              <h2 class="flex items-center gap-2 text-base font-semibold text-base-content">
+                <span class="material-symbols-outlined text-[20px] text-primary">history</span>
+                Historial de Actividad
+              </h2>
+              <app-loan-status-badge [status]="loanDetail.status" />
+            </div>
+
+            <p class="mb-6 text-sm text-base-content/60">{{ statusMessage() }}</p>
+
+            <div class="space-y-6">
+              @for (activity of loanDetail.activities; track trackActivity($index, activity)) {
+                <div class="flex gap-4">
+                  <div class="pt-1">
+                    <div class="h-5 w-5 rounded-full border-2 border-base-300 bg-base-100"></div>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-lg font-medium text-base-content">{{ activity.title }}</p>
+                    <p class="text-base leading-7 text-base-content/75">{{ activity.description }}</p>
+                    <p class="text-sm text-base-content/55">
+                      {{ formatActivityDate(activity.timestamp) }}, {{ formatActivityTime(activity.timestamp) }}
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  } @else {
+    <section class="card card-border bg-base-100 shadow-sm">
+      <div class="card-body items-center px-6 py-14 text-center">
+        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
+          <span class="material-symbols-outlined text-[32px]">search_off</span>
+        </div>
+        <h1 class="text-xl font-bold text-base-content">Préstamo no encontrado</h1>
+        <p class="mt-2 max-w-md text-sm leading-6 text-base-content/60">
+          El identificador solicitado no corresponde a un préstamo disponible en esta vista.
+        </p>
+        <a routerLink="/loans" class="btn btn-primary mt-6 shadow-sm">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          Volver a préstamos
+        </a>
+      </div>
+    </section>
+  }
+</div>

@@ -21,4 +21,14 @@ export const LOANS_ROUTES: Routes = [
       pageSubtitle: 'Registrar préstamo',
     },
   },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./pages/loan-detail/loan-detail.component').then((m) => m.LoanDetailComponent),
+    title: 'Detalle del Préstamo - SIGAE',
+    data: {
+      pageTitle: 'Préstamos',
+      pageSubtitle: 'Detalle del préstamo',
+    },
+  },
 ];
