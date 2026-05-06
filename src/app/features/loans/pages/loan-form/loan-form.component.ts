@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
 
 interface TeacherOption {
   id: string;
@@ -27,7 +28,7 @@ interface AssetOption {
 @Component({
   selector: 'app-loan-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, LoanSignaturePadComponent],
   templateUrl: './loan-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -124,6 +125,7 @@ export class LoanFormComponent {
   readonly showAssetsError = signal(false);
   readonly assetLookupError = signal('');
   readonly isSubmitting = signal(false);
+  readonly signatureDataUrl = signal<string | null>(null);
 
   readonly form = this.fb.group({
     destinationId: ['', Validators.required],
@@ -323,6 +325,10 @@ export class LoanFormComponent {
       : 'text-estado-regular bg-estado-regular-bg';
   }
 
+  onSignatureChange(signatureDataUrl: string | null) {
+    this.signatureDataUrl.set(signatureDataUrl);
+  }
+
   onCancel() {
     this.router.navigate(['/loans']);
   }
@@ -348,6 +354,7 @@ export class LoanFormComponent {
       teacher: this.selectedTeacher(),
       assets: this.selectedAssets(),
       form: this.form.getRawValue(),
+      signatureDataUrl: this.signatureDataUrl(),
     });
 
     queueMicrotask(() => this.isSubmitting.set(false));

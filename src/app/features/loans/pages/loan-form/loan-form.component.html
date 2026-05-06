@@ -1,8 +1,8 @@
-<div class="space-y-8 pb-24">
-  <div class="breadcrumbs text-sm text-base-content/60 p-0">
+<div class="space-y-6 pb-24">
+  <div class="breadcrumbs p-0 text-sm text-base-content/60">
     <ul>
-      <li><a routerLink="/loans" class="hover:text-primary transition-colors">Préstamos</a></li>
-      <li class="text-base-content font-medium">Registrar Préstamo</li>
+      <li><a routerLink="/loans" class="transition-colors hover:text-primary">Préstamos</a></li>
+      <li class="font-medium text-base-content">Registrar Préstamo</li>
     </ul>
   </div>
 
@@ -15,71 +15,77 @@
             Datos del Docente
           </h3>
 
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">
-              Buscar Docente <span class="text-error">*</span>
-            </legend>
+          <div class="space-y-4">
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">
+                Buscar Docente <span class="text-error">*</span>
+              </legend>
 
-            <div #teacherSearchContainer class="relative">
-              <label class="input w-full border border-base-300 bg-base-100 flex items-center gap-2">
-                <span class="material-symbols-outlined text-base-content/45 text-[18px]">search</span>
-                <input
-                  type="text"
-                  class="grow placeholder-shown:opacity-50"
-                  placeholder="DNI o nombre..."
-                  [value]="teacherQuery()"
-                  (input)="onTeacherSearch($event)"
-                  (focus)="onTeacherFocus()"
-                />
-              </label>
+              <div #teacherSearchContainer class="relative">
+                <label class="input h-11 w-full border border-base-300 bg-base-100 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base-content/45 text-[18px]">search</span>
+                  <input
+                    type="text"
+                    class="grow placeholder-shown:opacity-50"
+                    placeholder="DNI o nombre..."
+                    [value]="teacherQuery()"
+                    (input)="onTeacherSearch($event)"
+                    (focus)="onTeacherFocus()"
+                  />
+                </label>
 
-              @if (teacherDropdownOpen() && filteredTeachers().length > 0) {
-                <ul class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md">
-                  @for (teacher of filteredTeachers(); track teacher.id) {
-                    <li>
-                      <button
-                        type="button"
-                        class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
-                        (click)="selectTeacher(teacher)"
-                      >
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content">
-                          {{ teacher.initials }}
-                        </div>
-                        <div class="min-w-0">
-                          <p class="truncate text-sm font-semibold text-base-content">{{ teacher.name }}</p>
-                          <p class="truncate text-xs text-base-content/55">DNI: {{ teacher.dni }} • {{ teacher.specialty }}</p>
-                        </div>
-                      </button>
-                    </li>
-                  }
-                </ul>
+                @if (teacherDropdownOpen() && filteredTeachers().length > 0) {
+                  <ul class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md">
+                    @for (teacher of filteredTeachers(); track teacher.id) {
+                      <li>
+                        <button
+                          type="button"
+                          class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
+                          (click)="selectTeacher(teacher)"
+                        >
+                          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content">
+                            {{ teacher.initials }}
+                          </div>
+                          <div class="min-w-0">
+                            <p class="truncate text-sm font-semibold text-base-content">{{ teacher.name }}</p>
+                            <p class="truncate text-xs text-base-content/55">DNI: {{ teacher.dni }} • {{ teacher.specialty }}</p>
+                          </div>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              @if (showTeacherError()) {
+                <p class="fieldset-label mt-1 text-error">Seleccione un docente para continuar.</p>
               }
-            </div>
+            </fieldset>
 
-            @if (showTeacherError()) {
-              <p class="fieldset-label mt-1 text-error">Seleccione un docente para continuar.</p>
+            @if (selectedTeacher(); as teacher) {
+              <div class="rounded-xl border border-primary bg-primary/5 p-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-content">
+                    {{ teacher.initials }}
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-base font-bold text-base-content">{{ teacher.name }}</p>
+                    <p class="truncate text-sm text-base-content/60">DNI: {{ teacher.dni }} • {{ teacher.specialty }}</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-base-content"
+                    (click)="clearTeacher()"
+                    aria-label="Quitar docente seleccionado"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                  </button>
+                </div>
+              </div>
             }
-          </fieldset>
 
-          @if (selectedTeacher(); as teacher) {
-            <div class="mt-4 flex items-center gap-3 rounded-xl border border-primary bg-primary/5 p-3">
-              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-content">
-                {{ teacher.initials }}
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-base font-bold text-base-content">{{ teacher.name }}</p>
-                <p class="truncate text-sm text-base-content/60">DNI: {{ teacher.dni }} • {{ teacher.specialty }}</p>
-              </div>
-              <button
-                type="button"
-                class="btn btn-ghost btn-sm btn-square text-base-content/40 hover:text-base-content"
-                (click)="clearTeacher()"
-                aria-label="Quitar docente seleccionado"
-              >
-                <span class="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
-          }
+            <app-loan-signature-pad (signatureChange)="onSignatureChange($event)" />
+          </div>
         </div>
       </section>
 
@@ -98,7 +104,7 @@
 
               <div #locationSearchContainer class="relative">
                 <label
-                  class="input w-full border border-base-300 bg-base-100 flex items-center gap-2"
+                  class="input h-11 w-full border border-base-300 bg-base-100 flex items-center gap-2"
                   [class.input-error]="form.controls.destinationId.invalid && form.controls.destinationId.touched"
                 >
                   <span class="material-symbols-outlined text-base-content/45 text-[18px]">location_on</span>
@@ -113,7 +119,7 @@
                   @if (selectedDestination()) {
                     <button
                       type="button"
-                      class="text-base-content/35 hover:text-base-content/60 transition-colors"
+                      class="text-base-content/35 transition-colors hover:text-base-content/60"
                       (click)="clearDestination()"
                       aria-label="Quitar ubicación seleccionada"
                     >
@@ -161,7 +167,7 @@
                   type="date"
                   formControlName="startDate"
                   readonly
-                  class="input w-full border border-base-300 bg-base-200"
+                  class="input h-11 w-full border border-base-300 bg-base-200"
                 />
               </fieldset>
 
@@ -172,7 +178,7 @@
                 <input
                   type="date"
                   formControlName="dueDate"
-                  class="input w-full border border-base-300 bg-base-100"
+                  class="input h-11 w-full border border-base-300 bg-base-100"
                   [class.input-error]="form.controls.dueDate.invalid && form.controls.dueDate.touched"
                 />
                 @if (form.controls.dueDate.invalid && form.controls.dueDate.touched) {
@@ -185,19 +191,46 @@
               <legend class="fieldset-legend">Observaciones (Opcional)</legend>
               <textarea
                 formControlName="notes"
-                rows="4"
-                class="textarea w-full resize-y border border-base-300 bg-base-100 placeholder-shown:opacity-50"
+                rows="3"
+                class="textarea min-h-24 w-full resize-y border border-base-300 bg-base-100 placeholder-shown:opacity-50"
                 placeholder="Detalles adicionales sobre el préstamo..."
               ></textarea>
             </fieldset>
           </form>
         </div>
       </section>
+
+      <section class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body p-5">
+          <h3 class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+            <span class="material-symbols-outlined text-primary text-[20px]">description</span>
+            Documentación
+          </h3>
+
+          <div class="space-y-3">
+            <label class="flex items-center gap-2 text-sm font-medium text-base-content">
+              <span class="material-symbols-outlined text-[18px] text-base-content/45">description</span>
+              Documentos y Evidencias (Opcional)
+            </label>
+
+            <div class="cursor-pointer rounded-xl border-2 border-dashed border-base-300 bg-base-200/20 p-6 text-center transition-colors hover:bg-base-200/35">
+              <div class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-base-100 shadow-sm">
+                <span class="material-symbols-outlined text-[24px] text-primary">cloud_upload</span>
+              </div>
+              <p class="text-sm font-medium text-base-content">
+                Haga clic para subir o arrastre y suelte
+              </p>
+              <p class="mt-1 text-xs text-base-content/45">(PDF, JPG, PNG)</p>
+              <input type="file" class="hidden" aria-hidden="true" tabindex="-1" />
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <div class="xl:col-span-7">
       <section class="card card-border bg-base-100 shadow-sm h-full">
-        <div class="card-body flex h-full min-h-[620px] flex-col p-5">
+        <div class="card-body flex h-full min-h-[820px] flex-col p-5">
           <div class="mb-4 flex items-center justify-between border-b border-base-200 pb-3">
             <h3 class="flex items-center gap-2 text-base font-semibold text-base-content">
               <span class="material-symbols-outlined text-primary text-[20px]">qr_code_scanner</span>
@@ -206,7 +239,7 @@
             <span class="badge badge-soft badge-neutral">{{ selectedAssets().length }} activos</span>
           </div>
 
-          <div #assetSearchContainer class="mb-5">
+          <div #assetSearchContainer class="mb-6">
             <label class="input h-12 w-full border-2 border-dashed border-primary bg-primary/5 flex items-center gap-2 px-4">
               <input
                 type="text"
@@ -219,7 +252,7 @@
               />
               <button
                 type="button"
-                class="text-primary hover:text-primary/80 transition-colors"
+                class="text-primary transition-colors hover:text-primary/80"
                 (click)="addAssetFromQuery()"
                 aria-label="Agregar activo por código"
               >
@@ -253,9 +286,9 @@
           </div>
 
           <div class="flex flex-1 flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100">
-            <div class="flex items-center justify-between border-b border-base-300 bg-base-200/40 px-4 py-3">
+            <div class="flex items-center justify-between border-b border-base-300 bg-base-200/35 px-4 py-3">
               <span class="text-[12px] font-semibold uppercase tracking-wider text-base-content/55">
-                Activos seleccionados
+                Activos Seleccionados
               </span>
               <button
                 type="button"
@@ -275,10 +308,10 @@
             } @else {
               <ul class="flex-1 divide-y divide-base-200 overflow-y-auto">
                 @for (asset of selectedAssets(); track asset.id) {
-                  <li class="group flex items-center justify-between gap-3 px-4 py-4 transition-colors hover:bg-base-200/35">
+                  <li class="group flex items-center justify-between gap-3 px-5 py-5 transition-colors hover:bg-base-200/30">
                     <div class="min-w-0">
-                      <p class="truncate text-sm font-semibold text-base-content">{{ asset.name }}</p>
-                      <div class="mt-1 flex flex-wrap items-center gap-2">
+                      <p class="truncate text-[1.05rem] font-semibold text-base-content">{{ asset.name }}</p>
+                      <div class="mt-2 flex flex-wrap items-center gap-2">
                         <span class="text-xs font-mono text-base-content/55">{{ asset.code }}</span>
                         <span class="h-1 w-1 rounded-full bg-base-content/20"></span>
                         <span class="badge badge-sm {{ getAssetConditionClass(asset.condition) }}">{{ asset.condition }}</span>

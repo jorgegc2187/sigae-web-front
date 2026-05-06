@@ -1,0 +1,25 @@
+<div class="space-y-2">
+  <div class="flex items-center justify-between gap-3">
+    <label class="flex items-center gap-2 text-sm font-medium text-base-content">
+      <span class="material-symbols-outlined text-[18px] text-base-content/45">draw</span>
+      Firma Digital (Opcional)
+    </label>
+    <button
+      type="button"
+      class="text-sm font-medium text-primary transition-colors hover:text-primary/80 disabled:text-base-content/35"
+      [disabled]="!hasSignature()"
+      (click)="clearSignature()"
+    >
+      Limpiar firma
+    </button>
+  </div>
+
+  <div class="relative overflow-hidden rounded-lg border border-dashed border-base-300 bg-base-100">
+    <canvas #signatureCanvas class="block h-40 w-full touch-none"></canvas>
+    @if (!hasSignature()) {
+      <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <p class="text-sm text-base-content/35">Espacio para firma del docente</p>
+      </div>
+    }
+  </div>
+</div>
