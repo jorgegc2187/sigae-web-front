@@ -22,6 +22,7 @@ export class LoanSignaturePadComponent implements OnDestroy {
   private readonly canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('signatureCanvas');
   private signaturePad: SignaturePad | null = null;
 
+  readonly isInteracting = signal(false);
   readonly signatureDataUrl = signal<string | null>(null);
 
   constructor() {
@@ -30,6 +31,7 @@ export class LoanSignaturePadComponent implements OnDestroy {
 
   clearSignature() {
     this.signaturePad?.clear();
+    this.isInteracting.set(false);
     this.signatureDataUrl.set(null);
   }
 
@@ -50,6 +52,7 @@ export class LoanSignaturePadComponent implements OnDestroy {
 
   loadSignature(signatureDataUrl: string | null) {
     if (!this.signaturePad) {
+      this.isInteracting.set(false);
       this.signatureDataUrl.set(signatureDataUrl);
       return;
     }
@@ -86,6 +89,7 @@ export class LoanSignaturePadComponent implements OnDestroy {
         backgroundColor: 'rgba(255,255,255,0)',
       });
 
+      this.signaturePad.addEventListener('beginStroke', this.handleBeginStroke);
       this.signaturePad.addEventListener('endStroke', this.handleSignatureChange);
     }
 
@@ -94,7 +98,12 @@ export class LoanSignaturePadComponent implements OnDestroy {
   }
 
   private readonly handleSignatureChange = () => {
+    this.isInteracting.set(false);
     this.signatureDataUrl.set(this.getSignatureDataUrl());
+  };
+
+  private readonly handleBeginStroke = () => {
+    this.isInteracting.set(true);
   };
 
   private resizeCanvas() {
@@ -124,11 +133,13 @@ export class LoanSignaturePadComponent implements OnDestroy {
     this.signaturePad.clear();
 
     if (!signatureDataUrl) {
+      this.isInteracting.set(false);
       this.signatureDataUrl.set(null);
       return;
     }
 
     this.signaturePad.fromDataURL(signatureDataUrl);
+    this.isInteracting.set(false);
     this.signatureDataUrl.set(signatureDataUrl);
   }
 }
