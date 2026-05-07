@@ -1,0 +1,185 @@
+<!doctype html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SIGAE - Adjuntar Archivos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'surface-container-lowest': '#ffffff',
+              'on-primary-fixed': '#001551',
+              secondary: '#0051d5',
+              'on-error': '#ffffff',
+              'inverse-on-surface': '#eff1f3',
+              'secondary-fixed-dim': '#b4c5ff',
+              'secondary-container': '#316bf3',
+              'on-surface-variant': '#434655',
+              'surface-container-highest': '#e0e3e5',
+              outline: '#747686',
+              'tertiary-fixed-dim': '#ffb59c',
+              'inverse-surface': '#2d3133',
+              'on-primary': '#ffffff',
+              'error-container': '#ffdad6',
+              primary: '#0037b0',
+              'on-tertiary-fixed': '#390c00',
+              tertiary: '#7f2500',
+              'primary-fixed-dim': '#b7c4ff',
+              'surface-container': '#eceef0',
+              'surface-bright': '#f7f9fb',
+              'tertiary-fixed': '#ffdbcf',
+              'surface-dim': '#d8dadc',
+              'on-tertiary-container': '#ffc9b7',
+              surface: '#f7f9fb',
+              'primary-container': '#1d4ed8',
+              background: '#f7f9fb',
+              'on-surface': '#191c1e',
+              'on-tertiary-fixed-variant': '#832700',
+              'on-primary-fixed-variant': '#0039b5',
+              'surface-container-low': '#f2f4f6',
+              'tertiary-container': '#a73400',
+              'on-secondary-fixed': '#00174b',
+              'on-secondary-fixed-variant': '#003ea8',
+              'secondary-fixed': '#dbe1ff',
+              'outline-variant': '#c4c5d7',
+              'on-secondary': '#ffffff',
+              'inverse-primary': '#b7c4ff',
+              'surface-tint': '#2151da',
+              'primary-fixed': '#dce1ff',
+              'surface-container-high': '#e6e8ea',
+              'on-background': '#191c1e',
+              'on-error-container': '#93000a',
+              'surface-variant': '#e0e3e5',
+              'on-tertiary': '#ffffff',
+              'on-primary-container': '#cad3ff',
+              error: '#ba1a1a',
+              'on-secondary-container': '#fefcff',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+            },
+            spacing: {},
+            fontFamily: {
+              headline: ['Inter'],
+              display: ['Inter'],
+              body: ['Inter'],
+              label: ['Inter'],
+            },
+            fontSize: {},
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-background h-screen w-screen overflow-hidden flex flex-col items-center justify-center relative font-body"
+  >
+    <div class="absolute inset-0 bg-surface-container-low p-4 flex flex-col blur-sm opacity-50 z-0">
+      <div
+        class="h-16 w-full flex items-center justify-between border-b border-outline-variant mb-6"
+      >
+        <div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center">
+          <span
+            class="material-symbols-outlined text-primary"
+            style="font-variation-settings: 'FILL' 1"
+            >arrow_back</span
+          >
+        </div>
+        <div class="h-4 w-32 bg-outline-variant rounded"></div>
+        <div class="w-8 h-8"></div>
+      </div>
+      <div class="flex-1 flex flex-col gap-4">
+        <div class="h-32 w-full bg-surface-container-highest rounded-xl"></div>
+        <div class="h-12 w-full bg-surface-container-highest rounded-xl"></div>
+        <div class="h-12 w-full bg-surface-container-highest rounded-xl"></div>
+        <div class="h-24 w-full bg-surface-container-highest rounded-xl mt-4"></div>
+      </div>
+    </div>
+    <div class="absolute inset-0 bg-on-background/40 z-10"></div>
+    <div
+      class="relative z-20 w-11/12 max-w-sm bg-surface-container-lowest rounded-xl shadow-lg p-6 flex flex-col gap-6"
+    >
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-on-surface font-headline">Adjuntar Evidencias</h2>
+        <button
+          class="text-on-surface-variant hover:text-on-surface transition-colors p-1 rounded-full"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <button
+          class="w-full flex items-center justify-start gap-4 p-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors group"
+        >
+          <div
+            class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary group-hover:bg-primary-container/20 transition-colors"
+          >
+            <span
+              class="material-symbols-outlined text-2xl"
+              style="font-variation-settings: 'FILL' 1"
+              >photo_camera</span
+            >
+          </div>
+          <div class="flex flex-col items-start text-left">
+            <span class="font-semibold text-on-surface text-base">Tomar Foto</span>
+            <span class="text-sm text-on-surface-variant">Usar la cámara del dispositivo</span>
+          </div>
+        </button>
+        <button
+          class="w-full flex items-center justify-start gap-4 p-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors group"
+        >
+          <div
+            class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary group-hover:bg-primary-container/20 transition-colors"
+          >
+            <span
+              class="material-symbols-outlined text-2xl"
+              style="font-variation-settings: 'FILL' 1"
+              >folder</span
+            >
+          </div>
+          <div class="flex flex-col items-start text-left">
+            <span class="font-semibold text-on-surface text-base">Seleccionar del Dispositivo</span>
+            <span class="text-sm text-on-surface-variant">Elegir de la galería o archivos</span>
+          </div>
+        </button>
+      </div>
+      <div class="pt-2 border-t border-surface-container-high w-full">
+        <button
+          class="w-full h-10 flex items-center justify-center text-on-surface-variant font-medium hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

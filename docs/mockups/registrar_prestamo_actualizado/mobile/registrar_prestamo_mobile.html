@@ -1,0 +1,360 @@
+<!doctype html>
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SIGAE - Registro de Préstamo (Móvil)</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'surface-dim': '#d8dadc',
+              'on-tertiary-fixed-variant': '#832700',
+              surface: '#f7f9fb',
+              'tertiary-fixed-dim': '#ffb59c',
+              'on-tertiary-fixed': '#390c00',
+              'surface-container-high': '#e6e8ea',
+              'inverse-primary': '#b7c4ff',
+              'surface-tint': '#2151da',
+              'surface-container-lowest': '#ffffff',
+              'on-secondary-container': '#fefcff',
+              'surface-variant': '#e0e3e5',
+              'secondary-container': '#316bf3',
+              secondary: '#0051d5',
+              'primary-container': '#1d4ed8',
+              'secondary-fixed-dim': '#b4c5ff',
+              'on-surface': '#191c1e',
+              error: '#ba1a1a',
+              'on-tertiary': '#ffffff',
+              'surface-container-low': '#f2f4f6',
+              'error-container': '#ffdad6',
+              'on-secondary': '#ffffff',
+              'on-primary': '#ffffff',
+              'tertiary-fixed': '#ffdbcf',
+              'primary-fixed': '#dce1ff',
+              'on-error': '#ffffff',
+              'on-primary-fixed': '#001551',
+              'on-background': '#191c1e',
+              'secondary-fixed': '#dbe1ff',
+              'on-secondary-fixed': '#00174b',
+              'on-surface-variant': '#434655',
+              'on-primary-container': '#cad3ff',
+              'surface-container-highest': '#e0e3e5',
+              'inverse-surface': '#2d3133',
+              'tertiary-container': '#a73400',
+              tertiary: '#7f2500',
+              'on-secondary-fixed-variant': '#003ea8',
+              'on-primary-fixed-variant': '#0039b5',
+              'outline-variant': '#c4c5d7',
+              primary: '#0037b0',
+              'on-error-container': '#93000a',
+              background: '#f7f9fb',
+              'primary-fixed-dim': '#b7c4ff',
+              'on-tertiary-container': '#ffc9b7',
+              outline: '#747686',
+              'inverse-on-surface': '#eff1f3',
+              'surface-container': '#eceef0',
+              'surface-bright': '#f7f9fb',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+            },
+            fontFamily: {
+              headline: ['Inter', 'sans-serif'],
+              display: ['Inter', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+              label: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-background antialiased flex flex-col min-h-screen">
+    <!-- Top App Bar (Mobile) -->
+    <header
+      class="flex justify-between items-center px-4 w-full sticky top-0 z-40 bg-surface-container-lowest h-16 border-b border-surface-variant shadow-sm"
+    >
+      <div class="flex items-center gap-3">
+        <button
+          aria-label="Go back"
+          class="text-on-surface p-1 rounded-full hover:bg-surface-container-low transition-colors"
+        >
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="text-lg font-bold text-on-surface tracking-tight">Nuevo Préstamo</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          class="text-on-surface p-2 rounded-full hover:bg-surface-container-low transition-colors"
+        >
+          <span class="material-symbols-outlined">more_vert</span>
+        </button>
+      </div>
+    </header>
+    <!-- Main Content -->
+    <main class="flex-1 pb-24 px-4 pt-4 flex flex-col gap-6 overflow-y-auto">
+      <!-- Docente / Solicitante Section -->
+      <section
+        class="bg-surface-container-lowest rounded-xl border border-surface-variant p-4 shadow-sm"
+      >
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-primary">person</span>
+          <h2 class="text-base font-semibold text-on-surface">Datos del Solicitante</h2>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1"
+              >DNI del Docente / Personal <span class="text-error">*</span></label
+            >
+            <div class="flex gap-2">
+              <input
+                class="w-full h-10 px-3 border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-surface"
+                placeholder="Ej: 45678912"
+                type="text"
+              />
+              <button
+                class="bg-surface-container border border-outline-variant text-on-surface rounded-lg px-3 hover:bg-surface-variant transition-colors flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined text-[20px]">search</span>
+              </button>
+            </div>
+          </div>
+          <!-- Resultados busqueda (Hidden by default, showing state) -->
+          <div
+            class="bg-surface-container-low p-3 rounded-lg border border-surface-variant flex items-center gap-3"
+          >
+            <div
+              class="w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center font-bold"
+            >
+              MR
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-on-surface">María Rodríguez Paz</p>
+              <p class="text-xs text-on-surface-variant">Docente de Computación</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Escaneo de Activos Section -->
+      <section
+        class="bg-surface-container-lowest rounded-xl border border-surface-variant p-4 shadow-sm"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">barcode_scanner</span>
+            <h2 class="text-base font-semibold text-on-surface">Activos a Prestar</h2>
+          </div>
+          <span
+            class="bg-primary-container text-on-primary-container text-xs font-bold px-2 py-1 rounded-full"
+          >
+            2 Agregados
+          </span>
+        </div>
+        <div class="relative mb-4">
+          <input
+            class="w-full h-12 pl-10 pr-12 border-2 border-dashed border-primary rounded-lg focus:border-solid focus:ring-0 text-sm bg-surface"
+            placeholder="Escanear código o buscar por SBN..."
+            type="text"
+          />
+          <span class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant"
+            >search</span
+          >
+          <button class="absolute right-3 top-3 text-primary hover:text-primary-fixed-variant">
+            <span class="material-symbols-outlined">qr_code_scanner</span>
+          </button>
+        </div>
+        <!-- Lista de Activos Seleccionados -->
+        <div class="flex flex-col gap-3">
+          <!-- Item 1 -->
+          <div
+            class="flex items-start justify-between p-3 border border-surface-variant rounded-lg bg-surface"
+          >
+            <div class="flex gap-3">
+              <div
+                class="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg"
+              >
+                <span class="material-symbols-outlined text-on-surface-variant">laptop_mac</span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-on-surface">Laptop Lenovo ThinkPad T14</p>
+                <p class="text-xs text-on-surface-variant font-mono mt-0.5">SBN: 74089950-0021</p>
+                <span
+                  class="inline-flex items-center gap-1 mt-1 bg-[#DCFCE7] text-[#15803D] text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#15803D]"></span> Bueno
+                </span>
+              </div>
+            </div>
+            <button class="text-error p-1 hover:bg-error-container rounded-full transition-colors">
+              <span class="material-symbols-outlined text-[20px]">delete</span>
+            </button>
+          </div>
+          <!-- Item 2 -->
+          <div
+            class="flex items-start justify-between p-3 border border-surface-variant rounded-lg bg-surface"
+          >
+            <div class="flex gap-3">
+              <div
+                class="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg"
+              >
+                <span class="material-symbols-outlined text-on-surface-variant">videocam</span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-on-surface">Proyector Epson PowerLite</p>
+                <p class="text-xs text-on-surface-variant font-mono mt-0.5">SBN: 74089950-0105</p>
+                <span
+                  class="inline-flex items-center gap-1 mt-1 bg-[#FEF3C7] text-[#B45309] text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#B45309]"></span> Regular
+                </span>
+              </div>
+            </div>
+            <button class="text-error p-1 hover:bg-error-container rounded-full transition-colors">
+              <span class="material-symbols-outlined text-[20px]">delete</span>
+            </button>
+          </div>
+        </div>
+      </section>
+      <!-- Detalles del Préstamo -->
+      <section
+        class="bg-surface-container-lowest rounded-xl border border-surface-variant p-4 shadow-sm"
+      >
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-primary">description</span>
+          <h2 class="text-base font-semibold text-on-surface">Documentación</h2>
+        </div>
+        <div class="flex flex-col gap-3">
+          <label class="block text-sm font-medium text-on-surface-variant"
+            >Documentos y Evidencias (Opcional)</label
+          >
+          <div
+            class="border-2 border-dashed border-outline-variant rounded-lg p-6 flex flex-col items-center justify-center gap-2 bg-surface cursor-pointer hover:bg-surface-container-low transition-colors"
+          >
+            <span class="material-symbols-outlined text-outline text-3xl">cloud_upload</span>
+            <span class="text-xs text-on-surface-variant text-center"
+              >Toca para adjuntar archivos o imágenes</span
+            >
+          </div>
+        </div>
+      </section>
+      <section
+        class="bg-surface-container-lowest rounded-xl border border-surface-variant p-4 shadow-sm"
+      >
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-primary">edit_document</span>
+          <h2 class="text-base font-semibold text-on-surface">Detalles del Préstamo</h2>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1"
+              >Destino / Aula <span class="text-error">*</span></label
+            >
+            <select
+              class="w-full h-10 px-3 border border-outline-variant rounded-lg text-sm bg-surface"
+            >
+              <option>Seleccionar aula...</option>
+              <option selected="">Aula 304 - Pabellón B</option>
+              <option>Laboratorio de Cómputo 1</option>
+              <option>Auditorio Principal</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-on-surface-variant mb-1"
+                >Fecha Retorno <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full h-10 px-2 border border-outline-variant rounded-lg text-sm bg-surface"
+                type="date"
+                value="2023-10-25"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-on-surface-variant mb-1"
+                >Hora Retorno <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full h-10 px-2 border border-outline-variant rounded-lg text-sm bg-surface"
+                type="time"
+                value="13:00"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1"
+              >Observaciones</label
+            >
+            <textarea
+              class="w-full h-20 px-3 py-2 border border-outline-variant rounded-lg text-sm bg-surface resize-none"
+              placeholder="Estado específico al entregar, requerimientos especiales..."
+            ></textarea>
+          </div>
+        </div>
+      </section>
+      <!-- Firma Section -->
+      <section
+        class="bg-surface-container-lowest rounded-xl border border-surface-variant p-4 shadow-sm flex flex-col items-center justify-center py-6"
+      >
+        <span class="material-symbols-outlined text-outline text-4xl mb-2">draw</span>
+        <h3 class="text-sm font-medium text-on-surface mb-1">Firma del Docente Requerida</h3>
+        <p class="text-xs text-on-surface-variant text-center mb-4">
+          La firma digital es obligatoria para procesar la salida de los activos.
+        </p>
+        <button
+          class="w-full bg-surface text-primary border border-primary font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors"
+        >
+          <span class="material-symbols-outlined text-[20px]">signature</span>
+          Agregar Firma
+        </button>
+      </section>
+    </main>
+    <!-- Sticky Bottom Action Bar -->
+    <div
+      class="fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t border-surface-variant p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50"
+    >
+      <div class="flex gap-3">
+        <button
+          class="flex-1 border border-outline-variant text-on-surface bg-surface font-medium py-3 rounded-lg text-sm hover:bg-surface-variant transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          class="flex-[2] bg-primary text-on-primary font-semibold py-3 rounded-lg text-sm hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2"
+        >
+          Registrar Préstamo
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

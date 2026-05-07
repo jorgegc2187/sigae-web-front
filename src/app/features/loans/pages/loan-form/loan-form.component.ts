@@ -1,7 +1,17 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
+import { LoanAttachmentDraft, LoanAttachmentSource } from '../../models/loan-attachment-draft.model';
 
 interface TeacherOption {
   id: string;
@@ -25,6 +35,17 @@ interface AssetOption {
   condition: AssetCondition;
 }
 
+const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp']);
+const ALLOWED_ATTACHMENT_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
+
 @Component({
   selector: 'app-loan-form',
   standalone: true,
@@ -35,7 +56,7 @@ interface AssetOption {
     '(document:click)': 'onClickOutside($event)',
   },
 })
-export class LoanFormComponent {
+export class LoanFormComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -43,7 +64,10 @@ export class LoanFormComponent {
   readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
   readonly assetSearchContainer = viewChild<ElementRef>('assetSearchContainer');
   readonly signatureModal = viewChild<ElementRef<HTMLDialogElement>>('signatureModal');
+  readonly attachmentSourceModal = viewChild<ElementRef<HTMLDialogElement>>('attachmentSourceModal');
   readonly signaturePad = viewChild<LoanSignaturePadComponent>('signaturePad');
+  readonly documentPickerInput = viewChild<ElementRef<HTMLInputElement>>('documentPickerInput');
+  readonly cameraCaptureInput = viewChild<ElementRef<HTMLInputElement>>('cameraCaptureInput');
 
   readonly availableTeachers = signal<TeacherOption[]>([
     {
@@ -126,6 +150,9 @@ export class LoanFormComponent {
   readonly showTeacherError = signal(false);
   readonly showAssetsError = signal(false);
   readonly assetLookupError = signal('');
+  readonly attachmentFeedback = signal<string | null>(null);
+  readonly attachments = signal<LoanAttachmentDraft[]>([]);
+  readonly isDocumentDropActive = signal(false);
   readonly isSubmitting = signal(false);
   readonly isSignatureModalOpen = signal(false);
   readonly signatureDataUrl = signal<string | null>(null);
@@ -183,6 +210,7 @@ export class LoanFormComponent {
   });
 
   readonly hasSavedSignature = computed(() => !!this.signatureDataUrl());
+  readonly hasAttachments = computed(() => this.attachments().length > 0);
 
   onClickOutside(event: MouseEvent) {
     const teacherContainer = this.teacherSearchContainer();
@@ -369,6 +397,134 @@ export class LoanFormComponent {
     this.signatureDataUrl.set(null);
   }
 
+  openDocumentPicker() {
+    this.documentPickerInput()?.nativeElement.click();
+  }
+
+  openCameraCapture() {
+    this.cameraCaptureInput()?.nativeElement.click();
+  }
+
+  openAttachmentSourceModal() {
+    this.attachmentSourceModal()?.nativeElement.showModal();
+  }
+
+  closeAttachmentSourceModal() {
+    this.attachmentSourceModal()?.nativeElement.close();
+  }
+
+  openDocumentPickerFromModal() {
+    this.closeAttachmentSourceModal();
+    this.openDocumentPicker();
+  }
+
+  openCameraCaptureFromModal() {
+    this.closeAttachmentSourceModal();
+    this.openCameraCapture();
+  }
+
+  onDocumentDragOver(event: DragEvent) {
+    event.preventDefault();
+    this.isDocumentDropActive.set(true);
+  }
+
+  onDocumentDragLeave(event: DragEvent) {
+    event.preventDefault();
+    this.isDocumentDropActive.set(false);
+  }
+
+  onDocumentDrop(event: DragEvent) {
+    event.preventDefault();
+    this.isDocumentDropActive.set(false);
+
+    const fileList = event.dataTransfer?.files;
+    if (!fileList || fileList.length === 0) {
+      return;
+    }
+
+    this.processSelectedFiles(Array.from(fileList), 'picker');
+  }
+
+  onDocumentSelection(event: Event, source: LoanAttachmentSource) {
+    const input = event.target as HTMLInputElement;
+    const fileList = input.files;
+
+    if (!fileList || fileList.length === 0) {
+      input.value = '';
+      return;
+    }
+
+    this.processSelectedFiles(Array.from(fileList), source);
+    input.value = '';
+  }
+
+  removeAttachment(attachmentId: string) {
+    const attachment = this.attachments().find((item) => item.id === attachmentId);
+    if (attachment?.previewUrl) {
+      URL.revokeObjectURL(attachment.previewUrl);
+    }
+
+    this.attachments.update((attachments) =>
+      attachments.filter((item) => item.id !== attachmentId),
+    );
+
+    this.attachmentFeedback.set(null);
+  }
+
+  getAttachmentTypeLabel(attachment: LoanAttachmentDraft): string {
+    const extension = this.getFileExtension(attachment.name);
+
+    if (attachment.mimeType.startsWith('image/')) {
+      return 'Imagen';
+    }
+
+    if (extension === 'pdf') {
+      return 'PDF';
+    }
+
+    if (extension === 'docx') {
+      return 'DOCX';
+    }
+
+    return 'DOC';
+  }
+
+  getAttachmentIcon(attachment: LoanAttachmentDraft): string {
+    if (attachment.mimeType.startsWith('image/')) {
+      return 'image';
+    }
+
+    if (this.getFileExtension(attachment.name) === 'pdf') {
+      return 'picture_as_pdf';
+    }
+
+    return 'description';
+  }
+
+  formatAttachmentSize(size: number): string {
+    if (size < 1024) {
+      return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  getAttachmentSourceLabel(source: LoanAttachmentSource): string {
+    return source === 'camera' ? 'Cámara' : 'Archivo';
+  }
+
+  ngOnDestroy() {
+    for (const attachment of this.attachments()) {
+      if (attachment.previewUrl) {
+        URL.revokeObjectURL(attachment.previewUrl);
+      }
+    }
+  }
+
   onCancel() {
     this.router.navigate(['/loans']);
   }
@@ -390,13 +546,139 @@ export class LoanFormComponent {
 
     this.isSubmitting.set(true);
 
-    console.log('Registrar préstamo', {
-      teacher: this.selectedTeacher(),
-      assets: this.selectedAssets(),
-      form: this.form.getRawValue(),
-      signatureDataUrl: this.signatureDataUrl(),
-    });
+    console.log('Registrar préstamo', this.buildLoanSubmissionPayload());
 
     queueMicrotask(() => this.isSubmitting.set(false));
+  }
+
+  private createAttachmentDraft(file: File, source: LoanAttachmentSource): LoanAttachmentDraft {
+    const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined;
+
+    return {
+      id: this.buildAttachmentId(file),
+      file,
+      name: file.name,
+      size: file.size,
+      mimeType: file.type,
+      previewUrl,
+      source,
+      status: 'ready',
+    };
+  }
+
+  private validateAttachment(file: File): string | null {
+    const extension = this.getFileExtension(file.name);
+    const isValidMimeType =
+      file.type === '' ? ALLOWED_ATTACHMENT_EXTENSIONS.has(extension) : this.isAllowedMimeType(file.type);
+
+    if (!ALLOWED_ATTACHMENT_EXTENSIONS.has(extension) || !isValidMimeType) {
+      return 'Formato no permitido.';
+    }
+
+    if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+      return `Supera el máximo de ${this.formatAttachmentSize(MAX_ATTACHMENT_SIZE_BYTES)}.`;
+    }
+
+    return null;
+  }
+
+  private processSelectedFiles(files: File[], source: LoanAttachmentSource) {
+    const nextAttachments: LoanAttachmentDraft[] = [];
+    const duplicateNames: string[] = [];
+    const invalidMessages: string[] = [];
+    const currentKeys = new Set(
+      this.attachments().map((attachment) => this.getAttachmentKey(attachment.file)),
+    );
+
+    for (const file of files) {
+      const duplicateKey = this.getAttachmentKey(file);
+      if (currentKeys.has(duplicateKey)) {
+        duplicateNames.push(file.name);
+        continue;
+      }
+
+      const validationMessage = this.validateAttachment(file);
+      if (validationMessage) {
+        invalidMessages.push(`${file.name}: ${validationMessage}`);
+        continue;
+      }
+
+      currentKeys.add(duplicateKey);
+      nextAttachments.push(this.createAttachmentDraft(file, source));
+    }
+
+    if (nextAttachments.length > 0) {
+      this.attachments.update((attachments) => [...attachments, ...nextAttachments]);
+    }
+
+    this.attachmentFeedback.set(
+      this.buildAttachmentFeedback({
+        addedCount: nextAttachments.length,
+        duplicateNames,
+        invalidMessages,
+      }),
+    );
+  }
+
+  private buildAttachmentFeedback(params: {
+    addedCount: number;
+    duplicateNames: string[];
+    invalidMessages: string[];
+  }): string | null {
+    const messages: string[] = [];
+
+    if (params.addedCount > 0) {
+      messages.push(
+        `${params.addedCount} archivo${params.addedCount === 1 ? '' : 's'} agregado${params.addedCount === 1 ? '' : 's'}.`,
+      );
+    }
+
+    if (params.duplicateNames.length > 0) {
+      messages.push(`Duplicados omitidos: ${params.duplicateNames.join(', ')}.`);
+    }
+
+    if (params.invalidMessages.length > 0) {
+      messages.push(...params.invalidMessages);
+    }
+
+    return messages.length > 0 ? messages.join(' ') : null;
+  }
+
+  private getAttachmentKey(file: File): string {
+    return `${file.name}::${file.size}::${file.lastModified}`;
+  }
+
+  private buildAttachmentId(file: File): string {
+    return `attachment-${crypto.randomUUID()}-${file.lastModified}`;
+  }
+
+  private getFileExtension(fileName: string): string {
+    const segments = fileName.toLowerCase().split('.');
+    return segments.at(-1) ?? '';
+  }
+
+  private isAllowedMimeType(mimeType: string): boolean {
+    return mimeType.startsWith('image/') || ALLOWED_ATTACHMENT_MIME_TYPES.has(mimeType);
+  }
+
+  private buildLoanSubmissionPayload() {
+    return {
+      loanData: {
+        teacher: this.selectedTeacher(),
+        destination: this.selectedDestination(),
+        assets: this.selectedAssets(),
+        form: this.form.getRawValue(),
+        signatureDataUrl: this.signatureDataUrl(),
+      },
+      attachmentsMetadata: this.attachments().map((attachment) => ({
+        id: attachment.id,
+        name: attachment.name,
+        size: attachment.size,
+        mimeType: attachment.mimeType,
+        source: attachment.source,
+        status: attachment.status,
+      })),
+      attachmentFiles: this.attachments().map((attachment) => attachment.file),
+    };
   }
 }
