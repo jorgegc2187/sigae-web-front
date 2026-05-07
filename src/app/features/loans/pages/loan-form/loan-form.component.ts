@@ -42,6 +42,8 @@ export class LoanFormComponent {
   readonly teacherSearchContainer = viewChild<ElementRef>('teacherSearchContainer');
   readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
   readonly assetSearchContainer = viewChild<ElementRef>('assetSearchContainer');
+  readonly signatureModal = viewChild<ElementRef<HTMLDialogElement>>('signatureModal');
+  readonly signaturePad = viewChild<LoanSignaturePadComponent>('signaturePad');
 
   readonly availableTeachers = signal<TeacherOption[]>([
     {
@@ -125,7 +127,9 @@ export class LoanFormComponent {
   readonly showAssetsError = signal(false);
   readonly assetLookupError = signal('');
   readonly isSubmitting = signal(false);
+  readonly isSignatureModalOpen = signal(false);
   readonly signatureDataUrl = signal<string | null>(null);
+  readonly signatureDraft = signal<string | null>(null);
 
   readonly form = this.fb.group({
     destinationId: ['', Validators.required],
@@ -177,6 +181,8 @@ export class LoanFormComponent {
     const count = this.selectedAssets().length;
     return `${count} activo${count === 1 ? '' : 's'} seleccionado${count === 1 ? '' : 's'}`;
   });
+
+  readonly hasSavedSignature = computed(() => !!this.signatureDataUrl());
 
   onClickOutside(event: MouseEvent) {
     const teacherContainer = this.teacherSearchContainer();
@@ -325,8 +331,42 @@ export class LoanFormComponent {
       : 'text-estado-regular bg-estado-regular-bg';
   }
 
-  onSignatureChange(signatureDataUrl: string | null) {
+  openSignatureModal() {
+    const currentSignature = this.signatureDataUrl();
+    this.signatureDraft.set(currentSignature);
+    this.isSignatureModalOpen.set(true);
+    this.signatureModal()?.nativeElement.showModal();
+
+    requestAnimationFrame(() => {
+      this.signaturePad()?.loadSignature(currentSignature);
+    });
+  }
+
+  closeSignatureModal() {
+    this.signatureModal()?.nativeElement.close();
+  }
+
+  onSignatureModalClose() {
+    this.isSignatureModalOpen.set(false);
+    this.signatureDraft.set(null);
+    this.signaturePad()?.loadSignature(null);
+  }
+
+  clearSignatureDraft() {
+    this.signatureDraft.set(null);
+    this.signaturePad()?.clearSignature();
+  }
+
+  saveSignature() {
+    const signatureDataUrl = this.signaturePad()?.getSignatureDataUrl() ?? null;
+    this.signatureDraft.set(signatureDataUrl);
     this.signatureDataUrl.set(signatureDataUrl);
+    this.closeSignatureModal();
+  }
+
+  removeSignature() {
+    this.signatureDraft.set(null);
+    this.signatureDataUrl.set(null);
   }
 
   onCancel() {

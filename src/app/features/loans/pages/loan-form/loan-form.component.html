@@ -84,7 +84,42 @@
               </div>
             }
 
-            <app-loan-signature-pad (signatureChange)="onSignatureChange($event)" />
+            <div class="space-y-2">
+              <div class="flex items-center justify-between gap-3">
+                <label class="flex items-center gap-2 text-sm font-medium text-base-content/80">
+                  <span class="material-symbols-outlined text-[18px] text-base-content/45">draw</span>
+                  Firma Digital (Opcional)
+                </label>
+
+                @if (hasSavedSignature()) {
+                  <button
+                    type="button"
+                    class="text-xs font-medium text-error transition-colors hover:text-error/80"
+                    (click)="removeSignature()"
+                  >
+                    Quitar firma
+                  </button>
+                }
+              </div>
+
+              <button
+                type="button"
+                class="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-primary bg-base-100 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+                (click)="openSignatureModal()"
+              >
+                <span class="material-symbols-outlined text-[18px]">
+                  {{ hasSavedSignature() ? 'edit' : 'draw' }}
+                </span>
+                {{ hasSavedSignature() ? 'Editar Firma' : 'Agregar Firma' }}
+              </button>
+
+              @if (hasSavedSignature()) {
+                <div class="flex items-center gap-2 text-xs text-base-content/55">
+                  <span class="material-symbols-outlined text-[16px] text-success">check_circle</span>
+                  Firma registrada correctamente.
+                </div>
+              }
+            </div>
           </div>
         </div>
       </section>
@@ -340,6 +375,50 @@
     </div>
   </div>
 </div>
+
+<dialog #signatureModal class="modal" (close)="onSignatureModalClose()">
+  <div class="modal-box w-full max-w-md rounded-xl border border-base-300 bg-base-100 p-0 shadow-xl">
+    <div class="flex items-center justify-between gap-4 border-b border-base-300 px-5 py-4">
+      <h3 class="text-lg font-semibold text-base-content">Registrar Firma Digital</h3>
+
+      <form method="dialog">
+        <button
+          type="submit"
+          class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+          aria-label="Cerrar modal de firma digital"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="px-6 py-6">
+      <app-loan-signature-pad #signaturePad />
+    </div>
+
+    <div class="flex items-center justify-end gap-3 rounded-b-xl border-t border-base-300 bg-base-200/50 px-5 py-4">
+      <button
+        type="button"
+        class="px-4 py-2 text-sm font-medium text-base-content/70 transition-colors hover:text-base-content"
+        [disabled]="!signaturePad.hasSignature()"
+        (click)="clearSignatureDraft()"
+      >
+        Limpiar
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary h-11 min-h-11 rounded-lg px-6 text-sm font-medium shadow-sm"
+        (click)="saveSignature()"
+      >
+        Guardar Firma
+      </button>
+    </div>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>Cerrar</button>
+  </form>
+</dialog>
 
 <div class="fixed bottom-0 left-[240px] right-0 z-40 border-t border-base-300 bg-base-100 px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
   <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

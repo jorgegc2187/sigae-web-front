@@ -4,7 +4,6 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -23,7 +22,6 @@ export class LoanSignaturePadComponent implements OnDestroy {
   private readonly canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('signatureCanvas');
   private signaturePad: SignaturePad | null = null;
 
-  readonly signatureChange = output<string | null>();
   readonly signatureDataUrl = signal<string | null>(null);
 
   constructor() {
@@ -33,11 +31,31 @@ export class LoanSignaturePadComponent implements OnDestroy {
   clearSignature() {
     this.signaturePad?.clear();
     this.signatureDataUrl.set(null);
-    this.signatureChange.emit(null);
   }
 
   hasSignature(): boolean {
     return !!this.signatureDataUrl();
+  }
+
+  getSignatureDataUrl(): string | null {
+    if (!this.signaturePad || this.signaturePad.isEmpty()) {
+      this.signatureDataUrl.set(null);
+      return null;
+    }
+
+    const signatureDataUrl = this.signaturePad.toDataURL('image/png');
+    this.signatureDataUrl.set(signatureDataUrl);
+    return signatureDataUrl;
+  }
+
+  loadSignature(signatureDataUrl: string | null) {
+    if (!this.signaturePad) {
+      this.signatureDataUrl.set(signatureDataUrl);
+      return;
+    }
+
+    this.resizeCanvas();
+    this.restoreSignature(signatureDataUrl);
   }
 
   onWindowResize() {
@@ -45,12 +63,9 @@ export class LoanSignaturePadComponent implements OnDestroy {
       return;
     }
 
-    const currentSignature = this.signatureDataUrl();
+    const currentSignature = this.getSignatureDataUrl();
     this.resizeCanvas();
-
-    if (currentSignature) {
-      this.signaturePad.fromDataURL(currentSignature);
-    }
+    this.restoreSignature(currentSignature);
   }
 
   ngOnDestroy() {
@@ -75,18 +90,11 @@ export class LoanSignaturePadComponent implements OnDestroy {
     }
 
     this.resizeCanvas();
+    this.restoreSignature(this.signatureDataUrl());
   }
 
   private readonly handleSignatureChange = () => {
-    if (!this.signaturePad || this.signaturePad.isEmpty()) {
-      this.signatureDataUrl.set(null);
-      this.signatureChange.emit(null);
-      return;
-    }
-
-    const signatureDataUrl = this.signaturePad.toDataURL('image/png');
-    this.signatureDataUrl.set(signatureDataUrl);
-    this.signatureChange.emit(signatureDataUrl);
+    this.signatureDataUrl.set(this.getSignatureDataUrl());
   };
 
   private resizeCanvas() {
@@ -103,7 +111,24 @@ export class LoanSignaturePadComponent implements OnDestroy {
     canvas.height = height * ratio;
 
     const context = canvas.getContext('2d');
+    context?.setTransform(1, 0, 0, 1, 0, 0);
     context?.scale(ratio, ratio);
     this.signaturePad.clear();
+  }
+
+  private restoreSignature(signatureDataUrl: string | null) {
+    if (!this.signaturePad) {
+      return;
+    }
+
+    this.signaturePad.clear();
+
+    if (!signatureDataUrl) {
+      this.signatureDataUrl.set(null);
+      return;
+    }
+
+    this.signaturePad.fromDataURL(signatureDataUrl);
+    this.signatureDataUrl.set(signatureDataUrl);
   }
 }
