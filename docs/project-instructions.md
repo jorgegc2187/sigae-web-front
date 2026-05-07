@@ -62,6 +62,8 @@ El nombre del sistema (`appName`) debe usarse en: título del browser (`Title` s
 
 - Usar clases de DaisyUI como base, extender con utilidades Tailwind encima.
 - Usar `bg-primary`, `text-primary-content`, `bg-base-100`, etc. — nunca hex hardcodeado en templates.
+- **Semántica de superficies:** usar `bg-base-200` para el canvas principal/layout y `bg-base-100` para cards, formularios, tablas, dropdowns, modales y otras superficies elevadas.
+- **Regla de contraste:** no usar `bg-base-100` simultáneamente en el fondo principal de la vista y en las cards principales de esa misma pantalla.
 - Dark mode via `data-theme` en `<html>`. No usar la clase `.dark` de Tailwind.
 - No crear archivos `.scss` por componente. Los estilos viven en `styles.css`.
 - **Placeholders:** agregar siempre `placeholder-shown:opacity-50` a todo input con placeholder.
@@ -124,9 +126,9 @@ DaisyUI v5 usa `@plugin "daisyui/theme"` en el CSS con valores **OKLCH**. Los do
   --color-neutral: oklch(35% 0.02 261);
   --color-neutral-content: oklch(95% 0.01 261);
 
-  /* Base: fondos y superficies */
-  --color-base-100: oklch(98.5% 0.005 261); /* ~#F8FAFC — fondo general */
-  --color-base-200: oklch(95% 0.008 261); /* ~#F1F5F9 — sidebar, hover */
+  /* Base: superficies y fondo del canvas */
+  --color-base-100: oklch(98.5% 0.005 261); /* ~#F8FAFC — cards, formularios y superficies elevadas */
+  --color-base-200: oklch(95% 0.008 261); /* ~#F1F5F9 — fondo general del layout, sidebar, hover */
   --color-base-300: oklch(91% 0.012 261); /* ~#E2E8F0 — bordes */
   --color-base-content: oklch(15% 0.03 261); /* ~#0F172A — texto principal */
 
@@ -161,8 +163,8 @@ DaisyUI v5 usa `@plugin "daisyui/theme"` en el CSS con valores **OKLCH**. Los do
   --color-neutral-content: oklch(20% 0.02 261);
 
   /* Base oscura con tinte azulado frío */
-  --color-base-100: oklch(16% 0.025 261); /* ~#0F172A — fondo general */
-  --color-base-200: oklch(21% 0.028 261); /* ~#1E293B — cards, sidebar */
+  --color-base-100: oklch(16% 0.025 261); /* ~#0F172A — cards, formularios y superficies elevadas */
+  --color-base-200: oklch(21% 0.028 261); /* ~#1E293B — fondo general del layout, sidebar */
   --color-base-300: oklch(28% 0.03 261); /* ~#334155 — bordes */
   --color-base-content: oklch(93% 0.01 261); /* ~#F1F5F9 — texto principal */
 
@@ -314,7 +316,8 @@ Sidebar: fixed left, 240px, full height, z-50
 Header:  sticky top, full width menos sidebar, 64px, z-40
 Contenido: ml-[240px], padding 24px, pb-24 si hay footer sticky
 Footer sticky (solo en formularios): fixed bottom, w-[calc(100%-240px)], z-40
-Fondo general: #F8FAFC (bg-slate-50)
+Fondo general: usar `bg-base-200`
+Cards, formularios, tablas y superficies elevadas: usar `bg-base-100`
 ```
 
 #### Regla de normalización
