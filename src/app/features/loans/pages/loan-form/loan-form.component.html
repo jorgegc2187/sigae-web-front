@@ -10,7 +10,9 @@
     <div class="space-y-6 xl:col-span-5">
       <section class="card card-border bg-base-100 shadow-sm">
         <div class="card-body p-5">
-          <h3 class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+          <h3
+            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
+          >
             <span class="material-symbols-outlined text-primary text-[20px]">person</span>
             Datos del Docente
           </h3>
@@ -22,8 +24,12 @@
               </legend>
 
               <div #teacherSearchContainer class="relative">
-                <label class="input h-11 w-full border border-base-300 bg-base-100 flex items-center gap-2">
-                  <span class="material-symbols-outlined text-base-content/45 text-[18px]">search</span>
+                <label
+                  class="input h-11 w-full border border-base-300 bg-base-100 flex items-center gap-2"
+                >
+                  <span class="material-symbols-outlined text-base-content/45 text-[18px]"
+                    >search</span
+                  >
                   <input
                     type="text"
                     class="grow placeholder-shown:opacity-50"
@@ -35,7 +41,9 @@
                 </label>
 
                 @if (teacherDropdownOpen() && filteredTeachers().length > 0) {
-                  <ul class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md">
+                  <ul
+                    class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md"
+                  >
                     @for (teacher of filteredTeachers(); track teacher.id) {
                       <li>
                         <button
@@ -43,12 +51,18 @@
                           class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
                           (click)="selectTeacher(teacher)"
                         >
-                          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content">
+                          <div
+                            class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content"
+                          >
                             {{ teacher.initials }}
                           </div>
                           <div class="min-w-0">
-                            <p class="truncate text-sm font-semibold text-base-content">{{ teacher.name }}</p>
-                            <p class="truncate text-xs text-base-content/55">DNI: {{ teacher.dni }} • {{ teacher.specialty }}</p>
+                            <p class="truncate text-sm font-semibold text-base-content">
+                              {{ teacher.name }}
+                            </p>
+                            <p class="truncate text-xs text-base-content/55">
+                              DNI: {{ teacher.dni }} • {{ teacher.specialty }}
+                            </p>
                           </div>
                         </button>
                       </li>
@@ -65,12 +79,16 @@
             @if (selectedTeacher(); as teacher) {
               <div class="rounded-xl border border-primary bg-primary/5 p-4">
                 <div class="flex items-center gap-3">
-                  <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-content">
+                  <div
+                    class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-content"
+                  >
                     {{ teacher.initials }}
                   </div>
                   <div class="min-w-0 flex-1">
                     <p class="truncate text-base font-bold text-base-content">{{ teacher.name }}</p>
-                    <p class="truncate text-sm text-base-content/60">DNI: {{ teacher.dni }} • {{ teacher.specialty }}</p>
+                    <p class="truncate text-sm text-base-content/60">
+                      DNI: {{ teacher.dni }} • {{ teacher.specialty }}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -87,7 +105,9 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between gap-3">
                 <label class="flex items-center gap-2 text-sm font-medium text-base-content/80">
-                  <span class="material-symbols-outlined text-[18px] text-base-content/45">draw</span>
+                  <span class="material-symbols-outlined text-[18px] text-base-content/45"
+                    >draw</span
+                  >
                   Firma Digital (Opcional)
                 </label>
 
@@ -115,7 +135,9 @@
 
               @if (hasSavedSignature()) {
                 <div class="flex items-center gap-2 text-xs text-base-content/55">
-                  <span class="material-symbols-outlined text-[16px] text-success">check_circle</span>
+                  <span class="material-symbols-outlined text-[16px] text-success"
+                    >check_circle</span
+                  >
                   Firma registrada correctamente.
                 </div>
               }
@@ -126,7 +148,9 @@
 
       <section class="card card-border bg-base-100 shadow-sm">
         <div class="card-body p-5">
-          <h3 class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+          <h3
+            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
+          >
             <span class="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
             Configuración del Préstamo
           </h3>
@@ -140,9 +164,13 @@
               <div #locationSearchContainer class="relative">
                 <label
                   class="input h-11 w-full border border-base-300 bg-base-100 flex items-center gap-2"
-                  [class.input-error]="form.controls.destinationId.invalid && form.controls.destinationId.touched"
+                  [class.input-error]="
+                    form.controls.destinationId.invalid && form.controls.destinationId.touched
+                  "
                 >
-                  <span class="material-symbols-outlined text-base-content/45 text-[18px]">location_on</span>
+                  <span class="material-symbols-outlined text-base-content/45 text-[18px]"
+                    >location_on</span
+                  >
                   <input
                     type="text"
                     class="grow placeholder-shown:opacity-50"
@@ -161,11 +189,15 @@
                       <span class="material-symbols-outlined text-[18px]">close</span>
                     </button>
                   }
-                  <span class="material-symbols-outlined text-base-content/35 text-[18px]">expand_more</span>
+                  <span class="material-symbols-outlined text-base-content/35 text-[18px]"
+                    >expand_more</span
+                  >
                 </label>
 
                 @if (locationDropdownOpen()) {
-                  <ul class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md">
+                  <ul
+                    class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md"
+                  >
                     @if (filteredDestinations().length === 0) {
                       <li class="px-3 py-3 text-sm text-base-content/50">
                         No se encontraron ubicaciones con ese criterio.
@@ -178,8 +210,12 @@
                             class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
                             (click)="selectDestination(destination)"
                           >
-                            <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
-                            <span class="truncate text-sm font-medium text-base-content">{{ destination.name }}</span>
+                            <span class="material-symbols-outlined text-primary text-[18px]"
+                              >location_on</span
+                            >
+                            <span class="truncate text-sm font-medium text-base-content">{{
+                              destination.name
+                            }}</span>
                           </button>
                         </li>
                       }
@@ -214,7 +250,9 @@
                   type="date"
                   formControlName="dueDate"
                   class="input h-11 w-full border border-base-300 bg-base-100"
-                  [class.input-error]="form.controls.dueDate.invalid && form.controls.dueDate.touched"
+                  [class.input-error]="
+                    form.controls.dueDate.invalid && form.controls.dueDate.touched
+                  "
                 />
                 @if (form.controls.dueDate.invalid && form.controls.dueDate.touched) {
                   <p class="fieldset-label mt-1 text-error">Ingrese una fecha de devolución.</p>
@@ -237,14 +275,18 @@
 
       <section class="card card-border bg-base-100 shadow-sm">
         <div class="card-body p-5">
-          <h3 class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+          <h3
+            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
+          >
             <span class="material-symbols-outlined text-primary text-[20px]">description</span>
             Documentación
           </h3>
 
           <div class="space-y-3">
             <label class="flex items-center gap-2 text-sm font-medium text-base-content">
-              <span class="material-symbols-outlined text-[18px] text-base-content/45">description</span>
+              <span class="material-symbols-outlined text-[18px] text-base-content/45"
+                >description</span
+              >
               Documentos y Evidencias (Opcional)
             </label>
 
@@ -252,18 +294,20 @@
               type="button"
               [class]="
                 isDocumentDropActive()
-                  ? 'hidden w-full rounded-xl border-2 border-dashed border-primary bg-primary/5 p-6 text-center transition-colors md:block'
-                  : 'hidden w-full rounded-xl border-2 border-dashed border-base-300 bg-base-200/20 p-6 text-center transition-colors md:block'
+                  ? 'group hidden w-full cursor-pointer rounded-xl border-2 border-dashed border-primary bg-primary/5 p-6 text-center transition-colors md:block'
+                  : 'group hidden w-full cursor-pointer rounded-xl border-2 border-dashed border-base-300 bg-base-200/20 p-6 text-center transition-colors hover:bg-base-200/35 md:block'
               "
               (click)="openDocumentPicker()"
               (dragover)="onDocumentDragOver($event)"
               (dragleave)="onDocumentDragLeave($event)"
               (drop)="onDocumentDrop($event)"
             >
-              <div class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-base-100 shadow-sm">
+              <div
+                class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-base-100 shadow-sm transition-transform duration-200 group-hover:scale-110"
+              >
                 <span class="material-symbols-outlined text-[24px] text-primary">cloud_upload</span>
               </div>
-              <p class="text-sm font-medium text-base-content">
+              <p class="text-sm font-medium text-base-content/85">
                 Haga clic para subir o arrastre y suelte
               </p>
               <p class="mt-1 text-xs text-base-content/45">(PDF, DOC, DOCX, JPG, PNG, WEBP)</p>
@@ -275,7 +319,9 @@
               (click)="openAttachmentSourceModal()"
             >
               <span class="material-symbols-outlined text-primary text-[32px]">cloud_upload</span>
-              <span class="text-xs text-base-content/65">Toca para adjuntar archivos o imágenes</span>
+              <span class="text-xs text-base-content/65"
+                >Toca para adjuntar archivos o imágenes</span
+              >
             </button>
 
             <input
@@ -308,7 +354,9 @@
                   @for (attachment of attachments(); track attachment.id) {
                     <li class="flex items-start gap-4 px-4 py-4">
                       @if (attachment.previewUrl) {
-                        <div class="h-14 w-14 overflow-hidden rounded-lg border border-base-300 bg-base-100">
+                        <div
+                          class="h-14 w-14 overflow-hidden rounded-lg border border-base-300 bg-base-100"
+                        >
                           <img
                             [src]="attachment.previewUrl"
                             [alt]="'Vista previa de ' + attachment.name"
@@ -316,17 +364,27 @@
                           />
                         </div>
                       } @else {
-                        <div class="flex h-14 w-14 items-center justify-center rounded-lg border border-base-300 bg-base-200/35 text-primary">
-                          <span class="material-symbols-outlined text-[24px]">{{ getAttachmentIcon(attachment) }}</span>
+                        <div
+                          class="flex h-14 w-14 items-center justify-center rounded-lg border border-base-300 bg-base-200/35 text-primary"
+                        >
+                          <span class="material-symbols-outlined text-[24px]">{{
+                            getAttachmentIcon(attachment)
+                          }}</span>
                         </div>
                       }
 
                       <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
-                          <p class="truncate text-sm font-semibold text-base-content">{{ attachment.name }}</p>
-                          <span class="badge badge-sm badge-soft badge-neutral">{{ getAttachmentTypeLabel(attachment) }}</span>
+                          <p class="truncate text-sm font-semibold text-base-content">
+                            {{ attachment.name }}
+                          </p>
+                          <span class="badge badge-sm badge-soft badge-neutral">{{
+                            getAttachmentTypeLabel(attachment)
+                          }}</span>
                         </div>
-                        <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-base-content/55">
+                        <div
+                          class="mt-2 flex flex-wrap items-center gap-2 text-xs text-base-content/55"
+                        >
                           <span>{{ formatAttachmentSize(attachment.size) }}</span>
                           <span class="h-1 w-1 rounded-full bg-base-content/20"></span>
                           <span>{{ getAttachmentSourceLabel(attachment.source) }}</span>
@@ -358,14 +416,20 @@
         <div class="card-body flex h-full min-h-[820px] flex-col p-5">
           <div class="mb-4 flex items-center justify-between border-b border-base-200 pb-3">
             <h3 class="flex items-center gap-2 text-base font-semibold text-base-content">
-              <span class="material-symbols-outlined text-primary text-[20px]">qr_code_scanner</span>
+              <span class="material-symbols-outlined text-primary text-[20px]"
+                >qr_code_scanner</span
+              >
               Escaneo de Activos
             </h3>
-            <span class="badge badge-soft badge-neutral">{{ selectedAssets().length }} activos</span>
+            <span class="badge badge-soft badge-neutral"
+              >{{ selectedAssets().length }} activos</span
+            >
           </div>
 
           <div #assetSearchContainer class="mb-6">
-            <label class="input h-12 w-full border-2 border-dashed border-primary bg-primary/5 flex items-center gap-2 px-4">
+            <label
+              class="input h-12 w-full border-2 border-dashed border-primary bg-primary/5 flex items-center gap-2 px-4"
+            >
               <input
                 type="text"
                 class="grow placeholder-shown:opacity-50 text-sm"
@@ -399,10 +463,16 @@
                       (click)="addAsset(asset)"
                     >
                       <div class="min-w-0">
-                        <p class="truncate text-sm font-semibold text-base-content">{{ asset.name }}</p>
-                        <p class="truncate text-xs font-mono text-base-content/55">{{ asset.code }}</p>
+                        <p class="truncate text-sm font-semibold text-base-content">
+                          {{ asset.name }}
+                        </p>
+                        <p class="truncate text-xs font-mono text-base-content/55">
+                          {{ asset.code }}
+                        </p>
                       </div>
-                      <span class="badge badge-sm {{ getAssetConditionClass(asset.condition) }}">{{ asset.condition }}</span>
+                      <span class="badge badge-sm {{ getAssetConditionClass(asset.condition) }}">{{
+                        asset.condition
+                      }}</span>
                     </button>
                   </li>
                 }
@@ -410,8 +480,12 @@
             }
           </div>
 
-          <div class="flex flex-1 flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100">
-            <div class="flex items-center justify-between border-b border-base-300 bg-base-200/35 px-4 py-3">
+          <div
+            class="flex flex-1 flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100"
+          >
+            <div
+              class="flex items-center justify-between border-b border-base-300 bg-base-200/35 px-4 py-3"
+            >
               <span class="text-[12px] font-semibold uppercase tracking-wider text-base-content/55">
                 Activos Seleccionados
               </span>
@@ -425,21 +499,34 @@
             </div>
 
             @if (selectedAssets().length === 0) {
-              <div class="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-base-content/45">
+              <div
+                class="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-base-content/45"
+              >
                 <span class="material-symbols-outlined text-[44px]">inventory_2</span>
-                <p class="text-base font-semibold text-base-content/65">Aún no hay activos seleccionados</p>
-                <p class="max-w-sm text-sm">Escanee un código o busque un activo para agregarlo a este préstamo.</p>
+                <p class="text-base font-semibold text-base-content/65">
+                  Aún no hay activos seleccionados
+                </p>
+                <p class="max-w-sm text-sm">
+                  Escanee un código o busque un activo para agregarlo a este préstamo.
+                </p>
               </div>
             } @else {
               <ul class="flex-1 divide-y divide-base-200 overflow-y-auto">
                 @for (asset of selectedAssets(); track asset.id) {
-                  <li class="group flex items-center justify-between gap-3 px-5 py-5 transition-colors hover:bg-base-200/30">
+                  <li
+                    class="group flex items-center justify-between gap-3 px-5 py-5 transition-colors hover:bg-base-200/30"
+                  >
                     <div class="min-w-0">
-                      <p class="truncate text-[1.05rem] font-semibold text-base-content">{{ asset.name }}</p>
+                      <p class="truncate text-[1.05rem] font-semibold text-base-content">
+                        {{ asset.name }}
+                      </p>
                       <div class="mt-2 flex flex-wrap items-center gap-2">
                         <span class="text-xs font-mono text-base-content/55">{{ asset.code }}</span>
                         <span class="h-1 w-1 rounded-full bg-base-content/20"></span>
-                        <span class="badge badge-sm {{ getAssetConditionClass(asset.condition) }}">{{ asset.condition }}</span>
+                        <span
+                          class="badge badge-sm {{ getAssetConditionClass(asset.condition) }}"
+                          >{{ asset.condition }}</span
+                        >
                       </div>
                     </div>
 
@@ -458,7 +545,9 @@
           </div>
 
           @if (showAssetsError() && selectedAssets().length === 0) {
-            <p class="mt-3 text-sm text-error">Agregue al menos un activo para registrar el préstamo.</p>
+            <p class="mt-3 text-sm text-error">
+              Agregue al menos un activo para registrar el préstamo.
+            </p>
           }
         </div>
       </section>
@@ -467,7 +556,9 @@
 </div>
 
 <dialog #signatureModal class="modal" (close)="onSignatureModalClose()">
-  <div class="modal-box w-full max-w-md rounded-xl border border-base-300 bg-base-100 p-0 shadow-xl">
+  <div
+    class="modal-box w-full max-w-2xl rounded-xl border border-base-300 bg-base-100 p-0 shadow-xl"
+  >
     <div class="flex items-center justify-between gap-4 border-b border-base-300 px-5 py-4">
       <h3 class="text-lg font-semibold text-base-content">Registrar Firma Digital</h3>
 
@@ -486,7 +577,9 @@
       <app-loan-signature-pad #signaturePad />
     </div>
 
-    <div class="flex items-center justify-end gap-3 rounded-b-xl border-t border-base-300 bg-base-200/50 px-5 py-4">
+    <div
+      class="flex items-center justify-end gap-3 rounded-b-xl border-t border-base-300 bg-base-200/50 px-5 py-4"
+    >
       <button
         type="button"
         class="px-4 py-2 text-sm font-medium text-base-content/70 transition-colors hover:text-base-content"
@@ -531,7 +624,9 @@
         class="flex w-full items-center justify-start gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-colors hover:bg-base-200/35"
         (click)="openCameraCaptureFromModal()"
       >
-        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+        >
           <span class="material-symbols-outlined text-[26px]">photo_camera</span>
         </div>
         <div>
@@ -545,7 +640,9 @@
         class="flex w-full items-center justify-start gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-colors hover:bg-base-200/35"
         (click)="openDocumentPickerFromModal()"
       >
-        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+        >
           <span class="material-symbols-outlined text-[26px]">folder</span>
         </div>
         <div>
@@ -567,7 +664,9 @@
   </form>
 </dialog>
 
-<div class="fixed bottom-0 left-[240px] right-0 z-40 border-t border-base-300 bg-base-100 px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<div
+  class="fixed bottom-0 left-[240px] right-0 z-40 border-t border-base-300 bg-base-100 px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+>
   <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
     <div class="flex flex-wrap items-center gap-4 text-sm">
       <div class="flex items-center gap-2">
@@ -587,7 +686,12 @@
       <button type="button" class="btn btn-ghost border border-base-300" (click)="onCancel()">
         Cancelar
       </button>
-      <button type="button" class="btn btn-primary shadow-sm" [disabled]="isSubmitting()" (click)="onSubmit()">
+      <button
+        type="button"
+        class="btn btn-primary shadow-sm"
+        [disabled]="isSubmitting()"
+        (click)="onSubmit()"
+      >
         <span class="material-symbols-outlined text-[18px]">check_circle</span>
         Registrar Préstamo
       </button>
