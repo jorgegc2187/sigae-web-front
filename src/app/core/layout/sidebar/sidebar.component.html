@@ -1,7 +1,8 @@
 <aside
-  class="fixed left-0 top-0 z-50 flex h-full w-[240px] flex-col border-r border-base-300 bg-base-200 px-4 py-6 transition-transform duration-200 ease-out md:translate-x-0"
+  class="fixed left-0 top-0 z-50 flex h-full w-[240px] -translate-x-full flex-col border-r border-base-300 bg-base-200 px-4 py-6 transition-transform duration-200 ease-out md:pointer-events-auto md:translate-x-0 md:transition-none"
   [class.translate-x-0]="isMobileOpen()"
-  [class.-translate-x-full]="!isMobileOpen()"
+  [class.pointer-events-none]="!isMobileOpen()"
+  [class.pointer-events-auto]="isMobileOpen()"
 >
   <!-- Logo -->
   <div class="mb-8 px-2 flex items-center gap-3">

@@ -1,0 +1,202 @@
+<!doctype html>
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SIGAE - QR Scanner</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'on-error-container': '#93000a',
+              'surface-bright': '#f7f9fb',
+              'inverse-on-surface': '#eff1f3',
+              secondary: '#0051d5',
+              background: '#f7f9fb',
+              tertiary: '#7f2500',
+              'on-tertiary-container': '#ffc9b7',
+              'on-secondary': '#ffffff',
+              'inverse-surface': '#2d3133',
+              'surface-tint': '#2151da',
+              'on-primary-fixed': '#001551',
+              'surface-variant': '#e0e3e5',
+              'on-secondary-fixed': '#00174b',
+              'surface-container-low': '#f2f4f6',
+              'surface-container-high': '#e6e8ea',
+              'on-primary-fixed-variant': '#0039b5',
+              'tertiary-container': '#a73400',
+              'error-container': '#ffdad6',
+              'outline-variant': '#c4c5d7',
+              'on-surface-variant': '#434655',
+              surface: '#f7f9fb',
+              'on-primary-container': '#cad3ff',
+              'primary-fixed-dim': '#b7c4ff',
+              'surface-container-highest': '#e0e3e5',
+              'on-secondary-fixed-variant': '#003ea8',
+              'on-tertiary-fixed': '#390c00',
+              'on-error': '#ffffff',
+              'tertiary-fixed': '#ffdbcf',
+              primary: '#0037b0',
+              'on-surface': '#191c1e',
+              'on-background': '#191c1e',
+              'on-secondary-container': '#fefcff',
+              'secondary-fixed': '#dbe1ff',
+              'secondary-fixed-dim': '#b4c5ff',
+              error: '#ba1a1a',
+              'primary-fixed': '#dce1ff',
+              outline: '#747686',
+              'inverse-primary': '#b7c4ff',
+              'on-tertiary': '#ffffff',
+              'surface-container': '#eceef0',
+              'on-tertiary-fixed-variant': '#832700',
+              'primary-container': '#1d4ed8',
+              'tertiary-fixed-dim': '#ffb59c',
+              'secondary-container': '#316bf3',
+              'surface-container-lowest': '#ffffff',
+              'on-primary': '#ffffff',
+              'surface-dim': '#d8dadc',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+            },
+            fontFamily: {
+              headline: ['Inter'],
+              display: ['Inter'],
+              body: ['Inter'],
+              label: ['Inter'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-surface text-on-surface h-screen w-screen overflow-hidden">
+    <!-- The user requested a mobile modal, but the design system says "Target device: desktop browser (1280px and above). No mobile layouts needed."
+         However, the user prompt explicitly asks for "Mobile modal for QR code scanning".
+         I will build a modal that looks good on both, centered on desktop, taking full screen on mobile, simulating a mobile view within a desktop context if needed, or just a centered modal. -->
+    <!-- Main Background (Behind Modal) -->
+    <div class="fixed inset-0 bg-background flex flex-col z-0">
+      <!-- TopAppBar Placeholder (Hidden mostly by modal) -->
+      <header
+        class="flex justify-between items-center px-6 w-full h-16 z-40 bg-white border-b border-surface-variant shadow-sm hidden md:flex"
+      >
+        <div class="text-xl font-bold text-primary">SIGAE</div>
+        <div class="flex gap-4">
+          <span class="material-symbols-outlined text-outline">notifications</span>
+          <span class="material-symbols-outlined text-outline">settings</span>
+        </div>
+      </header>
+      <!-- Sidebar and Content Placeholder -->
+      <div class="flex flex-1 hidden md:flex">
+        <aside
+          class="flex flex-col w-60 h-full py-4 bg-surface-container-low border-r border-surface-variant hidden md:flex"
+        ></aside>
+        <main class="flex-1 p-6"></main>
+      </div>
+    </div>
+    <!-- Scanner Modal Overlay -->
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-8"
+    >
+      <!-- Modal Container -->
+      <div
+        class="relative w-full max-w-md md:max-w-lg h-full max-h-[800px] bg-inverse-surface rounded-xl flex flex-col overflow-hidden shadow-2xl ring-1 ring-white/10"
+      >
+        <!-- Camera View Area (Simulated Background Image) -->
+        <div class="absolute inset-0 z-0">
+          <img
+            alt="Simulated camera view"
+            class="w-full h-full object-cover opacity-60"
+            data-alt="A slightly blurred, real-world view through a camera lens showing the back of an institutional computer monitor and an office desk. The lighting is typical office fluorescent, slightly cool, indicating an administrative environment. The focus is soft, simulating the background of a device camera waiting to scan a QR code. The overall tone is professional and functional, aligning with an asset management system."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCB6O8KATMiZ5l6aSeWQnX6N31peF-vLBZrFrqvwA-kH0AhB58Kwp1jTmDdhj7ZQubm7sqEUlay8JIGytiBRA_aYtBhLmvU5rbBRQiE61tEUN3LdxKjLuS3z2vrA-JGhKg5o1D-aCP3b1YshQE2def6L-0KXbG09jVewso5vlm8Trjb3Nl6Ks1aQBIG-0zgG7CMtrM2fHLTFBoEnKGvNaG67QZsg0ETE1pO9EAnZwlepYQkVmvJxly3MlLaNAmHUBHKWGxlQhIq5427"
+          />
+        </div>
+        <!-- Header / Instructions -->
+        <div
+          class="relative z-10 w-full p-6 text-center pt-12 md:pt-8 bg-gradient-to-b from-black/80 to-transparent"
+        >
+          <h2
+            class="text-on-secondary font-headline text-lg md:text-xl font-semibold tracking-tight"
+          >
+            Escanear Activo
+          </h2>
+          <p class="text-surface-variant mt-2 text-sm font-body">
+            Alinee el código QR dentro del recuadro para escanear
+          </p>
+        </div>
+        <!-- Scanning Guide Frame -->
+        <div class="relative z-10 flex-1 flex items-center justify-center p-8">
+          <!-- Frame Container -->
+          <div class="relative w-64 h-64 md:w-72 md:h-72">
+            <!-- Scanning Area Background (Clearer than overlay) -->
+            <div
+              class="absolute inset-0 bg-white/10 rounded-lg shadow-[0_0_0_4000px_rgba(0,0,0,0.4)]"
+            ></div>
+            <!-- Corner Highlights (Primary Color) -->
+            <!-- Top Left -->
+            <div
+              class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary-container rounded-tl-lg"
+            ></div>
+            <!-- Top Right -->
+            <div
+              class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary-container rounded-tr-lg"
+            ></div>
+            <!-- Bottom Left -->
+            <div
+              class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary-container rounded-bl-lg"
+            ></div>
+            <!-- Bottom Right -->
+            <div
+              class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary-container rounded-br-lg"
+            ></div>
+            <!-- Scanning Line Animation Simulation (Static for this prompt) -->
+            <div
+              class="absolute top-1/2 left-4 right-4 h-0.5 bg-primary-container shadow-[0_0_8px_rgba(29,78,216,0.8)]"
+            ></div>
+          </div>
+        </div>
+        <!-- Bottom Controls -->
+        <div
+          class="relative z-10 w-full p-6 pb-8 md:pb-6 bg-gradient-to-t from-black/90 via-black/80 to-transparent flex flex-col gap-6"
+        >
+          <!-- Secondary Actions -->
+
+          <!-- Primary Action (Cancel) -->
+          <button
+            class="w-full h-12 bg-transparent border-2 border-primary-container text-primary-container font-medium rounded-xl transition-all flex items-center justify-center gap-2 hover:bg-primary-container/10 active:scale-[0.98]"
+          >
+            <span class="material-symbols-outlined text-[20px]">close</span> Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

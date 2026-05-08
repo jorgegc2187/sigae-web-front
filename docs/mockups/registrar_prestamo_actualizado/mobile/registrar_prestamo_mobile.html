@@ -180,17 +180,21 @@
             2 Agregados
           </span>
         </div>
-        <div class="relative mb-4">
-          <input
-            class="w-full h-12 pl-10 pr-12 border-2 border-dashed border-primary rounded-lg focus:border-solid focus:ring-0 text-sm bg-surface"
-            placeholder="Escanear código o buscar por SBN..."
-            type="text"
-          />
-          <span class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant"
-            >search</span
+        <div class="flex gap-2 mb-4">
+          <div class="relative flex-1">
+            <input
+              class="w-full h-12 pl-10 pr-4 border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-surface"
+              placeholder="Escanear código o buscar por SBN..."
+              type="text"
+            />
+            <span class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant"
+              >search</span
+            >
+          </div>
+          <button
+            class="h-12 w-12 bg-[#1D4ED8] text-white rounded-xl flex items-center justify-center transition-colors shadow-sm active:scale-95"
           >
-          <button class="absolute right-3 top-3 text-primary hover:text-primary-fixed-variant">
-            <span class="material-symbols-outlined">qr_code_scanner</span>
+            <span class="material-symbols-outlined text-[24px]">qr_code_scanner</span>
           </button>
         </div>
         <!-- Lista de Activos Seleccionados -->

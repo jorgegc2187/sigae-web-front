@@ -46,9 +46,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {
@@ -84,7 +82,10 @@
               "buildTarget": "sigae-front:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "allowedHosts": ["sacramento-mentioned-clicks-presidential.trycloudflare.com"]
+          }
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
@@ -99,9 +100,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.css"]
           }
         }
       }

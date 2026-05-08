@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { LoanQrScannerComponent } from '../../components/loan-qr-scanner/loan-qr-scanner.component';
 import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
 import { LoanAttachmentDraft, LoanAttachmentSource } from '../../models/loan-attachment-draft.model';
 
@@ -47,7 +48,7 @@ const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
 @Component({
   selector: 'app-loan-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, LoanSignaturePadComponent],
+  imports: [ReactiveFormsModule, RouterLink, LoanSignaturePadComponent, LoanQrScannerComponent],
   templateUrl: './loan-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -152,6 +153,7 @@ export class LoanFormComponent implements OnDestroy {
   readonly isSubmitting = signal(false);
   readonly isSignatureModalOpen = signal(false);
   readonly isAttachmentSourceModalOpen = signal(false);
+  readonly isQrScannerOpen = signal(false);
   readonly signatureDataUrl = signal<string | null>(null);
   readonly signatureDraft = signal<string | null>(null);
 
@@ -315,23 +317,12 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   addAssetFromQuery() {
-    const query = this.assetQuery().toLowerCase().trim();
+    const query = this.assetQuery();
     if (!query) {
       this.assetDropdownOpen.set(true);
       return;
     }
-
-    const asset = this.filteredAssets().find(
-      (item) => item.code.toLowerCase() === query || item.name.toLowerCase() === query,
-    );
-
-    if (asset) {
-      this.addAsset(asset);
-      return;
-    }
-
-    this.assetLookupError.set('No se encontró un activo disponible con ese código o nombre.');
-    this.assetDropdownOpen.set(true);
+    this.resolveAssetCode(query, { openDropdownOnFailure: true });
   }
 
   onAssetInputKeydown(event: KeyboardEvent) {
@@ -392,6 +383,20 @@ export class LoanFormComponent implements OnDestroy {
   removeSignature() {
     this.signatureDraft.set(null);
     this.signatureDataUrl.set(null);
+  }
+
+  openQrScanner() {
+    this.assetLookupError.set('');
+    this.isQrScannerOpen.set(true);
+  }
+
+  closeQrScanner() {
+    this.isQrScannerOpen.set(false);
+  }
+
+  onQrCodeDetected(rawCode: string) {
+    this.closeQrScanner();
+    this.resolveAssetCode(rawCode, { openDropdownOnFailure: false });
   }
 
   openDocumentPicker() {
@@ -671,6 +676,42 @@ export class LoanFormComponent implements OnDestroy {
 
   private isSupportedImage(mimeType: string, extension: string): boolean {
     return mimeType.startsWith('image/') || ALLOWED_IMAGE_EXTENSIONS.has(extension);
+  }
+
+  private resolveAssetCode(
+    rawValue: string,
+    options: { openDropdownOnFailure: boolean },
+  ): boolean {
+    const normalizedQuery = rawValue.toLowerCase().trim();
+
+    if (!normalizedQuery) {
+      return false;
+    }
+
+    const duplicateAsset = this.selectedAssets().find(
+      (asset) => asset.code.toLowerCase() === normalizedQuery,
+    );
+
+    if (duplicateAsset) {
+      this.assetLookupError.set('El activo ya fue agregado a este préstamo.');
+      this.assetDropdownOpen.set(options.openDropdownOnFailure);
+      return false;
+    }
+
+    const asset = this.availableAssets().find(
+      (item) =>
+        item.code.toLowerCase() === normalizedQuery ||
+        item.name.toLowerCase() === normalizedQuery,
+    );
+
+    if (!asset) {
+      this.assetLookupError.set('No se encontró un activo disponible con ese código o nombre.');
+      this.assetDropdownOpen.set(options.openDropdownOnFailure);
+      return false;
+    }
+
+    this.addAsset(asset);
+    return true;
   }
 
   private buildLoanSubmissionPayload() {
