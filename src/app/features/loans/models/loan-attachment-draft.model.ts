@@ -1,4 +1,4 @@
-export type LoanAttachmentSource = 'picker' | 'camera';
+export type LoanAttachmentSource = 'picker' | 'camera' | 'gallery' | 'files';
 
 export type LoanAttachmentStatus = 'ready';
 

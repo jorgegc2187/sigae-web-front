@@ -342,17 +342,9 @@
               #documentPickerInput
               type="file"
               class="hidden"
-              accept=".pdf,.doc,.docx,image/*"
+              accept=".pdf,.doc,.docx,.heic,.heif,image/*"
               multiple
               (change)="onDocumentSelection($event, 'picker')"
-            />
-            <input
-              #cameraCaptureInput
-              type="file"
-              class="hidden"
-              accept="image/*"
-              capture="environment"
-              (change)="onDocumentSelection($event, 'camera')"
             />
 
             @if (attachmentFeedback()) {
@@ -617,66 +609,105 @@
   </form>
 </dialog>
 
-<dialog #attachmentSourceModal class="modal md:hidden">
-  <div class="modal-box max-w-sm rounded-2xl border border-base-300 bg-base-100 p-6 shadow-xl">
-    <div class="flex items-center justify-between">
-      <h3 class="text-xl font-bold text-base-content">Adjuntar Evidencias</h3>
-      <form method="dialog">
+@if (isAttachmentSourceModalOpen()) {
+  <div class="fixed inset-0 z-[60] md:hidden" role="dialog" aria-modal="true">
+    <button
+      type="button"
+      class="absolute inset-0 bg-base-content/40"
+      aria-label="Cerrar selector de evidencias"
+      (click)="closeAttachmentSourceModal()"
+    ></button>
+
+    <div
+      class="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-base-300 bg-base-100 p-6 shadow-xl"
+    >
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold text-base-content">Adjuntar Evidencias</h3>
         <button
-          type="submit"
+          type="button"
           class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
           aria-label="Cerrar modal de adjuntar evidencias"
+          (click)="closeAttachmentSourceModal()"
         >
           <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
-      </form>
-    </div>
+      </div>
 
-    <div class="mt-6 flex flex-col gap-4">
-      <button
-        type="button"
-        class="flex w-full items-center justify-start gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-colors hover:bg-base-200/35"
-        (click)="openCameraCaptureFromModal()"
-      >
-        <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+      <div class="mt-6 flex flex-col gap-4">
+        <label
+          class="relative flex w-full cursor-pointer items-center justify-start gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-colors hover:bg-base-200/35"
         >
-          <span class="material-symbols-outlined text-[26px]">photo_camera</span>
-        </div>
-        <div>
-          <p class="text-base font-semibold text-base-content">Tomar Foto</p>
-          <p class="text-sm text-base-content/55">Usar la cámara del dispositivo</p>
-        </div>
-      </button>
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+          >
+            <span class="material-symbols-outlined text-[26px]">photo_camera</span>
+          </div>
+          <div>
+            <p class="text-base font-semibold text-base-content">Tomar Foto</p>
+            <p class="text-sm text-base-content/55">Usar la cámara del dispositivo</p>
+          </div>
+          <input
+            type="file"
+            class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            accept="image/*"
+            capture="environment"
+            (change)="onDocumentSelection($event, 'camera')"
+          />
+        </label>
 
-      <button
-        type="button"
-        class="flex w-full items-center justify-start gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-colors hover:bg-base-200/35"
-        (click)="openDocumentPickerFromModal()"
-      >
-        <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+        <label
+          class="relative flex w-full cursor-pointer items-center justify-start gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-colors hover:bg-base-200/35"
         >
-          <span class="material-symbols-outlined text-[26px]">folder</span>
-        </div>
-        <div>
-          <p class="text-base font-semibold text-base-content">Seleccionar del Dispositivo</p>
-          <p class="text-sm text-base-content/55">Elegir de la galería o archivos</p>
-        </div>
-      </button>
-    </div>
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+          >
+            <span class="material-symbols-outlined text-[26px]">photo_library</span>
+          </div>
+          <div>
+            <p class="text-base font-semibold text-base-content">Elegir Imagen</p>
+            <p class="text-sm text-base-content/55">Seleccionar desde galería o fotos</p>
+          </div>
+          <input
+            type="file"
+            class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            accept=".heic,.heif,image/*"
+            (change)="onDocumentSelection($event, 'gallery')"
+          />
+        </label>
 
-    <div class="mt-6 border-t border-base-200 pt-3">
-      <form method="dialog">
-        <button type="submit" class="btn btn-ghost w-full text-base-content/70">Cancelar</button>
-      </form>
+        <label
+          class="relative flex w-full cursor-pointer items-center justify-start gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-colors hover:bg-base-200/35"
+        >
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary"
+          >
+            <span class="material-symbols-outlined text-[26px]">folder</span>
+          </div>
+          <div>
+            <p class="text-base font-semibold text-base-content">Elegir Documento</p>
+            <p class="text-sm text-base-content/55">Abrir Archivos para PDF o Word</p>
+          </div>
+          <input
+            type="file"
+            class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            (change)="onDocumentSelection($event, 'files')"
+          />
+        </label>
+      </div>
+
+      <div class="mt-6 border-t border-base-200 pt-3">
+        <button
+          type="button"
+          class="btn btn-ghost w-full text-base-content/70"
+          (click)="closeAttachmentSourceModal()"
+        >
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
-
-  <form method="dialog" class="modal-backdrop">
-    <button>Cerrar</button>
-  </form>
-</dialog>
+}
 
 <div
   class="fixed bottom-0 left-0 right-0 z-30 border-t border-base-300 bg-base-100 px-4 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:left-[240px] md:px-6"

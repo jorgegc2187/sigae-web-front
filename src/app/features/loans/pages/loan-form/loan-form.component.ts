@@ -36,14 +36,12 @@ interface AssetOption {
 }
 
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_ATTACHMENT_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp']);
-const ALLOWED_ATTACHMENT_MIME_TYPES = new Set([
+const ALLOWED_DOCUMENT_EXTENSIONS = new Set(['pdf', 'doc', 'docx']);
+const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif']);
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'image/jpeg',
-  'image/png',
-  'image/webp',
 ]);
 
 @Component({
@@ -64,10 +62,8 @@ export class LoanFormComponent implements OnDestroy {
   readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
   readonly assetSearchContainer = viewChild<ElementRef>('assetSearchContainer');
   readonly signatureModal = viewChild<ElementRef<HTMLDialogElement>>('signatureModal');
-  readonly attachmentSourceModal = viewChild<ElementRef<HTMLDialogElement>>('attachmentSourceModal');
   readonly signaturePad = viewChild<LoanSignaturePadComponent>('signaturePad');
   readonly documentPickerInput = viewChild<ElementRef<HTMLInputElement>>('documentPickerInput');
-  readonly cameraCaptureInput = viewChild<ElementRef<HTMLInputElement>>('cameraCaptureInput');
 
   readonly availableTeachers = signal<TeacherOption[]>([
     {
@@ -155,6 +151,7 @@ export class LoanFormComponent implements OnDestroy {
   readonly isDocumentDropActive = signal(false);
   readonly isSubmitting = signal(false);
   readonly isSignatureModalOpen = signal(false);
+  readonly isAttachmentSourceModalOpen = signal(false);
   readonly signatureDataUrl = signal<string | null>(null);
   readonly signatureDraft = signal<string | null>(null);
 
@@ -401,26 +398,12 @@ export class LoanFormComponent implements OnDestroy {
     this.documentPickerInput()?.nativeElement.click();
   }
 
-  openCameraCapture() {
-    this.cameraCaptureInput()?.nativeElement.click();
-  }
-
   openAttachmentSourceModal() {
-    this.attachmentSourceModal()?.nativeElement.showModal();
+    this.isAttachmentSourceModalOpen.set(true);
   }
 
   closeAttachmentSourceModal() {
-    this.attachmentSourceModal()?.nativeElement.close();
-  }
-
-  openDocumentPickerFromModal() {
-    this.closeAttachmentSourceModal();
-    this.openDocumentPicker();
-  }
-
-  openCameraCaptureFromModal() {
-    this.closeAttachmentSourceModal();
-    this.openCameraCapture();
+    this.isAttachmentSourceModalOpen.set(false);
   }
 
   onDocumentDragOver(event: DragEvent) {
@@ -451,11 +434,22 @@ export class LoanFormComponent implements OnDestroy {
 
     if (!fileList || fileList.length === 0) {
       input.value = '';
+      this.closeAttachmentSourceModal();
       return;
     }
 
-    this.processSelectedFiles(Array.from(fileList), source);
+    const files = Array.from(fileList);
     input.value = '';
+
+    try {
+      this.processSelectedFiles(files, source);
+    } catch {
+      this.attachmentFeedback.set(
+        'No se pudo procesar el archivo seleccionado. Intente nuevamente o seleccione otro archivo.',
+      );
+    } finally {
+      this.closeAttachmentSourceModal();
+    }
   }
 
   removeAttachment(attachmentId: string) {
@@ -514,7 +508,16 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   getAttachmentSourceLabel(source: LoanAttachmentSource): string {
-    return source === 'camera' ? 'Cámara' : 'Archivo';
+    switch (source) {
+      case 'camera':
+        return 'Cámara';
+      case 'gallery':
+        return 'Galería';
+      case 'files':
+        return 'Archivos';
+      default:
+        return 'Archivo';
+    }
   }
 
   ngOnDestroy() {
@@ -568,10 +571,10 @@ export class LoanFormComponent implements OnDestroy {
 
   private validateAttachment(file: File): string | null {
     const extension = this.getFileExtension(file.name);
-    const isValidMimeType =
-      file.type === '' ? ALLOWED_ATTACHMENT_EXTENSIONS.has(extension) : this.isAllowedMimeType(file.type);
+    const isSupportedImage = this.isSupportedImage(file.type, extension);
+    const isSupportedDocument = this.isSupportedDocument(file.type, extension);
 
-    if (!ALLOWED_ATTACHMENT_EXTENSIONS.has(extension) || !isValidMimeType) {
+    if (!isSupportedImage && !isSupportedDocument) {
       return 'Formato no permitido.';
     }
 
@@ -649,7 +652,12 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   private buildAttachmentId(file: File): string {
-    return `attachment-${crypto.randomUUID()}-${file.lastModified}`;
+    const randomId = this.createClientId();
+    return `attachment-${randomId}-${file.lastModified}`;
+  }
+
+  private createClientId(): string {
+    return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
   private getFileExtension(fileName: string): string {
@@ -657,8 +665,12 @@ export class LoanFormComponent implements OnDestroy {
     return segments.at(-1) ?? '';
   }
 
-  private isAllowedMimeType(mimeType: string): boolean {
-    return mimeType.startsWith('image/') || ALLOWED_ATTACHMENT_MIME_TYPES.has(mimeType);
+  private isSupportedDocument(mimeType: string, extension: string): boolean {
+    return ALLOWED_DOCUMENT_MIME_TYPES.has(mimeType) || ALLOWED_DOCUMENT_EXTENSIONS.has(extension);
+  }
+
+  private isSupportedImage(mimeType: string, extension: string): boolean {
+    return mimeType.startsWith('image/') || ALLOWED_IMAGE_EXTENSIONS.has(extension);
   }
 
   private buildLoanSubmissionPayload() {
