@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
@@ -11,6 +11,7 @@ import { ThemeService } from '../../services/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
+  readonly menuClick = output<void>();
   readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -25,6 +26,10 @@ export class HeaderComponent {
 
   readonly pageTitle = computed(() => this.activeRouteData()?.['pageTitle'] ?? 'SIGAE');
   readonly pageSubtitle = computed(() => this.activeRouteData()?.['pageSubtitle'] ?? '');
+
+  onMenuClick() {
+    this.menuClick.emit();
+  }
 
   private getDeepestRouteData() {
     let route: ActivatedRoute | null = this.activatedRoute;

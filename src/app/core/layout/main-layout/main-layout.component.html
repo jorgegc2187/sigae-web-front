@@ -1,7 +1,20 @@
 <div class="bg-base-200 text-base-content antialiased overflow-hidden min-h-screen">
-  <app-sidebar />
-  <app-header />
-  <main class="ml-[240px] mt-16 p-8 min-h-[calc(100vh-64px)] overflow-y-auto">
+  <app-sidebar
+    [isMobileOpen]="isMobileSidebarOpen()"
+    (closeMobile)="closeMobileSidebar()"
+  />
+
+  @if (isMobileSidebarOpen()) {
+    <button
+      type="button"
+      class="fixed inset-0 z-40 bg-base-content/40 md:hidden"
+      (click)="closeMobileSidebar()"
+      aria-label="Cerrar navegación"
+    ></button>
+  }
+
+  <app-header (menuClick)="toggleMobileSidebar()" />
+  <main class="ml-0 mt-16 min-h-[calc(100vh-64px)] overflow-y-auto p-4 md:ml-[240px] md:p-8">
     <router-outlet />
   </main>
 </div>
