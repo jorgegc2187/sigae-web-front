@@ -18,66 +18,70 @@
           </h3>
 
           <div class="space-y-4">
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">
-                Buscar Docente <span class="text-error">*</span>
-              </legend>
+            @if (!selectedTeacher()) {
+              <div class="animate-in fade-in duration-200 ease-out">
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">
+                    Buscar Docente <span class="text-error">*</span>
+                  </legend>
 
-              <div #teacherSearchContainer class="relative">
-                <label
-                  class="input h-11 w-full border border-base-300 bg-base-100 flex items-center gap-2"
-                >
-                  <span class="material-symbols-outlined text-base-content/45 text-[18px]"
-                    >search</span
-                  >
-                  <input
-                    type="text"
-                    class="grow placeholder-shown:opacity-50"
-                    placeholder="DNI o nombre..."
-                    [value]="teacherQuery()"
-                    (input)="onTeacherSearch($event)"
-                    (focus)="onTeacherFocus()"
-                  />
-                </label>
+                  <div #teacherSearchContainer class="relative">
+                    <label
+                      class="input h-11 w-full border border-base-300 bg-base-100 flex items-center gap-2"
+                    >
+                      <span class="material-symbols-outlined text-base-content/45 text-[18px]"
+                        >search</span
+                      >
+                      <input
+                        type="text"
+                        class="grow placeholder-shown:opacity-50"
+                        placeholder="DNI o nombre..."
+                        [value]="teacherQuery()"
+                        (input)="onTeacherSearch($event)"
+                        (focus)="onTeacherFocus()"
+                      />
+                    </label>
 
-                @if (teacherDropdownOpen() && filteredTeachers().length > 0) {
-                  <ul
-                    class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md"
-                  >
-                    @for (teacher of filteredTeachers(); track teacher.id) {
-                      <li>
-                        <button
-                          type="button"
-                          class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
-                          (click)="selectTeacher(teacher)"
-                        >
-                          <div
-                            class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content"
-                          >
-                            {{ teacher.initials }}
-                          </div>
-                          <div class="min-w-0">
-                            <p class="truncate text-sm font-semibold text-base-content">
-                              {{ teacher.name }}
-                            </p>
-                            <p class="truncate text-xs text-base-content/55">
-                              DNI: {{ teacher.dni }} • {{ teacher.specialty }}
-                            </p>
-                          </div>
-                        </button>
-                      </li>
+                    @if (teacherDropdownOpen() && filteredTeachers().length > 0) {
+                      <ul
+                        class="absolute left-0 top-full z-30 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-2 shadow-md"
+                      >
+                        @for (teacher of filteredTeachers(); track teacher.id) {
+                          <li>
+                            <button
+                              type="button"
+                              class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
+                              (click)="selectTeacher(teacher)"
+                            >
+                              <div
+                                class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content"
+                              >
+                                {{ teacher.initials }}
+                              </div>
+                              <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-base-content">
+                                  {{ teacher.name }}
+                                </p>
+                                <p class="truncate text-xs text-base-content/55">
+                                  DNI: {{ teacher.dni }} • {{ teacher.specialty }}
+                                </p>
+                              </div>
+                            </button>
+                          </li>
+                        }
+                      </ul>
                     }
-                  </ul>
-                }
-              </div>
+                  </div>
 
-              @if (showTeacherError()) {
-                <p class="fieldset-label mt-1 text-error">Seleccione un docente para continuar.</p>
-              }
-            </fieldset>
+                  @if (showTeacherError()) {
+                    <p class="fieldset-label mt-1 text-error">Seleccione un docente para continuar.</p>
+                  }
+                </fieldset>
+              </div>
+            }
 
             @if (selectedTeacher(); as teacher) {
-              <div class="rounded-xl border border-primary bg-primary/5 p-4">
+              <div class="animate-in fade-in slide-in-from-top-1 duration-200 ease-out rounded-xl border border-primary bg-primary/5 p-4">
                 <div class="flex items-center gap-3">
                   <div
                     class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-content"

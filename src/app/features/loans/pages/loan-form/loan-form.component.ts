@@ -133,7 +133,7 @@ export class LoanFormComponent implements OnDestroy {
     },
   ]);
 
-  readonly selectedTeacher = signal<TeacherOption | null>(this.availableTeachers()[0] ?? null);
+  readonly selectedTeacher = signal<TeacherOption | null>(null);
   readonly selectedDestination = signal<DestinationOption | null>(null);
   readonly selectedAssets = signal<AssetOption[]>([
     this.availableAssets()[0]!,
@@ -141,7 +141,7 @@ export class LoanFormComponent implements OnDestroy {
     this.availableAssets()[2]!,
   ]);
 
-  readonly teacherQuery = signal(this.selectedTeacher()?.name ?? '');
+  readonly teacherQuery = signal('');
   readonly locationQuery = signal('');
   readonly assetQuery = signal('');
   readonly teacherDropdownOpen = signal(false);
