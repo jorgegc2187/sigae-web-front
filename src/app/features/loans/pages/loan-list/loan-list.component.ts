@@ -181,6 +181,18 @@ export class LoanListComponent {
     return 'bg-primary/10 text-primary';
   }
 
+  getLoanRowClass(status: LoanStatus): string {
+    if (status === 'Vencido') {
+      return 'bg-error/5 hover:bg-error/10';
+    }
+
+    if (status === 'Devuelto') {
+      return 'opacity-75 hover:bg-base-200/35';
+    }
+
+    return 'hover:bg-base-200/35';
+  }
+
   getPrimaryAssetName(loan: Loan): string {
     return loan.assets[0]?.name ?? 'Sin activos registrados';
   }

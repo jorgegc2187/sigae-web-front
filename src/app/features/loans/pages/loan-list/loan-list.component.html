@@ -99,8 +99,8 @@
     @for (loan of paginatedLoans(); track loan.id) {
       <tr
         listing-body
-        class="transition-colors hover:bg-base-200/35"
-        [ngClass]="{ 'bg-error/5': loan.status === 'Vencido' }"
+        class="transition-colors"
+        [ngClass]="getLoanRowClass(loan.status)"
       >
           <td class="px-5 py-4 align-middle">
             <label class="flex justify-center">
