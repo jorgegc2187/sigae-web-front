@@ -201,6 +201,15 @@ export class LoanListComponent {
     return loan.assets.slice(1);
   }
 
+  getAssetsCountLabel(loan: Loan): string {
+    const count = loan.assets.length;
+    return `${count} activo${count === 1 ? '' : 's'}`;
+  }
+
+  getAssetsCountAriaLabel(loan: Loan): string {
+    return `Ver ${this.getAssetsCountLabel(loan).toLowerCase()} del préstamo`;
+  }
+
   getExtraAssetsLabel(loan: Loan): string {
     const count = this.getExtraAssets(loan).length;
     return `Ver ${count} activo${count === 1 ? '' : 's'} adicional${count === 1 ? '' : 'es'}`;
