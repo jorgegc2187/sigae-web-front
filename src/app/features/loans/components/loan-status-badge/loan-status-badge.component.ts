@@ -9,6 +9,7 @@ import { LoanStatus } from '../../models/loan.model';
 })
 export class LoanStatusBadgeComponent {
   status = input.required<LoanStatus>();
+  compact = input(false);
 
   readonly badgeClass = computed(() => {
     const map: Record<LoanStatus, string> = {

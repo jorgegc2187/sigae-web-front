@@ -1,11 +1,11 @@
 <div class="space-y-4">
-  <div class="space-y-4 md:hidden">
+  <div class="space-y-3 pb-10 md:hidden">
     <div class="relative">
-      <label class="input flex w-full items-center gap-2 rounded-xl border border-base-300 bg-base-100 shadow-sm">
-        <span class="material-symbols-outlined text-base-content/45 text-[20px]">search</span>
+      <label class="input flex h-11 w-full items-center gap-2 rounded-xl border border-base-300 bg-base-100 shadow-sm">
+        <span class="material-symbols-outlined text-base-content/40 text-[18px]">search</span>
         <input
           type="text"
-          class="grow placeholder-shown:opacity-50 text-sm"
+          class="grow text-sm placeholder-shown:opacity-50"
           placeholder="Buscar por responsable o activo..."
           [value]="queryState().search"
           (input)="onSearch($event)"
@@ -14,10 +14,10 @@
     </div>
 
     <div class="-mx-4 overflow-x-auto px-4">
-      <div class="flex min-w-max items-center gap-2 pb-1">
+      <div class="flex min-w-max items-center gap-1.5 pb-1">
         <button
           type="button"
-          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
           [class.bg-primary]="isStatusTabActive('all')"
           [class.text-primary-content]="isStatusTabActive('all')"
           [class.bg-base-200]="!isStatusTabActive('all')"
@@ -28,7 +28,7 @@
         </button>
         <button
           type="button"
-          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
           [class.bg-primary]="isStatusTabActive('active')"
           [class.text-primary-content]="isStatusTabActive('active')"
           [class.bg-base-200]="!isStatusTabActive('active')"
@@ -39,7 +39,7 @@
         </button>
         <button
           type="button"
-          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
           [class.bg-primary]="isStatusTabActive('overdue')"
           [class.text-primary-content]="isStatusTabActive('overdue')"
           [class.bg-base-200]="!isStatusTabActive('overdue')"
@@ -50,7 +50,7 @@
         </button>
         <button
           type="button"
-          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
           [class.bg-primary]="isStatusTabActive('returned')"
           [class.text-primary-content]="isStatusTabActive('returned')"
           [class.bg-base-200]="!isStatusTabActive('returned')"
@@ -69,49 +69,49 @@
         <p class="max-w-xs text-sm">Ajusta la búsqueda o cambia el estado seleccionado para ver otros resultados.</p>
       </div>
     } @else {
-      <div class="space-y-3">
+      <div class="space-y-2.5">
         @for (loan of paginatedLoans(); track loan.id) {
           <article
-            class="rounded-xl border p-3 shadow-sm"
+            class="rounded-xl border px-3 py-2.5 shadow-sm"
             [class]="getMobileStatusCardClass(loan.status)"
           >
-            <div class="mb-3 flex items-start justify-between gap-3">
-              <div class="flex min-w-0 items-center gap-3">
+            <div class="mb-2 flex items-start justify-between gap-2.5">
+              <div class="flex min-w-0 items-center gap-2.5">
                 <div
-                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
                   [class]="getTeacherAvatarClass(loan.status)"
                 >
                   {{ loan.teacher.initials }}
                 </div>
                 <div class="min-w-0">
-                  <h3 class="truncate text-base font-bold text-base-content">{{ loan.teacher.name }}</h3>
+                  <h3 class="truncate text-[15px] font-bold leading-tight text-base-content">{{ loan.teacher.name }}</h3>
                   <p class="truncate text-xs text-base-content/55">{{ formatDate(loan.loanDate) }}</p>
                 </div>
               </div>
             </div>
 
-            <div class="mb-1">
+            <div class="mb-0.5">
               <button
                 type="button"
-                class="inline-flex h-7 items-center gap-1.5 rounded-full border border-base-300 bg-base-100 px-2.5 text-[11px] font-semibold text-base-content/70"
+                class="inline-flex h-6 items-center gap-1 rounded-full border border-base-300 bg-base-100 px-2 text-[10px] font-semibold text-base-content/70"
                 [attr.aria-label]="getAssetsCountAriaLabel(loan)"
                 [attr.popovertarget]="getExtraAssetsPopoverId(loan.id)"
                 [style.anchor-name]="getExtraAssetsAnchorName(loan.id)"
               >
-                <span class="material-symbols-outlined text-[14px] text-base-content/45">inventory_2</span>
+                <span class="material-symbols-outlined text-[13px] text-base-content/40">inventory_2</span>
                 {{ getAssetsCountLabel(loan) }}
               </button>
             </div>
 
-            <div class="flex items-center justify-between gap-3 border-t border-base-300 pt-2">
-              <app-loan-status-badge [status]="loan.status" />
+            <div class="flex items-center justify-between gap-2 border-t border-base-300 pt-2">
+              <app-loan-status-badge [status]="loan.status" [compact]="true" />
               <button
                 type="button"
-                class="flex items-center gap-1 text-sm font-bold text-primary"
+                class="flex items-center gap-0.5 text-[13px] font-bold text-primary"
                 (click)="onViewLoan(loan.id)"
               >
                 Ver detalle
-                <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                <span class="material-symbols-outlined text-[13px]">arrow_forward_ios</span>
               </button>
             </div>
 
@@ -144,34 +144,26 @@
       </div>
 
       @if (totalPages() > 1) {
-        <div class="flex items-center justify-between rounded-xl border border-base-300 bg-base-100 px-4 py-3 shadow-sm">
-          <p class="text-xs text-base-content/60">{{ resultLabel() }}</p>
-          <div class="join">
-            <button
-              type="button"
-              class="join-item btn btn-sm border border-base-300 bg-base-100"
-              [disabled]="queryState().page === 1"
-              (click)="onPageChange(queryState().page - 1)"
-              aria-label="Página anterior"
-            >
-              <span class="material-symbols-outlined text-sm">chevron_left</span>
-            </button>
-            <button type="button" class="join-item btn btn-sm btn-primary min-w-10">
-              {{ queryState().page }}
-            </button>
-            <button
-              type="button"
-              class="join-item btn btn-sm border border-base-300 bg-base-100"
-              [disabled]="queryState().page === totalPages()"
-              (click)="onPageChange(queryState().page + 1)"
-              aria-label="Página siguiente"
-            >
-              <span class="material-symbols-outlined text-sm">chevron_right</span>
-            </button>
-          </div>
+        <div class="py-1">
+          <app-mobile-pagination
+            [currentPage]="queryState().page"
+            [totalPages]="totalPages()"
+            (pageChange)="onPageChange($event)"
+          />
         </div>
       }
     }
+
+    <div class="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-base-200 via-base-200/95 to-transparent px-4 pb-4 pt-8 md:hidden">
+      <button
+        type="button"
+        class="btn btn-primary h-12 w-full rounded-xl text-sm font-bold shadow-lg pointer-events-auto"
+        (click)="onCreateLoan()"
+      >
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        Nuevo préstamo
+      </button>
+    </div>
   </div>
 
   <app-data-listing

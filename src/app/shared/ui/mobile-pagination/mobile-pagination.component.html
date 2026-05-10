@@ -1,0 +1,25 @@
+<div class="flex items-center justify-center gap-4">
+  <button
+    type="button"
+    class="flex h-8 w-8 items-center justify-center rounded-full border border-base-300 bg-base-200 text-base-content/70 transition-colors hover:bg-base-300/70 disabled:cursor-not-allowed disabled:opacity-50"
+    [disabled]="!canGoPrevious()"
+    (click)="onPreviousPage()"
+    aria-label="Página anterior"
+  >
+    <span class="material-symbols-outlined text-sm">arrow_back_ios_new</span>
+  </button>
+
+  <span class="min-w-14 text-center text-sm font-medium text-base-content">
+    {{ resolvedPageLabel() }}
+  </span>
+
+  <button
+    type="button"
+    class="flex h-8 w-8 items-center justify-center rounded-full border border-base-300 bg-base-200 text-base-content transition-colors hover:bg-base-300/70 disabled:cursor-not-allowed disabled:text-base-content/50 disabled:opacity-50"
+    [disabled]="!canGoNext()"
+    (click)="onNextPage()"
+    aria-label="Página siguiente"
+  >
+    <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+  </button>
+</div>

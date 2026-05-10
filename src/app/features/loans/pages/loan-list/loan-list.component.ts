@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
+import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
 import { Loan, LoanStatus, LoanStatusTab, MOCK_LOANS } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
@@ -12,7 +13,7 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
 @Component({
   selector: 'app-loan-list',
   standalone: true,
-  imports: [NgClass, DataListingComponent, LoanStatusBadgeComponent],
+  imports: [NgClass, DataListingComponent, LoanStatusBadgeComponent, MobilePaginationComponent],
   templateUrl: './loan-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
