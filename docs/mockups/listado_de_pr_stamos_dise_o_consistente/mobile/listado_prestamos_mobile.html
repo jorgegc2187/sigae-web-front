@@ -1,0 +1,404 @@
+<!doctype html>
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SIGAE - Préstamos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'secondary-fixed-dim': '#b4c5ff',
+              primary: '#1d4ed8',
+              'on-surface': '#191c1e',
+              'inverse-primary': '#b7c4ff',
+              'tertiary-container': '#a73400',
+              'on-primary-fixed-variant': '#0039b5',
+              'outline-variant': '#c4c5d7',
+              'on-error': '#ffffff',
+              'on-secondary': '#ffffff',
+              'tertiary-fixed-dim': '#ffb59c',
+              surface: '#f7f9fb',
+              'on-tertiary-fixed-variant': '#832700',
+              'on-primary-fixed': '#001551',
+              'on-secondary-fixed-variant': '#003ea8',
+              'surface-dim': '#d8dadc',
+              tertiary: '#7f2500',
+              'secondary-container': '#316bf3',
+              'on-surface-variant': '#434655',
+              background: '#f7f9fb',
+              'error-container': '#ffdad6',
+              'inverse-surface': '#2d3133',
+              'on-background': '#191c1e',
+              'on-primary': '#ffffff',
+              'surface-container-low': '#f2f4f6',
+              'surface-container-high': '#e6e8ea',
+              'surface-container': '#eceef0',
+              'on-tertiary-container': '#ffc9b7',
+              'on-secondary-container': '#fefcff',
+              'on-tertiary': '#ffffff',
+              'primary-container': '#1d4ed8',
+              'on-tertiary-fixed': '#390c00',
+              'inverse-on-surface': '#eff1f3',
+              'surface-variant': '#e0e3e5',
+              error: '#ba1a1a',
+              secondary: '#0051d5',
+              'on-primary-container': '#cad3ff',
+              'on-secondary-fixed': '#00174b',
+              'surface-tint': '#2151da',
+              outline: '#747686',
+              'on-error-container': '#93000a',
+              'primary-fixed-dim': '#b7c4ff',
+              'surface-bright': '#f7f9fb',
+              'secondary-fixed': '#dbe1ff',
+              'surface-container-lowest': '#ffffff',
+              'tertiary-fixed': '#ffdbcf',
+              'primary-fixed': '#dce1ff',
+              'surface-container-highest': '#e0e3e5',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+            },
+            fontFamily: {
+              headline: ['Inter'],
+              display: ['Inter'],
+              body: ['Inter'],
+              label: ['Inter'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-surface text-on-surface min-h-screen pb-40">
+    <!-- Top AppBar -->
+    <header
+      class="bg-surface dark:bg-on-background flex justify-between items-center h-16 px-4 w-full z-50 docked full-width top-0 border-b border-outline-variant dark:border-outline shadow-sm sticky"
+    >
+      <div class="flex items-center gap-3">
+        <span
+          class="material-symbols-outlined text-primary dark:text-primary-fixed-dim"
+          style="font-variation-settings: 'FILL' 1"
+          >account_balance</span
+        >
+        <h1 class="font-headline text-lg font-bold text-primary dark:text-primary-fixed-dim">
+          SIGAE
+        </h1>
+      </div>
+      <div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+        <img
+          alt="User Profile"
+          data-alt="A high-quality professional headshot of a person with a friendly expression, set against a clean, neutral background. The lighting is bright and even, reflecting a modern corporate aesthetic suitable for an institutional user profile. The overall tone is professional and trustworthy, aligning with a formal asset management system UI."
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiBe_9j0b2eedtvVhWvgwdetEleND99ZB_dC9djbT5rjZGd-RL7LI-dU8bVXBjQG9wzcdQXSUwvTgYgvWhKIVnmNU0-veAffElwH8M3GfdTqC7DKTd1K1LNUYATVH6bZXfEnBY8GO-6JELKj8iWhzdcaxq27lyVveforULOKKupVdS6qfDhp_U6kum1im-M_SaXFS30qm30rcapSp6PfMkxiQu7ecUA4S-ratlSPKEWTarJPBWFBO4HHBdc9_OW0GZoRBsygVEXov0"
+        />
+      </div>
+    </header>
+    <!-- Page Header Content -->
+    <main class="px-4 py-6">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-on-surface">Préstamos</h2>
+        <p class="text-on-surface-variant text-sm">Seguimiento de activos entregados</p>
+      </div>
+      <!-- Search Bar -->
+      <div class="relative mb-6">
+        <span
+          class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+          >search</span
+        >
+        <input
+          class="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+          placeholder="Buscar por responsable o activo..."
+          type="text"
+        />
+      </div>
+      <!-- Filter Chips -->
+      <div class="flex overflow-x-auto gap-2 mb-8 hide-scrollbar">
+        <button
+          class="bg-primary text-on-primary px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap"
+        >
+          Todos
+        </button>
+        <button
+          class="bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition-colors"
+        >
+          Activos
+        </button>
+        <button
+          class="bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition-colors"
+        >
+          Vencidos
+        </button>
+        <button
+          class="bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition-colors"
+        >
+          Devueltos
+        </button>
+      </div>
+      <!-- Loans List -->
+      <div class="space-y-3">
+        <!-- Card 1: Active Loan -->
+        <div
+          class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-3">
+              <img
+                class="w-10 h-10 rounded-full object-cover"
+                data-alt="Close-up portrait of a professional woman with a warm smile, wearing business casual attire. The setting is a brightly lit, modern office environment with soft focus in the background. The lighting is natural and flattering, reinforcing a sense of reliability and institutional professionalism."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPjXBMhtTUDameWhHxOue3-pBBk5dYW6gVckpodAS87zZYmXa_F-xFFM6Vsf7GFVK1_uEmwLuTSTu_Nvkx6wK1RNTJCpSMigBcxEDTeZ-wKsJFHuXFa23sEsIBMI_X25p_g8rGoZNU-I6Mm0E1D2ZLvYuxLTKznNUEZU4Gq5Rc1E8ggXAKykERE8gSYyyhtXPBFl_ZG1y5RVQTeLqjlKsB9Gtnkplal1WzpBoHG7NNV_PTkmyjAoRk183NhL7_JLPCTEi1RROpuwAS"
+              />
+              <div>
+                <h3 class="text-base font-bold text-on-surface">María Pérez</h3>
+                <p class="text-xs text-on-surface-variant">12 Oct 2023</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+          </div>
+          <div class="mb-2">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-medium text-on-surface">Laptop HP ProBook 450 G8</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span
+                class="bg-secondary-fixed text-primary px-2 py-0.5 rounded text-[10px] font-bold"
+                >+2 más</span
+              >
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-outline-variant">
+            <div
+              class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DCFCE7] text-[#15803D]"
+            >
+              <span class="w-2 h-2 rounded-full bg-[#15803D]"></span>
+              <span class="text-xs font-bold uppercase tracking-wider">Activo</span>
+            </div>
+            <button class="text-primary text-sm font-bold flex items-center gap-1">
+              Ver detalle
+              <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+            </button>
+          </div>
+        </div>
+        <!-- Card 2: Overdue Loan -->
+        <div
+          class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-3">
+              <img
+                class="w-10 h-10 rounded-full object-cover"
+                data-alt="Professional headshot of a middle-aged man with glasses, looking directly at the camera with a calm and confident demeanor. The background is a clean, minimalist architectural setting with cool blue and grey tones. The lighting is crisp and detailed, emphasizing a high-end, institutional design aesthetic."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCclVc5MhucL-oS8I_zEq1AikKa2ECZTG-VmcDacNguYoSAiXnC9iXS4iVMcftI1SJSryn6sz-6Ra6Apq2dXle2tln4F3JjGs9X3CQaaEZgW1Za4XwT2Rt4ran-1eyieLCa4lUbskUz20DRQ61eH7i98mSskcnBnGzFyvLZm8Ppsa65daMCw0uAf5yNdklDAkQ2SSd3JhAYgdUBwpiR3_rZ9TG5f_j8GE4BbaFRMoWWZqXFGgTXr_t_sYuh_9rM7eN_NKsH7qiwK1bD"
+              />
+              <div>
+                <h3 class="text-base font-bold text-on-surface">Carlos Mendoza</h3>
+                <p class="text-xs text-on-surface-variant">05 Oct 2023</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+          </div>
+          <div class="mb-2">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-medium text-on-surface">Proyector Epson PowerLite</p>
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-outline-variant">
+            <div
+              class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEE2E2] text-[#B91C1C]"
+            >
+              <span class="w-2 h-2 rounded-full bg-[#B91C1C]"></span>
+              <span class="text-xs font-bold uppercase tracking-wider">Vencido</span>
+            </div>
+            <button class="text-primary text-sm font-bold flex items-center gap-1">
+              Ver detalle
+              <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+            </button>
+          </div>
+        </div>
+        <!-- Card 3: Returned Loan -->
+        <div
+          class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-3">
+              <img
+                class="w-10 h-10 rounded-full object-cover"
+                data-alt="A focused female educator in a contemporary school setting, captured in a professional and empowering portrait. The environment is bright and clean with soft geometric lines, using a palette of whites and blues. The high-key lighting creates a vibrant, modern light-mode feel that is optimistic and clear."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKDVD8GtWCUPy4LXft1El265qUWD3SEupavHPl5gZeTKNKkTFspJS-mNNMlFRqPPK2qrSoTZyIt0V6OBRoebvFILt3Qx3Rm9_jG9wxbravLsN0Z1aQHt9-388_VNplbRdBrzXJhSpi0VvhQCtZljffpqfDj524B6e5MpdA_Ppk1r3lq6bNaNvo35My68hYR9OIXcQyjg9MUnZmiLkK5HzbNmtPQf_VnIJrrwQy0NJykACqEogQsNhUWUmHgZP0X2ggq-z0_BujBJpN"
+              />
+              <div>
+                <h3 class="text-base font-bold text-on-surface">Lucía Torres</h3>
+                <p class="text-xs text-on-surface-variant">28 Sep 2023</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+          </div>
+          <div class="mb-2">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-medium text-on-surface">iPad Air (4th Gen) 64GB</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span
+                class="bg-secondary-fixed text-primary px-2 py-0.5 rounded text-[10px] font-bold"
+                >+1 más</span
+              >
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-outline-variant">
+            <div
+              class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant"
+            >
+              <span class="w-2 h-2 rounded-full bg-on-surface-variant"></span>
+              <span class="text-xs font-bold uppercase tracking-wider">Devuelto</span>
+            </div>
+            <button class="text-primary text-sm font-bold flex items-center gap-1">
+              Ver detalle
+              <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+            </button>
+          </div>
+        </div>
+        <!-- Card 4: Active Loan -->
+        <div
+          class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-3">
+              <img
+                class="w-10 h-10 rounded-full object-cover"
+                data-alt="A high-quality studio portrait of a male professional with a confident look, wearing a structured shirt. The background is a flat, soft grey that highlights the subject. The cinematic yet professional lighting, with subtle shadows that provide depth, aligns perfectly with the clean, formal SIGAE design guidelines."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmb23Rlp3TXi4-EdymystEgRRmsQTuimCkqHFxcXSqnM3upZbI-ovN4XLRr0jn-Tm45MINC52RpX5xa2cAWPf12iw1yZMvzLD5rCHu3chT_5Mv0u_h3AH8dioEqF3pSMjitjWvWmz1AJfJ3IB-Cp1SQ6rgMOWHO1v3UGVRQtqfSeWbAXX39zyzbv_LNEESdqJmpbyJAq9MFatCcPbdp0Px6ognLydKxvyGi01tlMoXol4g7bW4XsJj3Di5zvwVstSYZ_I4UhlripAZ"
+              />
+              <div>
+                <h3 class="text-base font-bold text-on-surface">Roberto Salas</h3>
+                <p class="text-xs text-on-surface-variant">15 Oct 2023</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+          </div>
+          <div class="mb-2">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="text-sm font-medium text-on-surface">Micrófono Inalámbrico Shure</p>
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-outline-variant">
+            <div
+              class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DCFCE7] text-[#15803D]"
+            >
+              <span class="w-2 h-2 rounded-full bg-[#15803D]"></span>
+              <span class="text-xs font-bold uppercase tracking-wider">Activo</span>
+            </div>
+            <button class="text-primary text-sm font-bold flex items-center gap-1">
+              Ver detalle
+              <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Pagination Control -->
+      <div class="flex justify-center items-center gap-4 mt-6 mb-8">
+        <button
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-low border border-outline-variant text-on-surface-variant disabled:opacity-50"
+        >
+          <span class="material-symbols-outlined text-sm">arrow_back_ios_new</span>
+        </button>
+        <span class="text-sm font-medium text-on-surface">1 de 5</span>
+        <button
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-low border border-outline-variant text-on-surface hover:bg-surface-variant transition-colors"
+        >
+          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+        </button>
+      </div>
+    </main>
+    <!-- Fixed Bottom Button Area -->
+    <div
+      class="fixed bottom-16 left-0 w-full p-4 bg-gradient-to-t from-surface via-surface/90 to-transparent pointer-events-none"
+    >
+      <button
+        class="w-full bg-primary text-on-primary py-4 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 pointer-events-auto active:scale-95 transition-transform"
+      >
+        <span class="material-symbols-outlined">add</span>
+        Nuevo Préstamo
+      </button>
+    </div>
+    <!-- Bottom Navigation Bar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full flex justify-around items-center h-16 bg-surface dark:bg-on-background px-2 pb-safe border-t border-outline-variant dark:border-outline shadow-lg z-50"
+    >
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors active:opacity-80"
+        href="#"
+      >
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="font-label text-xs font-medium">Dashboard</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim bg-secondary-fixed dark:bg-secondary-container rounded-full px-3 py-1 transition-colors active:opacity-80"
+        href="#"
+      >
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1"
+          >inventory_2</span
+        >
+        <span class="font-label text-xs font-medium">Inventario</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors active:opacity-80"
+        href="#"
+      >
+        <span class="material-symbols-outlined">location_on</span>
+        <span class="font-label text-xs font-medium">Sedes</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors active:opacity-80"
+        href="#"
+      >
+        <span class="material-symbols-outlined">build_circle</span>
+        <span class="font-label text-xs font-medium">Mantenimiento</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors active:opacity-80"
+        href="#"
+      >
+        <span class="material-symbols-outlined">assessment</span>
+        <span class="font-label text-xs font-medium">Reportes</span>
+      </a>
+    </nav>
+  </body>
+</html>
