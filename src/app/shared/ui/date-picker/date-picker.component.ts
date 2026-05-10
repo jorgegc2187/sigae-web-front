@@ -34,6 +34,13 @@ let nextDatePickerId = 0;
   ],
 })
 export class DatePickerComponent implements ControlValueAccessor {
+  private readonly displayDateFormatter = new Intl.DateTimeFormat('es-PE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+
   readonly placeholder = input('Seleccionar fecha');
   readonly disabled = input(false);
   readonly min = input<string>();
@@ -55,7 +62,10 @@ export class DatePickerComponent implements ControlValueAccessor {
   readonly anchorName = `--${this.baseId}-anchor`;
 
   readonly isDisabled = computed(() => this.disabled() || this.controlDisabled());
-  readonly displayValue = computed(() => this.valueSignal() || this.placeholder());
+  readonly displayValue = computed(() => {
+    const value = this.valueSignal();
+    return value ? this.formatDisplayDate(value) : this.placeholder();
+  });
   readonly hasValue = computed(() => !!this.valueSignal());
 
   private onChange: (value: string) => void = () => {};
@@ -99,5 +109,14 @@ export class DatePickerComponent implements ControlValueAccessor {
     }
 
     calendar.value = value;
+  }
+
+  private formatDisplayDate(value: string): string {
+    const date = new Date(`${value}T00:00:00Z`);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return this.displayDateFormatter.format(date);
   }
 }

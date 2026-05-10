@@ -248,11 +248,10 @@
                 <legend class="fieldset-legend">
                   Fecha de Inicio <span class="text-error">*</span>
                 </legend>
-                <input
-                  type="date"
+                <app-date-picker
                   formControlName="startDate"
-                  readonly
-                  class="input h-11 w-full border border-base-300 bg-base-200"
+                  placeholder="Seleccionar fecha de inicio"
+                  [required]="true"
                 />
               </fieldset>
 
