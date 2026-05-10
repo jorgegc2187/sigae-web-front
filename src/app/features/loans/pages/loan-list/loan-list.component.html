@@ -1,5 +1,185 @@
 <div class="space-y-4">
+  <div class="space-y-4 md:hidden">
+    <div class="relative">
+      <label class="input flex w-full items-center gap-2 rounded-xl border border-base-300 bg-base-100 shadow-sm">
+        <span class="material-symbols-outlined text-base-content/45 text-[20px]">search</span>
+        <input
+          type="text"
+          class="grow placeholder-shown:opacity-50 text-sm"
+          placeholder="Buscar por responsable o activo..."
+          [value]="queryState().search"
+          (input)="onSearch($event)"
+        />
+      </label>
+    </div>
+
+    <div class="-mx-4 overflow-x-auto px-4">
+      <div class="flex min-w-max items-center gap-2 pb-1">
+        <button
+          type="button"
+          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          [class.bg-primary]="isStatusTabActive('all')"
+          [class.text-primary-content]="isStatusTabActive('all')"
+          [class.bg-base-200]="!isStatusTabActive('all')"
+          [class.text-base-content/70]="!isStatusTabActive('all')"
+          (click)="onStatusTabChange('all')"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          [class.bg-primary]="isStatusTabActive('active')"
+          [class.text-primary-content]="isStatusTabActive('active')"
+          [class.bg-base-200]="!isStatusTabActive('active')"
+          [class.text-base-content/70]="!isStatusTabActive('active')"
+          (click)="onStatusTabChange('active')"
+        >
+          Activos
+        </button>
+        <button
+          type="button"
+          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          [class.bg-primary]="isStatusTabActive('overdue')"
+          [class.text-primary-content]="isStatusTabActive('overdue')"
+          [class.bg-base-200]="!isStatusTabActive('overdue')"
+          [class.text-base-content/70]="!isStatusTabActive('overdue')"
+          (click)="onStatusTabChange('overdue')"
+        >
+          Vencidos
+        </button>
+        <button
+          type="button"
+          class="rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+          [class.bg-primary]="isStatusTabActive('returned')"
+          [class.text-primary-content]="isStatusTabActive('returned')"
+          [class.bg-base-200]="!isStatusTabActive('returned')"
+          [class.text-base-content/70]="!isStatusTabActive('returned')"
+          (click)="onStatusTabChange('returned')"
+        >
+          Devueltos
+        </button>
+      </div>
+    </div>
+
+    @if (totalResults() === 0) {
+      <div class="flex flex-col items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-6 py-12 text-center text-base-content/50 shadow-sm">
+        <span class="material-symbols-outlined text-[44px]">manage_search</span>
+        <p class="text-base font-semibold text-base-content/70">No se encontraron préstamos</p>
+        <p class="max-w-xs text-sm">Ajusta la búsqueda o cambia el estado seleccionado para ver otros resultados.</p>
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (loan of paginatedLoans(); track loan.id) {
+          <article
+            class="rounded-xl border p-3 shadow-sm"
+            [class]="getMobileStatusCardClass(loan.status)"
+          >
+            <div class="mb-3 flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                  [class]="getTeacherAvatarClass(loan.status)"
+                >
+                  {{ loan.teacher.initials }}
+                </div>
+                <div class="min-w-0">
+                  <h3 class="truncate text-base font-bold text-base-content">{{ loan.teacher.name }}</h3>
+                  <p class="truncate text-xs text-base-content/55">{{ formatDate(loan.loanDate) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3 space-y-1.5">
+              <p class="text-sm font-medium text-base-content">{{ getPrimaryAssetName(loan) }}</p>
+              @if (getExtraAssets(loan).length > 0) {
+                <button
+                  type="button"
+                  class="inline-flex h-7 items-center gap-1 rounded-full bg-base-200 px-2.5 text-[10px] font-bold text-primary"
+                  [attr.aria-label]="getExtraAssetsLabel(loan)"
+                  [attr.popovertarget]="getExtraAssetsPopoverId(loan.id)"
+                  [style.anchor-name]="getExtraAssetsAnchorName(loan.id)"
+                >
+                  +{{ getExtraAssets(loan).length }} más
+                </button>
+              }
+            </div>
+
+            <div class="flex items-center justify-between gap-3 border-t border-base-300 pt-3">
+              <app-loan-status-badge [status]="loan.status" />
+              <button
+                type="button"
+                class="flex items-center gap-1 text-sm font-bold text-primary"
+                (click)="onViewLoan(loan.id)"
+              >
+                Ver detalle
+                <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+              </button>
+            </div>
+
+            @if (getExtraAssets(loan).length > 0) {
+              <div
+                popover="auto"
+                [id]="getExtraAssetsPopoverId(loan.id)"
+                class="dropdown rounded-box border border-base-300 bg-base-100 shadow-md [position-anchor:var(--anchor)]"
+                [style.position-anchor]="getExtraAssetsAnchorName(loan.id)"
+              >
+                <div class="w-64 p-2">
+                  <div class="border-b border-base-200 px-3 py-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-base-content/45">
+                      Activos adicionales
+                    </p>
+                  </div>
+                  <div class="py-1">
+                    @for (asset of getExtraAssets(loan); track asset.id) {
+                      <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
+                        <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/35">
+                          inventory_2
+                        </span>
+                        <span class="leading-snug">{{ asset.name }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </article>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="flex items-center justify-between rounded-xl border border-base-300 bg-base-100 px-4 py-3 shadow-sm">
+          <p class="text-xs text-base-content/60">{{ resultLabel() }}</p>
+          <div class="join">
+            <button
+              type="button"
+              class="join-item btn btn-sm border border-base-300 bg-base-100"
+              [disabled]="queryState().page === 1"
+              (click)="onPageChange(queryState().page - 1)"
+              aria-label="Página anterior"
+            >
+              <span class="material-symbols-outlined text-sm">chevron_left</span>
+            </button>
+            <button type="button" class="join-item btn btn-sm btn-primary min-w-10">
+              {{ queryState().page }}
+            </button>
+            <button
+              type="button"
+              class="join-item btn btn-sm border border-base-300 bg-base-100"
+              [disabled]="queryState().page === totalPages()"
+              (click)="onPageChange(queryState().page + 1)"
+              aria-label="Página siguiente"
+            >
+              <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
   <app-data-listing
+    class="hidden md:block"
     [isLoading]="false"
     [isEmpty]="totalResults() === 0"
     [resultLabel]="resultLabel()"

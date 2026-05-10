@@ -214,6 +214,14 @@ export class LoanListComponent {
     return `--loan-extra-assets-${loanId}`;
   }
 
+  getMobileStatusCardClass(status: LoanStatus): string {
+    if (status === 'Vencido') {
+      return 'border-error/20 bg-error/5';
+    }
+
+    return 'border-base-300 bg-base-100';
+  }
+
   formatDate(dateIso: string): string {
     return this.dateFormatter.format(new Date(dateIso));
   }
