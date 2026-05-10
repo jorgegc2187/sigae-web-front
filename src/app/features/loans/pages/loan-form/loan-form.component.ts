@@ -8,11 +8,18 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LoanQrScannerComponent } from '../../components/loan-qr-scanner/loan-qr-scanner.component';
 import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
 import { LoanAttachmentDraft, LoanAttachmentSource } from '../../models/loan-attachment-draft.model';
+import { DatePickerComponent } from '../../../../shared/ui/date-picker/date-picker.component';
 
 interface TeacherOption {
   id: string;
@@ -45,10 +52,27 @@ const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ]);
 
+function dueDateAfterStartDateValidator(control: AbstractControl): ValidationErrors | null {
+  const startDate = control.get('startDate')?.value as string | null;
+  const dueDate = control.get('dueDate')?.value as string | null;
+
+  if (!startDate || !dueDate) {
+    return null;
+  }
+
+  return dueDate >= startDate ? null : { dueDateBeforeStartDate: true };
+}
+
 @Component({
   selector: 'app-loan-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, LoanSignaturePadComponent, LoanQrScannerComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    LoanSignaturePadComponent,
+    LoanQrScannerComponent,
+    DatePickerComponent,
+  ],
   templateUrl: './loan-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -158,11 +182,13 @@ export class LoanFormComponent implements OnDestroy {
   readonly signatureDraft = signal<string | null>(null);
 
   readonly form = this.fb.group({
-    destinationId: ['', Validators.required],
-    startDate: ['2026-05-03', Validators.required],
-    dueDate: ['', Validators.required],
-    notes: [''],
-  });
+      destinationId: ['', Validators.required],
+      startDate: ['2026-05-03', Validators.required],
+      dueDate: ['', Validators.required],
+      notes: [''],
+    },
+    { validators: dueDateAfterStartDateValidator },
+  );
 
   readonly filteredTeachers = computed(() => {
     const query = this.teacherQuery().toLowerCase().trim();
@@ -269,9 +295,9 @@ export class LoanFormComponent implements OnDestroy {
     this.locationQuery.set(value);
     this.locationDropdownOpen.set(true);
     this.selectedDestination.set(null);
-    this.form.controls.destinationId.setValue('');
-    this.form.controls.destinationId.markAsUntouched();
-    this.form.controls.destinationId.updateValueAndValidity();
+    this.form.controls['destinationId'].setValue('');
+    this.form.controls['destinationId'].markAsUntouched();
+    this.form.controls['destinationId'].updateValueAndValidity();
   }
 
   onLocationFocus() {
@@ -282,18 +308,18 @@ export class LoanFormComponent implements OnDestroy {
     this.selectedDestination.set(destination);
     this.locationQuery.set(destination.name);
     this.locationDropdownOpen.set(false);
-    this.form.controls.destinationId.setValue(destination.id);
-    this.form.controls.destinationId.markAsTouched();
-    this.form.controls.destinationId.updateValueAndValidity();
+    this.form.controls['destinationId'].setValue(destination.id);
+    this.form.controls['destinationId'].markAsTouched();
+    this.form.controls['destinationId'].updateValueAndValidity();
   }
 
   clearDestination() {
     this.selectedDestination.set(null);
     this.locationQuery.set('');
     this.locationDropdownOpen.set(true);
-    this.form.controls.destinationId.setValue('');
-    this.form.controls.destinationId.markAsUntouched();
-    this.form.controls.destinationId.updateValueAndValidity();
+    this.form.controls['destinationId'].setValue('');
+    this.form.controls['destinationId'].markAsUntouched();
+    this.form.controls['destinationId'].updateValueAndValidity();
   }
 
   onAssetSearch(event: Event) {

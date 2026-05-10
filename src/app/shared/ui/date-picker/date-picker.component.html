@@ -1,0 +1,67 @@
+<button
+  type="button"
+  [id]="triggerId"
+  [attr.popovertarget]="popoverId"
+  class="input flex h-11 w-full min-w-0 max-w-full justify-between overflow-hidden border border-base-300 bg-base-100 px-3 text-left shadow-none"
+  [class.input-error]="invalid()"
+  [class.opacity-60]="isDisabled()"
+  [class.cursor-not-allowed]="isDisabled()"
+  [style.anchor-name]="anchorName"
+  [disabled]="isDisabled()"
+  [attr.aria-invalid]="invalid()"
+  [attr.aria-required]="required()"
+  (blur)="onTriggerBlur()"
+>
+  <span class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+    <span class="material-symbols-outlined shrink-0 text-[18px] text-base-content/45">
+      calendar_today
+    </span>
+    <span
+      class="block min-w-0 truncate text-sm"
+      [class.text-base-content]="hasValue()"
+      [class.text-base-content/50]="!hasValue()"
+    >
+      {{ displayValue() }}
+    </span>
+  </span>
+  <span class="material-symbols-outlined shrink-0 text-[18px] text-base-content/35">
+    expand_more
+  </span>
+</button>
+
+<div
+  #popover
+  popover="auto"
+  [id]="popoverId"
+  class="dropdown rounded-box border border-base-300 bg-base-100 shadow-lg [position-anchor:var(--anchor)]"
+  [style.position-anchor]="anchorName"
+>
+  <calendar-date
+    #calendar
+    class="cally rounded-box border border-base-300 bg-base-100"
+    [attr.value]="valueSignal() || null"
+    [attr.min]="min() || null"
+    [attr.max]="max() || null"
+    (change)="onCalendarChange($event)"
+  >
+    <svg
+      aria-label="Anterior"
+      class="fill-current size-4"
+      slot="previous"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+    >
+      <path d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+    </svg>
+    <svg
+      aria-label="Siguiente"
+      class="fill-current size-4"
+      slot="next"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+    >
+      <path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+    </svg>
+    <calendar-month></calendar-month>
+  </calendar-date>
+</div>
