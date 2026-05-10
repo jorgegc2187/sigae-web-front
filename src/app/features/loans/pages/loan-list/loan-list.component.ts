@@ -10,6 +10,8 @@ import {
 } from '../../../../shared/ui/segmented-filter-tabs/segmented-filter-tabs.component';
 import { Loan, LoanStatus, LoanStatusTab, MOCK_LOANS } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
+
+type AssetsPopoverContext = 'desktop' | 'mobile';
 interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
   selectedIds: string[];
 }
@@ -237,12 +239,12 @@ export class LoanListComponent {
     return `Ver ${count} activo${count === 1 ? '' : 's'} adicional${count === 1 ? '' : 'es'}`;
   }
 
-  getExtraAssetsPopoverId(loanId: string): string {
-    return `loan-extra-assets-${loanId}`;
+  getAssetsPopoverId(loanId: string, context: AssetsPopoverContext): string {
+    return `loan-assets-${context}-${loanId}`;
   }
 
-  getExtraAssetsAnchorName(loanId: string): string {
-    return `--loan-extra-assets-${loanId}`;
+  getAssetsAnchorName(loanId: string, context: AssetsPopoverContext): string {
+    return `--loan-assets-${context}-${loanId}`;
   }
 
   getMobileStatusCardClass(status: LoanStatus): string {

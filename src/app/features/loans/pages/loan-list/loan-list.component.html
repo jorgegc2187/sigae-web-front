@@ -58,8 +58,8 @@
                 type="button"
                 class="inline-flex h-6 items-center gap-1 rounded-full border border-base-300 bg-base-100 px-2 text-[10px] font-semibold text-base-content/70"
                 [attr.aria-label]="getAssetsCountAriaLabel(loan)"
-                [attr.popovertarget]="getExtraAssetsPopoverId(loan.id)"
-                [style.anchor-name]="getExtraAssetsAnchorName(loan.id)"
+                [attr.popovertarget]="getAssetsPopoverId(loan.id, 'mobile')"
+                [style.anchor-name]="getAssetsAnchorName(loan.id, 'mobile')"
               >
                 <span class="material-symbols-outlined text-[13px] text-base-content/40">inventory_2</span>
                 {{ getAssetsCountLabel(loan) }}
@@ -80,9 +80,9 @@
 
             <div
               popover="auto"
-              [id]="getExtraAssetsPopoverId(loan.id)"
+              [id]="getAssetsPopoverId(loan.id, 'mobile')"
               class="dropdown rounded-box border border-base-300 bg-base-100 shadow-md [position-anchor:var(--anchor)]"
-              [style.position-anchor]="getExtraAssetsAnchorName(loan.id)"
+              [style.position-anchor]="getAssetsAnchorName(loan.id, 'mobile')"
             >
               <div class="w-64 p-2">
                 <div class="border-b border-base-200 px-3 py-2">
@@ -209,46 +209,40 @@
             </div>
           </td>
           <td class="px-4 py-4">
-            <div class="space-y-1">
-              <p class="font-medium text-base-content">{{ getPrimaryAssetName(loan) }}</p>
-              @if (getExtraAssets(loan).length > 0) {
-                <div class="mt-1">
-                  <button
-                    type="button"
-                    class="inline-flex h-7 items-center gap-1 rounded-full border border-base-300 bg-base-100 px-2.5 text-xs font-medium text-base-content/70 shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    [attr.aria-label]="getExtraAssetsLabel(loan)"
-                    [attr.popovertarget]="getExtraAssetsPopoverId(loan.id)"
-                    [style.anchor-name]="getExtraAssetsAnchorName(loan.id)"
-                  >
-                    +{{ getExtraAssets(loan).length }} más
-                    <span class="material-symbols-outlined text-[13px] text-base-content/45">expand_more</span>
-                  </button>
-                  <div
-                    popover="auto"
-                    [id]="getExtraAssetsPopoverId(loan.id)"
-                    class="dropdown rounded-box border border-base-300 bg-base-100 shadow-md [position-anchor:var(--anchor)]"
-                    [style.position-anchor]="getExtraAssetsAnchorName(loan.id)"
-                  >
-                    <div class="w-64 p-2">
-                      <div class="border-b border-base-200 px-3 py-2">
-                        <p class="text-[11px] font-semibold uppercase tracking-wider text-base-content/45">
-                          Activos adicionales
-                        </p>
-                      </div>
-                      <div class="py-1">
-                        @for (asset of getExtraAssets(loan); track asset.id) {
-                          <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
-                            <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/35">
-                              inventory_2
-                            </span>
-                            <span class="leading-snug">{{ asset.name }}</span>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </div>
+            <button
+              type="button"
+              class="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-full border border-base-300 bg-base-100 px-2 text-[11px] font-medium text-base-content/70 shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              [attr.aria-label]="getAssetsCountAriaLabel(loan)"
+              [attr.popovertarget]="getAssetsPopoverId(loan.id, 'desktop')"
+              [style.anchor-name]="getAssetsAnchorName(loan.id, 'desktop')"
+            >
+              <span class="material-symbols-outlined shrink-0 text-[12px] text-base-content/45">inventory_2</span>
+              {{ getAssetsCountLabel(loan) }}
+              <span class="material-symbols-outlined shrink-0 text-[11px] text-base-content/45">expand_more</span>
+            </button>
+            <div
+              popover="auto"
+              [id]="getAssetsPopoverId(loan.id, 'desktop')"
+              class="dropdown rounded-box border border-base-300 bg-base-100 shadow-md [position-anchor:var(--anchor)]"
+              [style.position-anchor]="getAssetsAnchorName(loan.id, 'desktop')"
+            >
+              <div class="w-64 p-2">
+                <div class="border-b border-base-200 px-3 py-2">
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-base-content/45">
+                    Activos del préstamo
+                  </p>
                 </div>
-              }
+                <div class="py-1">
+                  @for (asset of loan.assets; track asset.id) {
+                    <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
+                      <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/35">
+                        inventory_2
+                      </span>
+                      <span class="leading-snug">{{ asset.name }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
           </td>
           <td class="px-4 py-4 text-base-content/65">{{ loan.destination }}</td>
