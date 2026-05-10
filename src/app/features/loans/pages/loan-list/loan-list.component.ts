@@ -4,6 +4,10 @@ import { Router } from '@angular/router';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
+import {
+  SegmentedFilterTabItem,
+  SegmentedFilterTabsComponent,
+} from '../../../../shared/ui/segmented-filter-tabs/segmented-filter-tabs.component';
 import { Loan, LoanStatus, LoanStatusTab, MOCK_LOANS } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
 interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
@@ -13,7 +17,13 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
 @Component({
   selector: 'app-loan-list',
   standalone: true,
-  imports: [NgClass, DataListingComponent, LoanStatusBadgeComponent, MobilePaginationComponent],
+  imports: [
+    NgClass,
+    DataListingComponent,
+    LoanStatusBadgeComponent,
+    MobilePaginationComponent,
+    SegmentedFilterTabsComponent,
+  ],
   templateUrl: './loan-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -95,6 +105,13 @@ export class LoanListComponent {
     () => this.loans().filter((loan) => loan.status === 'Vencido').length,
   );
 
+  readonly statusTabs = computed<SegmentedFilterTabItem[]>(() => [
+    { value: 'all', label: 'Todos' },
+    { value: 'active', label: 'Activos' },
+    { value: 'overdue', label: 'Vencidos', badgeCount: this.overdueCount() },
+    { value: 'returned', label: 'Devueltos' },
+  ]);
+
   readonly selectedIds = computed(() => this.queryState().selectedIds);
 
   readonly allVisibleSelected = computed(() => {
@@ -117,6 +134,10 @@ export class LoanListComponent {
       status,
       page: 1,
     }));
+  }
+
+  onStatusTabSelect(status: string) {
+    this.onStatusTabChange(status as LoanStatusTab);
   }
 
   onPageChange(page: number) {

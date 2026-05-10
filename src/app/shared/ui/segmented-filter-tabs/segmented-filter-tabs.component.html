@@ -1,0 +1,44 @@
+<div
+  class="inline-flex items-center gap-1 border p-1"
+  [class.min-w-max]="compact()"
+  [class.rounded-xl]="isMobile()"
+  [class.rounded-lg]="isDesktop()"
+  [class.border-base-300]="isMobile()"
+  [class.border-base-300/80]="isDesktop()"
+  [class.bg-base-200/70]="isMobile()"
+  [class.bg-base-200/55]="isDesktop()"
+>
+  @for (item of items(); track item.value) {
+    <button
+      type="button"
+      class="inline-flex items-center font-medium transition-colors"
+      [class.gap-1]="item.badgeCount"
+      [class.rounded-lg]="isMobile()"
+      [class.rounded-md]="isDesktop()"
+      [class.px-3]="true"
+      [class.py-1.5]="true"
+      [class.text-[13px]]="isMobile()"
+      [class.text-sm]="isDesktop()"
+      [class.bg-base-100]="isActive(item.value)"
+      [class.text-base-content]="isActive(item.value)"
+      [class.shadow-sm]="isActive(item.value)"
+      [class.text-base-content/70]="isMobile() && !isActive(item.value)"
+      [class.text-base-content/60]="isDesktop() && !isActive(item.value)"
+      [class.hover:bg-base-100/70]="isMobile() && !isActive(item.value)"
+      [class.hover:bg-base-100/60]="isDesktop() && !isActive(item.value)"
+      [class.hover:text-base-content]="!isActive(item.value)"
+      (click)="onSelect(item.value)"
+    >
+      {{ item.label }}
+      @if (item.badgeCount) {
+        <span
+          class="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+          [class.bg-error/10]="true"
+          [class.text-error]="true"
+        >
+          {{ item.badgeCount }}
+        </span>
+      }
+    </button>
+  }
+</div>

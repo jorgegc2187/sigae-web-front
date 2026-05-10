@@ -14,51 +14,14 @@
     </div>
 
     <div class="-mx-4 overflow-x-auto px-4">
-      <div class="flex min-w-max items-center gap-1.5 pb-1">
-        <button
-          type="button"
-          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
-          [class.bg-primary]="isStatusTabActive('all')"
-          [class.text-primary-content]="isStatusTabActive('all')"
-          [class.bg-base-200]="!isStatusTabActive('all')"
-          [class.text-base-content/70]="!isStatusTabActive('all')"
-          (click)="onStatusTabChange('all')"
-        >
-          Todos
-        </button>
-        <button
-          type="button"
-          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
-          [class.bg-primary]="isStatusTabActive('active')"
-          [class.text-primary-content]="isStatusTabActive('active')"
-          [class.bg-base-200]="!isStatusTabActive('active')"
-          [class.text-base-content/70]="!isStatusTabActive('active')"
-          (click)="onStatusTabChange('active')"
-        >
-          Activos
-        </button>
-        <button
-          type="button"
-          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
-          [class.bg-primary]="isStatusTabActive('overdue')"
-          [class.text-primary-content]="isStatusTabActive('overdue')"
-          [class.bg-base-200]="!isStatusTabActive('overdue')"
-          [class.text-base-content/70]="!isStatusTabActive('overdue')"
-          (click)="onStatusTabChange('overdue')"
-        >
-          Vencidos
-        </button>
-        <button
-          type="button"
-          class="rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors"
-          [class.bg-primary]="isStatusTabActive('returned')"
-          [class.text-primary-content]="isStatusTabActive('returned')"
-          [class.bg-base-200]="!isStatusTabActive('returned')"
-          [class.text-base-content/70]="!isStatusTabActive('returned')"
-          (click)="onStatusTabChange('returned')"
-        >
-          Devueltos
-        </button>
+      <div class="pb-1">
+        <app-segmented-filter-tabs
+          [items]="statusTabs()"
+          [activeValue]="queryState().status ?? 'all'"
+          variant="mobile"
+          [compact]="true"
+          (valueChange)="onStatusTabSelect($event)"
+        />
       </div>
     </div>
 
@@ -180,53 +143,12 @@
     (toggleSelectAll)="onToggleSelectAll($event)"
   >
     <div listing-toolbar class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-      <div class="flex flex-wrap items-center gap-2 rounded-xl bg-base-200/70 p-1">
-        <button
-          type="button"
-          class="btn btn-sm border-none shadow-none"
-          [class.btn-active]="isStatusTabActive('all')"
-          [class.bg-base-100]="isStatusTabActive('all')"
-          [class.text-base-content]="isStatusTabActive('all')"
-          [class.btn-ghost]="!isStatusTabActive('all')"
-          (click)="onStatusTabChange('all')"
-        >
-          Todos
-        </button>
-        <button
-          type="button"
-          class="btn btn-sm border-none shadow-none"
-          [class.btn-active]="isStatusTabActive('active')"
-          [class.bg-base-100]="isStatusTabActive('active')"
-          [class.text-base-content]="isStatusTabActive('active')"
-          [class.btn-ghost]="!isStatusTabActive('active')"
-          (click)="onStatusTabChange('active')"
-        >
-          Activos
-        </button>
-        <button
-          type="button"
-          class="btn btn-sm border-none shadow-none gap-2"
-          [class.btn-active]="isStatusTabActive('overdue')"
-          [class.bg-base-100]="isStatusTabActive('overdue')"
-          [class.text-base-content]="isStatusTabActive('overdue')"
-          [class.btn-ghost]="!isStatusTabActive('overdue')"
-          (click)="onStatusTabChange('overdue')"
-        >
-          Vencidos
-          <span class="badge badge-error badge-xs">{{ overdueCount() }}</span>
-        </button>
-        <button
-          type="button"
-          class="btn btn-sm border-none shadow-none"
-          [class.btn-active]="isStatusTabActive('returned')"
-          [class.bg-base-100]="isStatusTabActive('returned')"
-          [class.text-base-content]="isStatusTabActive('returned')"
-          [class.btn-ghost]="!isStatusTabActive('returned')"
-          (click)="onStatusTabChange('returned')"
-        >
-          Devueltos
-        </button>
-      </div>
+      <app-segmented-filter-tabs
+        [items]="statusTabs()"
+        [activeValue]="queryState().status ?? 'all'"
+        variant="desktop"
+        (valueChange)="onStatusTabSelect($event)"
+      />
 
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
         <label class="input border border-base-300 flex w-full items-center gap-2 shadow-sm sm:w-[320px]">
