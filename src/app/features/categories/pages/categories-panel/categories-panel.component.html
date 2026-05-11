@@ -171,7 +171,7 @@
         <legend class="fieldset-legend">Nombre de la Categoría</legend>
         <input
           type="text"
-          class="input h-11 w-full border border-base-300 bg-base-100 placeholder-shown:opacity-50"
+          class="h-11 w-full rounded-lg border border-base-300 bg-base-100 px-4 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
           placeholder="Ej. Mobiliario, Laboratorio"
           [ngModel]="categoryDraftName()"
           (ngModelChange)="categoryDraftName.set($event)"
@@ -226,7 +226,7 @@
             <legend class="fieldset-legend">Nombre del tipo</legend>
             <input
               type="text"
-              class="input h-11 w-full border border-base-300 bg-base-100 placeholder-shown:opacity-50"
+              class="h-11 w-full rounded-lg border border-base-300 bg-base-100 px-4 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
               placeholder="Ej. Escáner 3D"
               [ngModel]="typeFormDraft().name"
               (ngModelChange)="updateTypeDraftName($event)"
@@ -236,7 +236,7 @@
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Categoría</legend>
             <select
-              class="select h-11 w-full border border-base-300 bg-base-100"
+              class="h-11 w-full rounded-lg border border-base-300 bg-base-100 px-4 text-sm text-base-content shadow-sm transition-all focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
               [ngModel]="typeFormDraft().categoryId"
               (ngModelChange)="updateTypeDraftCategory($event)"
             >
@@ -267,7 +267,7 @@
                 <div class="flex-1">
                   <input
                     type="text"
-                    class="input h-10 w-full border border-base-300 bg-base-100 text-sm placeholder-shown:opacity-50 shadow-sm"
+                    class="h-10 w-full rounded-lg border border-base-300 bg-base-100 px-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                     placeholder="Nombre (ej. Marca)"
                     [ngModel]="attribute.name"
                     (ngModelChange)="updateDraftAttributeName(attribute.id, $event)"
