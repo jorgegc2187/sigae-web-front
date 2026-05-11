@@ -1,68 +1,49 @@
-<div class="h-[calc(100vh-100px)] flex gap-6 px-8 pb-8 pt-4">
-  <!-- Left Panel: Categorías (30%) -->
-  <section class="w-[30%] flex flex-col bg-base-100 border border-base-300 rounded-xl shadow-sm overflow-hidden flex-shrink-0">
-    <!-- Header & Action -->
-    <div class="p-5 border-b border-base-300 flex justify-between items-center bg-base-100">
+<div class="flex h-[calc(100vh-100px)] gap-6 px-8 pb-8 pt-4">
+  <section
+    class="flex w-[30%] flex-shrink-0 flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm"
+  >
+    <div class="flex items-center justify-between border-b border-base-300 bg-base-100 p-5">
       <h2 class="text-xl font-bold text-base-content">Categorías</h2>
-      <button class="btn btn-primary btn-sm rounded-lg" (click)="onCreateCategory()">
+      <button type="button" class="btn btn-primary btn-sm rounded-lg" (click)="openCategoryModal()">
         <span class="material-symbols-outlined text-[18px]">add</span>
         Nueva
       </button>
     </div>
 
-    <!-- Search Filter -->
-    <div class="p-4 border-b border-base-300 bg-base-200/50">
-      <label class="input input-sm border border-base-300 flex items-center gap-2 bg-base-100 rounded-lg shadow-sm focus-within:border-primary transition-all">
-        <span class="material-symbols-outlined text-base-content/50 text-[18px]">search</span>
-        <input
-          type="text"
-          class="grow placeholder-shown:opacity-50 focus:outline-none"
-          placeholder="Filtrar categorías..."
-          [ngModel]="categorySearchQuery()"
-          (ngModelChange)="categorySearchQuery.set($event)"
-        />
-      </label>
-    </div>
-
-    <!-- List -->
     <div class="flex-1 overflow-y-auto">
       <ul class="flex flex-col">
-        @if (filteredCategories().length === 0) {
-          <li class="px-5 py-8 text-center text-sm text-base-content/50">
-            No se encontraron categorías.
-          </li>
-        }
-
-        @for (category of filteredCategories(); track category.id) {
+        @for (category of categoriesWithMetrics(); track category.id) {
           <li>
             <button
-              class="w-full text-left px-5 py-4 border-b border-base-200 flex items-center justify-between group transition-colors"
-              [class.bg-primary]="selectedCategoryId() === category.id"
-              [class.bg-opacity-10]="selectedCategoryId() === category.id"
-              [class.hover:bg-base-200]="selectedCategoryId() !== category.id"
+              type="button"
+              class="group flex w-full items-center justify-between border-b border-base-200 px-5 py-4 text-left transition-colors"
+              [ngClass]="{
+                'bg-primary/5 hover:bg-primary/10': selectedCategoryId() === category.id,
+                'hover:bg-base-200/60': selectedCategoryId() !== category.id,
+              }"
               (click)="selectCategory(category.id)"
             >
               <div class="flex items-center gap-3">
                 <div
-                  class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                  [class.bg-primary]="selectedCategoryId() === category.id"
-                  [class.text-primary-content]="selectedCategoryId() === category.id"
-                  [class.bg-base-200]="selectedCategoryId() !== category.id"
-                  [class.text-base-content]="selectedCategoryId() !== category.id"
-                  [class.text-opacity-60]="selectedCategoryId() !== category.id"
-                  [class.group-hover:bg-base-300]="selectedCategoryId() !== category.id"
+                  class="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+                  [ngClass]="{
+                    'bg-primary text-primary-content': selectedCategoryId() === category.id,
+                    'bg-base-200 text-base-content/60 group-hover:bg-base-300':
+                      selectedCategoryId() !== category.id,
+                  }"
                 >
                   <span class="material-symbols-outlined">{{ category.icon }}</span>
                 </div>
                 <div>
                   <span
-                    class="block text-sm font-semibold transition-colors"
-                    [class.text-base-content]="true"
-                    [class.group-hover:text-primary]="selectedCategoryId() !== category.id"
+                    class="block text-sm font-semibold text-base-content transition-colors"
+                    [ngClass]="{
+                      'group-hover:text-primary': selectedCategoryId() !== category.id,
+                    }"
                   >
                     {{ category.name }}
                   </span>
-                  <span class="block text-xs text-base-content/60 mt-0.5">
+                  <span class="mt-0.5 block text-xs text-base-content/60">
                     {{ category.typesCount }} Tipos • {{ category.assetsCount }} Activos
                   </span>
                 </div>
@@ -70,11 +51,13 @@
 
               <span
                 class="material-symbols-outlined transition-colors"
-                [class.text-primary]="selectedCategoryId() === category.id"
-                [class.text-base-content]="selectedCategoryId() !== category.id"
-                [class.text-opacity-40]="selectedCategoryId() !== category.id"
-                >chevron_right</span
+                [ngClass]="{
+                  'text-primary': selectedCategoryId() === category.id,
+                  'text-base-content/40': selectedCategoryId() !== category.id,
+                }"
               >
+                chevron_right
+              </span>
             </button>
           </li>
         }
@@ -82,165 +65,388 @@
     </div>
   </section>
 
-  <!-- Right Panel: Tipos de Activos (70%) -->
-  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto pr-2 pb-6">
-    @if (selectedCategory(); as cat) {
-      <!-- Header & Breadcrumb -->
-      <div class="mb-6 flex justify-between items-end flex-shrink-0">
-        <div>
-          <div class="flex items-center gap-2 text-sm text-base-content/60 mb-1">
-            <span>Categorías</span>
-            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-            <span class="font-medium text-base-content/80">{{ cat.name }}</span>
-          </div>
-          <h1 class="text-[24px] font-bold text-base-content">
-            {{ cat.name }}
-          </h1>
+  <div class="flex min-w-0 flex-1 flex-col overflow-y-auto pr-2 pb-6">
+    <div class="mb-6 flex items-center gap-4">
+      <label
+        class="flex h-12 flex-1 items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-4 shadow-sm transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
+      >
+        <span class="material-symbols-outlined text-[20px] text-base-content/45">search</span>
+        <input
+          type="text"
+          class="w-full border-0 bg-transparent p-0 text-base focus:outline-none placeholder-shown:opacity-50"
+          placeholder="Buscar tipo en todas las categorías..."
+          [ngModel]="typeSearchQuery()"
+          (ngModelChange)="onTypeSearch($event)"
+        />
+      </label>
+
+      <button
+        type="button"
+        class="btn btn-primary btn-sm h-12 rounded-lg px-4 shadow-sm"
+        (click)="openCreateTypeModal()"
+      >
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        Nuevo tipo de activo
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      @if (visibleTypeEntries().length === 0) {
+        <div
+          class="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-100 text-base-content/50"
+        >
+          <span class="material-symbols-outlined mb-3 text-[48px]">category</span>
+          <p class="font-medium">{{ typeSearchEmptyMessage() }}</p>
+          <p class="mt-1 text-sm">
+            {{
+              isGlobalSearchActive()
+                ? 'Pruebe con otro término o seleccione una categoría distinta.'
+                : 'Crea el primer tipo para esta categoría.'
+            }}
+          </p>
         </div>
-        <button class="btn btn-primary btn-sm h-[36px] px-4 rounded-lg shadow-sm" (click)="onCreateAssetType(cat)">
-          <span class="material-symbols-outlined text-[18px]">add</span>
-          Nuevo tipo de activo
-        </button>
-      </div>
+      }
 
-      <!-- List of Asset Types -->
-      <div class="space-y-4">
-        @if (cat.types.length === 0) {
-          <div
-            class="flex flex-col items-center justify-center h-48 bg-base-100 border border-base-300 border-dashed rounded-xl text-base-content/50"
-          >
-            <span class="material-symbols-outlined text-[48px] mb-3">category</span>
-            <p class="font-medium">No hay tipos de activos configurados</p>
-            <p class="text-sm mt-1">Crea el primer tipo para esta categoría.</p>
-          </div>
-        }
-
-        @for (type of cat.types; track type.id) {
-          <div
-            class="bg-base-100 border border-base-300 rounded-xl shadow-sm transition-shadow cursor-pointer"
-            [class.hover:shadow-md]="!isTypeExpanded(type.id)"
-          >
-            <!-- Card Header (Toggle) -->
-            <div
-              class="p-4 flex justify-between items-center"
-              [class.border-b]="isTypeExpanded(type.id)"
-              [class.border-base-200]="isTypeExpanded(type.id)"
-              [class.bg-base-200]="isTypeExpanded(type.id)"
-              [class.bg-opacity-50]="isTypeExpanded(type.id)"
-              (click)="toggleType(type.id)"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-base-content/50">{{ type.icon }}</span>
-                <div>
-                  <h3 class="text-[16px] font-semibold text-base-content">{{ type.name }}</h3>
-                  <p class="text-xs text-base-content/60">
-                    {{ type.attributes.length }} atributos configurados
-                  </p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                @if (isTypeExpanded(type.id)) {
-                  <button
-                    class="p-1.5 text-base-content/50 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
-                    (click)="onEditAssetType(type, $event)"
-                    aria-label="Editar"
-                  >
-                    <span class="material-symbols-outlined text-[20px]">edit</span>
-                  </button>
-                }
-                <button class="p-1.5 text-base-content/50 hover:text-base-content/80 rounded-lg transition-colors">
-                  <span
-                    class="material-symbols-outlined text-[24px] transition-transform duration-200"
-                    [class.rotate-180]="isTypeExpanded(type.id)"
-                  >
-                    expand_more
+      @for (entry of visibleTypeEntries(); track entry.categoryId + ':' + entry.type.id) {
+        <div
+          class="rounded-xl border border-base-300 bg-base-100 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div class="flex items-center justify-between p-4">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-base-content/40">{{ entry.type.icon }}</span>
+              <div>
+                <h3 class="text-[16px] font-semibold text-base-content">{{ entry.type.name }}</h3>
+                <p class="text-xs text-base-content/60">
+                  {{ entry.type.attributes.length }} atributos configurados
+                </p>
+                @if (isGlobalSearchActive()) {
+                  <span class="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-base-content/50">
+                    <span class="material-symbols-outlined text-[14px]">{{ entry.categoryIcon }}</span>
+                    {{ entry.categoryName }}
                   </span>
-                </button>
+                }
               </div>
             </div>
 
-            <!-- Attributes Table (Expanded Content) -->
-            @if (isTypeExpanded(type.id)) {
-              <div class="p-0">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="bg-base-200/50 border-b border-base-200">
-                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider w-1/3">
-                        Atributo
-                      </th>
-                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider w-1/3">
-                        Descripción
-                      </th>
-                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider text-center w-1/6">
-                        Obligatorio
-                      </th>
-                      <th class="px-4 py-3 text-xs font-semibold text-base-content/60 uppercase tracking-wider text-right w-1/6">
-                        Acciones
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-base-200 text-sm">
-                    @for (attr of type.attributes; track attr.id) {
-                      <tr class="hover:bg-base-200/30 transition-colors">
-                        <td class="px-4 py-3 font-medium text-base-content">{{ attr.name }}</td>
-                        <td class="px-4 py-3 text-base-content/70">{{ attr.description }}</td>
-                        <td class="px-4 py-3 text-center">
-                          <label
-                            class="relative inline-flex h-6 w-11 cursor-pointer items-center"
-                            [attr.aria-label]="'Cambiar obligatorio para ' + attr.name"
-                          >
-                            <input
-                              type="checkbox"
-                              class="peer sr-only"
-                              [checked]="attr.isRequired"
-                              (change)="onToggleAttributeRequired(attr)"
-                            />
-                            <span
-                              class="inline-block h-6 w-11 rounded-full border border-base-300 bg-base-300/70 transition-all duration-200 peer-checked:border-primary peer-checked:bg-primary/90 peer-focus-visible:ring-4 peer-focus-visible:ring-primary/15"
-                            ></span>
-                            <span
-                              class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-base-100 shadow-sm transition-transform duration-200 peer-checked:translate-x-5"
-                            ></span>
-                          </label>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                          <button
-                            class="text-base-content/40 hover:text-error transition-colors p-1"
-                            (click)="onDeleteAttribute(attr)"
-                          >
-                            <span class="material-symbols-outlined text-[18px]">delete</span>
-                          </button>
-                        </td>
-                      </tr>
-                    }
-                    @if (type.attributes.length === 0) {
-                      <tr>
-                        <td
-                          colspan="4"
-                          class="px-4 py-4 text-center text-base-content/50 text-sm italic"
-                        >
-                          No hay atributos configurados para este tipo.
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                class="flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:border-primary/10 hover:bg-primary/5 hover:text-primary/85"
+                (click)="openAttributesModal(entry)"
+              >
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                Ver atributos
+              </button>
 
-                <!-- Add Attribute Action -->
-                <div class="p-4 bg-base-100 border-t border-base-200">
-                  <button
-                    class="text-primary hover:text-primary-focus text-sm font-medium flex items-center gap-1"
-                    (click)="onAddAttribute(type)"
-                  >
-                    <span class="material-symbols-outlined text-[18px]">add</span>
-                    Agregar atributo
-                  </button>
+              <div class="h-6 w-px bg-base-300"></div>
+
+              <button
+                type="button"
+                class="rounded-lg p-1 text-base-content/40 transition-colors hover:text-primary"
+                (click)="openEditTypeModal(entry)"
+                aria-label="Editar tipo de activo"
+              >
+                <span class="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<dialog #categoryDialog class="modal" (close)="onCategoryDialogClose()">
+  <div class="modal-box w-full max-w-md rounded-xl border border-base-300 bg-base-100 p-0 shadow-xl">
+    <div class="flex items-center justify-between border-b border-base-300 bg-base-100 px-5 py-4">
+      <h2 class="text-lg font-bold text-base-content">Nueva Categoría</h2>
+      <form method="dialog">
+        <button
+          type="submit"
+          class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+          aria-label="Cerrar modal de nueva categoría"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="p-6">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nombre de la Categoría</legend>
+        <input
+          type="text"
+          class="input h-11 w-full border border-base-300 bg-base-100 placeholder-shown:opacity-50"
+          placeholder="Ej. Mobiliario, Laboratorio"
+          [ngModel]="categoryDraftName()"
+          (ngModelChange)="categoryDraftName.set($event)"
+        />
+        <span class="fieldset-label">
+          Define un nombre descriptivo para agrupar diferentes tipos de activos.
+        </span>
+      </fieldset>
+    </div>
+
+    <div class="flex justify-end gap-3 border-t border-base-300 bg-base-200/40 px-4 py-4">
+      <form method="dialog">
+        <button type="submit" class="btn btn-ghost text-base-content/70">Cancelar</button>
+      </form>
+      <button type="button" class="btn btn-primary shadow-sm" (click)="submitCategory()">
+        Crear Categoría
+      </button>
+    </div>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>Cerrar</button>
+  </form>
+</dialog>
+
+<dialog #typeDialog class="modal" (close)="onTypeDialogClose()">
+  <div
+    class="modal-box w-full max-w-3xl rounded-xl border border-base-300 bg-base-100 p-0 shadow-xl"
+  >
+    <div class="border-b border-base-300 bg-base-100 px-6 py-5">
+      <div class="mb-2 flex items-center justify-between">
+        <h2 class="text-xl font-bold text-base-content">{{ typeFormTitle() }}</h2>
+        <form method="dialog">
+          <button
+            type="submit"
+            class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+            aria-label="Cerrar modal de tipo de activo"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </form>
+      </div>
+      <p class="text-sm text-base-content/60">
+        Defina la estructura y atributos para este tipo de activo.
+      </p>
+    </div>
+
+    <div class="max-h-[70vh] overflow-y-auto p-6">
+      <div class="space-y-5">
+        <div class="space-y-4">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">Nombre del tipo</legend>
+            <input
+              type="text"
+              class="input h-11 w-full border border-base-300 bg-base-100 placeholder-shown:opacity-50"
+              placeholder="Ej. Escáner 3D"
+              [ngModel]="typeFormDraft().name"
+              (ngModelChange)="updateTypeDraftName($event)"
+            />
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">Categoría</legend>
+            <select
+              class="select h-11 w-full border border-base-300 bg-base-100"
+              [ngModel]="typeFormDraft().categoryId"
+              (ngModelChange)="updateTypeDraftCategory($event)"
+            >
+              <option disabled value="">Seleccione una categoría</option>
+              @for (category of categoriesWithMetrics(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+              }
+            </select>
+          </fieldset>
+        </div>
+
+        <div class="border-t border-base-300 pt-5">
+          <div class="mb-3 flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-base-content">Atributos dinámicos</h3>
+            <button
+              type="button"
+              class="flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+              (click)="addDraftAttribute()"
+            >
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              Agregar atributo
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            @for (attribute of typeFormDraft().attributes; track attribute.id) {
+              <div class="flex items-center gap-4 border-b border-base-200 py-2">
+                <div class="flex-1">
+                  <input
+                    type="text"
+                    class="input h-10 w-full border border-base-300 bg-base-100 text-sm placeholder-shown:opacity-50 shadow-sm"
+                    placeholder="Nombre (ej. Marca)"
+                    [ngModel]="attribute.name"
+                    (ngModelChange)="updateDraftAttributeName(attribute.id, $event)"
+                  />
                 </div>
+
+                <div class="flex items-center gap-2 px-2">
+                  <span class="text-xs font-medium text-base-content/60">Obligatorio</span>
+                  <label class="relative inline-flex h-6 w-11 cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      class="peer sr-only"
+                      [attr.aria-label]="'Cambiar obligatorio para ' + attribute.name"
+                      [checked]="attribute.isRequired"
+                      (change)="toggleDraftAttributeRequired(attribute.id)"
+                    />
+                    <span
+                      class="inline-block h-6 w-11 rounded-full border border-base-300 bg-base-300/70 transition-all duration-200 peer-checked:border-primary peer-checked:bg-primary/90 peer-focus-visible:ring-4 peer-focus-visible:ring-primary/15"
+                    ></span>
+                    <span
+                      class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-base-100 shadow-sm transition-transform duration-200 peer-checked:translate-x-5"
+                    ></span>
+                  </label>
+                </div>
+
+                <button
+                  type="button"
+                  class="flex h-10 w-10 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-error/5 hover:text-error"
+                  (click)="removeDraftAttribute(attribute.id)"
+                  aria-label="Eliminar atributo del borrador"
+                >
+                  <span class="material-symbols-outlined text-[20px]">delete</span>
+                </button>
               </div>
             }
           </div>
-        }
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 border-t border-base-300 bg-base-200/40 px-4 py-4">
+      <form method="dialog">
+        <button type="submit" class="btn btn-ghost text-base-content/70">Cancelar</button>
+      </form>
+      <button type="button" class="btn btn-primary shadow-sm" (click)="submitTypeForm()">
+        {{ typeFormSubmitLabel() }}
+      </button>
+    </div>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>Cerrar</button>
+  </form>
+</dialog>
+
+<dialog #attributesDialog class="modal" (close)="onAttributesDialogClose()">
+  <div
+    class="modal-box w-full max-w-4xl rounded-xl border border-base-300 bg-base-100 p-0 shadow-xl"
+  >
+    @if (currentAttributesEntry(); as entry) {
+      <div class="flex items-center justify-between border-b border-base-300 bg-base-100 px-5 py-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary"
+          >
+            <span class="material-symbols-outlined">{{ entry.type.icon }}</span>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-base-content">Atributos: {{ entry.type.name }}</h2>
+            <p class="mt-0.5 text-xs text-base-content/55">Categoría: {{ entry.categoryName }}</p>
+          </div>
+        </div>
+        <form method="dialog">
+          <button
+            type="submit"
+            class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+            aria-label="Cerrar modal de atributos"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="max-h-[60vh] overflow-y-auto">
+        <table class="w-full border-collapse text-left">
+          <thead class="sticky top-0 z-10 bg-base-200/50">
+            <tr class="border-b border-base-300">
+              <th
+                class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-base-content/60"
+              >
+                Atributo
+              </th>
+              <th
+                class="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-base-content/60"
+              >
+                Descripción
+              </th>
+              <th
+                class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-base-content/60"
+              >
+                Obligatorio
+              </th>
+              <th
+                class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-base-content/60"
+              >
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-base-200 text-sm">
+            @for (attribute of entry.type.attributes; track attribute.id) {
+              <tr class="transition-colors hover:bg-base-200/30">
+                <td class="px-5 py-3 font-medium text-base-content">{{ attribute.name }}</td>
+                <td class="px-5 py-3 text-base-content/70">{{ attribute.description }}</td>
+                <td class="px-5 py-3 text-center">
+                  <label class="relative inline-flex h-6 w-11 cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      class="peer sr-only"
+                      [attr.aria-label]="'Cambiar obligatorio para ' + attribute.name"
+                      [checked]="attribute.isRequired"
+                      (change)="onToggleAttributeRequired(entry.categoryId, entry.type.id, attribute.id)"
+                    />
+                    <span
+                      class="inline-block h-6 w-11 rounded-full border border-base-300 bg-base-300/70 transition-all duration-200 peer-checked:border-primary peer-checked:bg-primary/90 peer-focus-visible:ring-4 peer-focus-visible:ring-primary/15"
+                    ></span>
+                    <span
+                      class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-base-100 shadow-sm transition-transform duration-200 peer-checked:translate-x-5"
+                    ></span>
+                  </label>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <button
+                    type="button"
+                    class="p-1 text-base-content/40 transition-colors hover:text-error"
+                    (click)="onDeleteAttribute(entry.categoryId, entry.type.id, attribute.id)"
+                    [attr.aria-label]="'Eliminar atributo ' + attribute.name"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="px-5 py-6 text-center text-sm italic text-base-content/50">
+                  Este tipo todavía no tiene atributos configurados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        class="flex items-center justify-between border-t border-base-300 bg-base-200/40 px-4 py-4"
+      >
+        <button
+          type="button"
+          class="flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+          (click)="addAttributeFromDetails()"
+        >
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          Agregar atributo
+        </button>
+        <form method="dialog">
+          <button type="submit" class="btn border border-base-300 bg-base-100 text-base-content shadow-sm">
+            Cerrar
+          </button>
+        </form>
       </div>
     }
   </div>
-</div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>Cerrar</button>
+  </form>
+</dialog>
