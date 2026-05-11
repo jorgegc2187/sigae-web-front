@@ -20,7 +20,6 @@ import { LoanQrScannerComponent } from '../../components/loan-qr-scanner/loan-qr
 import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
 import { LoanAttachmentDraft, LoanAttachmentSource } from '../../models/loan-attachment-draft.model';
 import { DatePickerComponent } from '../../../../shared/ui/date-picker/date-picker.component';
-import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 
 interface TeacherOption {
   id: string;
@@ -73,7 +72,6 @@ function dueDateAfterStartDateValidator(control: AbstractControl): ValidationErr
     LoanSignaturePadComponent,
     LoanQrScannerComponent,
     DatePickerComponent,
-    FormFieldComponent,
   ],
   templateUrl: './loan-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
