@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, signal, viewChild, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 
 interface UserOption {
   id: string;
@@ -12,7 +13,7 @@ interface UserOption {
   selector: 'app-location-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, FormFieldComponent],
   templateUrl: './location-form.component.html',
   host: {
     '(document:click)': 'onClickOutside($event)',

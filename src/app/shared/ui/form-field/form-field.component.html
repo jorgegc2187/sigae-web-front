@@ -1,0 +1,31 @@
+<fieldset class="fieldset w-full">
+  @if (label()) {
+    <label [attr.for]="fieldId()" [class]="labelClass()">
+      {{ label() }}
+      @if (required()) {
+        <span class="text-error">*</span>
+      }
+    </label>
+  }
+
+  <div [class]="wrapperClass()">
+    @if (controlType() !== 'textarea' && prefixIcon()) {
+      <span [class]="prefixIconClass()">{{ prefixIcon() }}</span>
+    }
+
+    @if (controlType() === 'textarea') {
+      <ng-content />
+    } @else {
+      <div class="min-w-0 flex-1">
+        <ng-content />
+      </div>
+      <ng-content select="[formFieldSuffix]" />
+    }
+  </div>
+
+  @if (error()) {
+    <span [class]="helperTextClass()">{{ error() }}</span>
+  } @else if (hint()) {
+    <span [class]="helperTextClass()">{{ hint() }}</span>
+  }
+</fieldset>

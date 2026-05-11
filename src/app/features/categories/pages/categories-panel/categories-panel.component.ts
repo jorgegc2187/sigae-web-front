@@ -8,6 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { AssetType, Attribute, Category, MOCK_CATEGORIES } from '../../models/category.model';
 
@@ -42,7 +43,7 @@ interface AttributesModalContext {
 @Component({
   selector: 'app-categories-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchInputComponent],
+  imports: [CommonModule, FormsModule, SearchInputComponent, FormFieldComponent],
   templateUrl: './categories-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

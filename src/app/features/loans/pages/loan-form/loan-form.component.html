@@ -281,15 +281,19 @@
               </fieldset>
             </div>
 
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Observaciones (Opcional)</legend>
+            <app-form-field
+              label="Observaciones (Opcional)"
+              fieldId="loan-notes"
+              controlType="textarea"
+            >
               <textarea
+                id="loan-notes"
                 formControlName="notes"
                 rows="3"
-                class="textarea min-h-24 w-full resize-y border border-base-300 bg-base-100 placeholder-shown:opacity-50"
+                class="min-h-24 w-full resize-y border-0 bg-transparent px-0 py-3 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
                 placeholder="Detalles adicionales sobre el préstamo..."
               ></textarea>
-            </fieldset>
+            </app-form-field>
           </form>
         </div>
       </section>

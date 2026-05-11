@@ -24,37 +24,43 @@
 
         <div class="grid grid-cols-1 gap-5 mb-8">
           <!-- Nombre -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">
-              Nombre <span class="text-error">*</span>
-            </legend>
+          <app-form-field
+            label="Nombre"
+            fieldId="locationName"
+            [required]="true"
+            [error]="
+              nameControl.invalid && nameControl.touched
+                ? nameControl.hasError('required')
+                  ? 'El nombre es obligatorio.'
+                  : nameControl.hasError('minlength')
+                    ? 'El nombre debe tener al menos 3 caracteres.'
+                    : null
+                : null
+            "
+          >
             <input
               id="locationName"
               type="text"
               formControlName="name"
-              class="input w-full bg-base-200 border border-base-300 placeholder-shown:opacity-50"
-              [class.input-error]="nameControl.invalid && nameControl.touched"
+              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="Ej. Laboratorio de Cómputo 1"
             />
-            @if (nameControl.invalid && nameControl.touched) {
-              <p class="fieldset-label text-error mt-1">
-                @if (nameControl.hasError('required')) { El nombre es obligatorio. }
-                @else if (nameControl.hasError('minlength')) { El nombre debe tener al menos 3 caracteres. }
-              </p>
-            }
-          </fieldset>
+          </app-form-field>
 
           <!-- Descripción -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">Descripción</legend>
+          <app-form-field
+            label="Descripción"
+            fieldId="locationDescription"
+            controlType="textarea"
+          >
             <textarea
               id="locationDescription"
               formControlName="description"
-              class="textarea w-full bg-base-200 border border-base-300 resize-y placeholder-shown:opacity-50"
+              class="w-full resize-y border-0 bg-transparent px-0 py-3 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="Detalles adicionales sobre la ubicación..."
               rows="4"
             ></textarea>
-          </fieldset>
+          </app-form-field>
         </div>
 
         <!-- Section: Asignación de Encargados -->
