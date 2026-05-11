@@ -8,6 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { AssetType, Attribute, Category, MOCK_CATEGORIES } from '../../models/category.model';
 
 type TypeFormMode = 'create' | 'edit';
@@ -41,7 +42,7 @@ interface AttributesModalContext {
 @Component({
   selector: 'app-categories-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SearchInputComponent],
   templateUrl: './categories-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

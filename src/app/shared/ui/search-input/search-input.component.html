@@ -1,0 +1,11 @@
+<label [class]="containerClass()">
+  <span [class]="iconClass()">search</span>
+  <input
+    type="text"
+    [class]="inputClass()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    (input)="onInput($event)"
+  />
+</label>

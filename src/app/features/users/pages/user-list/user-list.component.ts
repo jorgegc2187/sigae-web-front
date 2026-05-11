@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { MOCK_USERS, User, UserRole, UserStatus } from '../../models/user.model';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
+  imports: [SearchInputComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-list.component.html',
 })
@@ -27,8 +29,8 @@ export class UserListComponent {
     });
   });
 
-  onSearch(event: Event) {
-    this.searchQuery.set((event.target as HTMLInputElement).value);
+  onSearch(value: string) {
+    this.searchQuery.set(value);
   }
 
   onRoleFilter(event: Event) {

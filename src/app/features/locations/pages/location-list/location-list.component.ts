@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { LocationCardComponent } from '../../components/location-card/location-card.component';
 import { Location } from '../../models/location.model';
 
@@ -7,11 +8,13 @@ import { Location } from '../../models/location.model';
   selector: 'app-location-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, LocationCardComponent],
+  imports: [RouterLink, LocationCardComponent, SearchInputComponent],
   templateUrl: './location-list.component.html',
 })
 export class LocationListComponent {
-  mockLocations = signal<Location[]>([
+  readonly searchQuery = signal('');
+
+  readonly mockLocations = signal<Location[]>([
     {
       id: '1',
       name: 'Aula de Cómputo',
@@ -71,6 +74,24 @@ export class LocationListComponent {
       managersText: 'Torres, Mora, S. y 1 más'
     }
   ]);
+
+  readonly filteredLocations = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    if (!query) {
+      return this.mockLocations();
+    }
+
+    return this.mockLocations().filter(
+      (location) =>
+        location.name.toLowerCase().includes(query) ||
+        location.description.toLowerCase().includes(query) ||
+        (location.managersText ?? '').toLowerCase().includes(query),
+    );
+  });
+
+  onSearch(value: string) {
+    this.searchQuery.set(value);
+  }
 
   onEdit(id: string) {
     console.log('Editar ubicación', id);

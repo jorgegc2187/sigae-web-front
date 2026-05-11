@@ -67,18 +67,13 @@
 
   <div class="flex min-w-0 flex-1 flex-col overflow-y-auto pr-2 pb-6">
     <div class="mb-6 flex items-center gap-4">
-      <label
-        class="flex h-12 flex-1 items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-4 shadow-sm transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
-      >
-        <span class="material-symbols-outlined text-[20px] text-base-content/45">search</span>
-        <input
-          type="text"
-          class="w-full border-0 bg-transparent p-0 text-base focus:outline-none placeholder-shown:opacity-50"
-          placeholder="Buscar tipo en todas las categorías..."
-          [ngModel]="typeSearchQuery()"
-          (ngModelChange)="onTypeSearch($event)"
-        />
-      </label>
+      <app-search-input
+        size="lg"
+        widthClass="flex-1"
+        placeholder="Buscar tipo en todas las categorías..."
+        [value]="typeSearchQuery()"
+        (valueChange)="onTypeSearch($event)"
+      />
 
       <button
         type="button"

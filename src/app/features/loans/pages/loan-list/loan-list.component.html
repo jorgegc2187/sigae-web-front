@@ -1,16 +1,11 @@
 <div class="space-y-4">
   <div class="space-y-3 pb-10 md:hidden">
     <div class="relative">
-      <label class="input flex h-11 w-full items-center gap-2 rounded-xl border border-base-300 bg-base-100 shadow-sm">
-        <span class="material-symbols-outlined text-base-content/40 text-[18px]">search</span>
-        <input
-          type="text"
-          class="grow text-sm placeholder-shown:opacity-50"
-          placeholder="Buscar por responsable o activo..."
-          [value]="queryState().search"
-          (input)="onSearch($event)"
-        />
-      </label>
+      <app-search-input
+        placeholder="Buscar por responsable o activo..."
+        [value]="queryState().search"
+        (valueChange)="onSearch($event)"
+      />
     </div>
 
     <div class="-mx-4 overflow-x-auto px-4">
@@ -151,16 +146,12 @@
       />
 
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <label class="input border border-base-300 flex w-full items-center gap-2 shadow-sm sm:w-[320px]">
-          <span class="material-symbols-outlined text-base-content/50 text-[20px]">search</span>
-          <input
-            type="text"
-            class="grow placeholder-shown:opacity-50 focus:outline-none text-sm"
-            placeholder="Buscar préstamo..."
-            [value]="queryState().search"
-            (input)="onSearch($event)"
-          />
-        </label>
+        <app-search-input
+          widthClass="w-full sm:w-[320px]"
+          placeholder="Buscar préstamo..."
+          [value]="queryState().search"
+          (valueChange)="onSearch($event)"
+        />
 
         <button type="button" class="btn btn-primary shadow-sm" (click)="onCreateLoan()">
           <span class="material-symbols-outlined text-[20px]">add</span>

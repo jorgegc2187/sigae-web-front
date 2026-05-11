@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
+import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import {
   SegmentedFilterTabItem,
   SegmentedFilterTabsComponent,
@@ -24,6 +25,7 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
     DataListingComponent,
     LoanStatusBadgeComponent,
     MobilePaginationComponent,
+    SearchInputComponent,
     SegmentedFilterTabsComponent,
   ],
   templateUrl: './loan-list.component.html',
@@ -121,8 +123,7 @@ export class LoanListComponent {
     return visibleIds.length > 0 && visibleIds.every((id) => this.selectedIds().includes(id));
   });
 
-  onSearch(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
+  onSearch(value: string) {
     this.queryState.update((state) => ({
       ...state,
       search: value,
