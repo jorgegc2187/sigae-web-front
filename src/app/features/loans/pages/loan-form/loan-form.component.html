@@ -449,73 +449,25 @@
             </span>
           </div>
 
-          <div #assetSearchContainer class="mb-6">
-            <div class="flex gap-2">
-              <label
-                class="flex h-12 flex-1 items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-4 shadow-sm transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
-              >
-                <span class="material-symbols-outlined text-base-content/45 text-[20px]">search</span>
-                <input
-                  type="text"
-                  class="grow border-0 bg-transparent text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
-                  placeholder="Escanear código o buscar por SBN..."
-                  [value]="assetQuery()"
-                  (input)="onAssetSearch($event)"
-                  (focus)="onAssetFocus()"
-                  (keydown)="onAssetInputKeydown($event)"
-                />
-              </label>
+          <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <button
+              type="button"
+              class="flex h-11 items-center justify-center gap-2 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-semibold text-base-content shadow-sm transition-all duration-200 hover:border-base-content/30 hover:bg-base-200/40 active:scale-[0.99]"
+              (click)="openAssetSearchModal()"
+            >
+              <span class="material-symbols-outlined text-primary text-[20px]">search</span>
+              Buscar Activo
+            </button>
 
-              <button
-                type="button"
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-content shadow-sm transition-transform duration-150 hover:bg-primary/92 active:scale-95"
-                (click)="openQrScanner()"
-                aria-label="Escanear etiqueta QR del activo"
-              >
-                <span class="material-symbols-outlined text-[24px]">qr_code_scanner</span>
-              </button>
-            </div>
-
-            <div class="mt-2 flex justify-end">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary/80"
-                (click)="addAssetFromQuery()"
-              >
-                <span class="material-symbols-outlined text-[18px]">barcode_scanner</span>
-                Agregar por código
-              </button>
-            </div>
-
-            @if (assetLookupError()) {
-              <p class="mt-2 text-sm text-error">{{ assetLookupError() }}</p>
-            }
-
-            @if (assetDropdownOpen() && filteredAssets().length > 0) {
-              <ul class="mt-2 rounded-box border border-base-300 bg-base-100 p-2 shadow-md">
-                @for (asset of filteredAssets(); track asset.id) {
-                  <li>
-                    <button
-                      type="button"
-                      class="flex w-full items-start justify-between gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-base-200"
-                      (click)="addAsset(asset)"
-                    >
-                      <div class="min-w-0">
-                        <p class="truncate text-sm font-semibold text-base-content">
-                          {{ asset.name }}
-                        </p>
-                        <p class="truncate text-xs font-mono text-base-content/55">
-                          {{ asset.code }}
-                        </p>
-                      </div>
-                      <span class="badge badge-sm {{ getAssetConditionClass(asset.condition) }}">{{
-                        asset.condition
-                      }}</span>
-                    </button>
-                  </li>
-                }
-              </ul>
-            }
+            <button
+              type="button"
+              class="flex h-11 items-center justify-center gap-2 rounded-lg border border-primary bg-primary px-4 text-sm font-semibold text-primary-content shadow-sm transition-all duration-200 hover:bg-primary/90 active:scale-[0.99]"
+              (click)="openQrScanner()"
+              aria-label="Escanear etiqueta QR del activo"
+            >
+              <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+              Escanear QR
+            </button>
           </div>
 
           <div
@@ -736,6 +688,214 @@
         >
           Cancelar
         </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isAssetSearchModalOpen()) {
+  <div
+    class="fixed inset-0 z-[60] flex items-center justify-center bg-base-content/40 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="asset-search-modal-title"
+  >
+    <button
+      type="button"
+      class="absolute inset-0"
+      aria-label="Cerrar buscador de activos"
+      (click)="closeAssetSearchModal()"
+    ></button>
+
+    <div
+      class="relative z-10 flex h-[80vh] max-h-[800px] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-xl"
+    >
+      <div class="flex items-center justify-between gap-4 border-b border-base-300 px-6 py-4">
+        <h2
+          id="asset-search-modal-title"
+          class="flex items-center gap-2 text-lg font-bold text-base-content"
+        >
+          <span class="material-symbols-outlined text-primary">search</span>
+          Buscar Activo
+        </h2>
+
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+          aria-label="Cerrar buscador de activos"
+          (click)="closeAssetSearchModal()"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+        <aside
+          class="border-b border-base-300 bg-base-200/55 p-4 md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r"
+        >
+          <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-base-content/55">
+            Filtro por Categoría
+          </h3>
+
+          <ul class="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
+            @for (category of assetCategoryOptions(); track category.id) {
+              <li class="shrink-0 md:shrink">
+                <button
+                  type="button"
+                  [class]="
+                    selectedAssetCategory() === category.id
+                      ? 'flex w-full items-center justify-between gap-3 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors'
+                      : 'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium text-base-content/65 transition-colors hover:bg-base-300/65 hover:text-base-content'
+                  "
+                  (click)="setAssetCategory(category.id)"
+                >
+                  <span>{{ category.name }}</span>
+                  <span
+                    [class]="
+                      selectedAssetCategory() === category.id
+                        ? 'rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary'
+                        : 'rounded-full bg-base-300 px-2 py-0.5 text-xs text-base-content/60'
+                    "
+                    >{{ category.count }}</span
+                  >
+                </button>
+              </li>
+            }
+          </ul>
+        </aside>
+
+        <div class="flex min-w-0 flex-1 flex-col overflow-hidden p-6">
+          <div class="relative mb-6">
+            <span
+              class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"
+              >search</span
+            >
+            <input
+              type="text"
+              class="h-11 w-full rounded-lg border border-base-300 bg-base-100 pl-10 pr-4 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Buscar por nombre, marca o número de serie..."
+              [value]="assetModalQuery()"
+              (input)="onAssetModalSearch($event)"
+            />
+          </div>
+
+          <div class="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+            @for (group of filteredAssetGroups(); track group.key) {
+              <article
+                class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm"
+              >
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-4 border-b border-base-300 bg-base-200/55 px-4 py-3 text-left transition-colors hover:bg-base-200"
+                  (click)="toggleAssetGroup(group.key)"
+                >
+                  <span class="flex min-w-0 items-center gap-3">
+                    <span class="material-symbols-outlined text-base-content/45">{{
+                      group.icon
+                    }}</span>
+                    <span class="truncate text-sm font-semibold text-base-content">{{
+                      group.name
+                    }}</span>
+                  </span>
+                  <span class="flex shrink-0 items-center gap-4">
+                    <span class="text-xs font-medium text-base-content/55">
+                      {{ group.availableCount }}
+                      {{ group.availableCount === 1 ? 'disponible' : 'disponibles' }}
+                    </span>
+                    <span
+                      [class]="
+                        isAssetSearchGroupExpanded(group.key)
+                          ? 'material-symbols-outlined text-base-content/40 transition-transform'
+                          : 'material-symbols-outlined -rotate-90 text-base-content/40 transition-transform'
+                      "
+                      >expand_more</span
+                    >
+                  </span>
+                </button>
+
+                @if (isAssetSearchGroupExpanded(group.key)) {
+                  <ul class="divide-y divide-base-200">
+                    @for (asset of group.assets; track asset.id) {
+                      <li
+                        [class]="
+                          isModalAssetDisabled(asset)
+                            ? 'flex items-center justify-between gap-4 bg-base-200/35 px-4 py-3 opacity-75'
+                            : 'group flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-primary/5'
+                        "
+                      >
+                        <label class="flex min-w-0 flex-1 items-center gap-3">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-sm border-base-300 checked:border-primary checked:bg-primary"
+                            [checked]="isModalAssetSelected(asset.id)"
+                            [disabled]="isModalAssetDisabled(asset)"
+                            (change)="toggleModalAssetSelection(asset.id)"
+                          />
+                          <span class="min-w-0">
+                            <span class="block text-sm font-medium text-base-content">{{
+                              asset.code
+                            }}</span>
+                            <span class="block truncate text-xs text-base-content/55">
+                              {{ asset.serial }} • {{ asset.location }}
+                            </span>
+                          </span>
+                        </label>
+
+                        <span
+                          class="inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[10px] font-bold"
+                          [class]="getAssetSearchStatusClass(asset)"
+                        >
+                          {{ getAssetSearchStatusLabel(asset) }}
+                        </span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </article>
+            } @empty {
+              <div
+                class="flex h-full min-h-52 flex-col items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-200/35 px-6 text-center"
+              >
+                <span class="material-symbols-outlined text-[40px] text-base-content/35"
+                  >search_off</span
+                >
+                <p class="mt-2 text-sm font-semibold text-base-content/70">
+                  No se encontraron activos
+                </p>
+                <p class="mt-1 max-w-sm text-xs text-base-content/45">
+                  Ajuste el filtro de categoría o intente con otro nombre, código o número de serie.
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col gap-3 border-t border-base-300 bg-base-200/55 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p class="text-sm text-base-content/65">
+          <span class="font-bold text-base-content">{{ modalSelectedAssetsCount() }}</span>
+          {{ modalSelectedAssetsCount() === 1 ? 'activo seleccionado' : 'activos seleccionados' }}
+        </p>
+
+        <div class="flex gap-3">
+          <button
+            type="button"
+            class="btn btn-ghost border border-base-300 bg-base-100"
+            (click)="closeAssetSearchModal()"
+          >
+            Atrás
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary shadow-sm"
+            [disabled]="modalSelectedAssetsCount() === 0"
+            (click)="confirmAssetSelection()"
+          >
+            Confirmar Selección
+          </button>
+        </div>
       </div>
     </div>
   </div>

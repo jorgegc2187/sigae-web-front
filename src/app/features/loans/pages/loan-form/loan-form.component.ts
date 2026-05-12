@@ -35,12 +35,41 @@ interface DestinationOption {
 }
 
 type AssetCondition = 'Bueno' | 'Regular';
+type AssetCategoryId = 'all' | 'technology' | 'furniture' | 'laboratory' | 'sports';
+type AssetAvailabilityStatus = 'available' | 'maintenance';
 
 interface AssetOption {
   id: string;
   name: string;
   code: string;
   condition: AssetCondition;
+}
+
+interface AssetCategoryOption {
+  id: AssetCategoryId;
+  name: string;
+  count: number;
+}
+
+interface AssetSearchMetadata {
+  category: Exclude<AssetCategoryId, 'all'>;
+  groupKey: string;
+  groupName: string;
+  groupIcon: string;
+  serial: string;
+  location: string;
+  availabilityStatus: AssetAvailabilityStatus;
+  modalStatusLabel: string;
+}
+
+interface AssetSearchOption extends AssetOption, AssetSearchMetadata {}
+
+interface AssetSearchGroup {
+  key: string;
+  name: string;
+  icon: string;
+  availableCount: number;
+  assets: AssetSearchOption[];
 }
 
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
@@ -154,6 +183,59 @@ export class LoanFormComponent implements OnDestroy {
     },
   ]);
 
+  private readonly assetSearchMetadataById: Record<string, AssetSearchMetadata> = {
+    'asset-1': {
+      category: 'technology',
+      groupKey: 'laptop-lenovo-thinkpad',
+      groupName: 'Laptop Lenovo ThinkPad',
+      groupIcon: 'laptop_mac',
+      serial: 'SN: LNV-T14-4587',
+      location: 'Almacén Central',
+      availabilityStatus: 'available',
+      modalStatusLabel: 'Operativo',
+    },
+    'asset-2': {
+      category: 'technology',
+      groupKey: 'proyector-epson-powerlite',
+      groupName: 'Proyector Epson PowerLite',
+      groupIcon: 'videocam',
+      serial: 'SN: EPS-PL-2022',
+      location: 'Laboratorio de Cómputo',
+      availabilityStatus: 'available',
+      modalStatusLabel: 'Operativo',
+    },
+    'asset-3': {
+      category: 'technology',
+      groupKey: 'accesorios-audiovisuales',
+      groupName: 'Accesorios Audiovisuales',
+      groupIcon: 'settings_input_hdmi',
+      serial: 'SN: HDMI-5M-108',
+      location: 'Almacén Central',
+      availabilityStatus: 'available',
+      modalStatusLabel: 'Operativo',
+    },
+    'asset-4': {
+      category: 'technology',
+      groupKey: 'perifericos-hp',
+      groupName: 'Periféricos HP',
+      groupIcon: 'mouse',
+      serial: 'SN: HP-MSE-021',
+      location: 'Aula 101 - Pabellón A',
+      availabilityStatus: 'available',
+      modalStatusLabel: 'Operativo',
+    },
+    'asset-5': {
+      category: 'laboratory',
+      groupKey: 'audio-portatil',
+      groupName: 'Audio Portátil',
+      groupIcon: 'speaker',
+      serial: 'SN: JBL-AUD-014',
+      location: 'Sala de Profesores',
+      availabilityStatus: 'maintenance',
+      modalStatusLabel: 'Mantenimiento',
+    },
+  };
+
   readonly selectedTeacher = signal<TeacherOption | null>(null);
   readonly selectedDestination = signal<DestinationOption | null>(null);
   readonly selectedAssets = signal<AssetOption[]>([
@@ -177,9 +259,14 @@ export class LoanFormComponent implements OnDestroy {
   readonly isSubmitting = signal(false);
   readonly isSignatureModalOpen = signal(false);
   readonly isAttachmentSourceModalOpen = signal(false);
+  readonly isAssetSearchModalOpen = signal(false);
   readonly isQrScannerOpen = signal(false);
   readonly signatureDataUrl = signal<string | null>(null);
   readonly signatureDraft = signal<string | null>(null);
+  readonly assetModalQuery = signal('');
+  readonly selectedAssetCategory = signal<AssetCategoryId>('all');
+  readonly expandedAssetGroups = signal<Set<string>>(new Set(['laptop-lenovo-thinkpad']));
+  readonly modalSelectedAssetIds = signal<Set<string>>(new Set());
 
   readonly form = this.fb.group({
       destinationId: ['', Validators.required],
@@ -228,6 +315,79 @@ export class LoanFormComponent implements OnDestroy {
       );
     });
   });
+
+  readonly assetSearchOptions = computed<AssetSearchOption[]>(() =>
+    this.availableAssets().map((asset) => ({
+      ...asset,
+      ...this.assetSearchMetadataById[asset.id]!,
+    })),
+  );
+
+  readonly assetCategoryOptions = computed<AssetCategoryOption[]>(() => {
+    const assets = this.assetSearchOptions();
+
+    return [
+      { id: 'all', name: 'Todos', count: assets.length },
+      {
+        id: 'technology',
+        name: 'Tecnología',
+        count: assets.filter((asset) => asset.category === 'technology').length,
+      },
+      {
+        id: 'furniture',
+        name: 'Mobiliario',
+        count: assets.filter((asset) => asset.category === 'furniture').length,
+      },
+      {
+        id: 'laboratory',
+        name: 'Laboratorio',
+        count: assets.filter((asset) => asset.category === 'laboratory').length,
+      },
+      {
+        id: 'sports',
+        name: 'Deportes',
+        count: assets.filter((asset) => asset.category === 'sports').length,
+      },
+    ];
+  });
+
+  readonly filteredAssetGroups = computed<AssetSearchGroup[]>(() => {
+    const selectedCategory = this.selectedAssetCategory();
+    const query = this.assetModalQuery().trim().toLowerCase();
+    const groups = new Map<string, AssetSearchGroup>();
+
+    const assets = this.assetSearchOptions().filter((asset) => {
+      const matchesCategory = selectedCategory === 'all' || asset.category === selectedCategory;
+      const matchesQuery =
+        !query ||
+        asset.name.toLowerCase().includes(query) ||
+        asset.code.toLowerCase().includes(query) ||
+        asset.serial.toLowerCase().includes(query);
+
+      return matchesCategory && matchesQuery;
+    });
+
+    for (const asset of assets) {
+      const group = groups.get(asset.groupKey);
+      if (group) {
+        group.assets.push(asset);
+        group.availableCount += this.isAssetSearchOptionAvailable(asset) ? 1 : 0;
+        continue;
+      }
+
+      groups.set(asset.groupKey, {
+        key: asset.groupKey,
+        name: asset.groupName,
+        icon: asset.groupIcon,
+        availableCount: this.isAssetSearchOptionAvailable(asset) ? 1 : 0,
+        assets: [asset],
+      });
+    }
+
+    return Array.from(groups.values());
+  });
+
+  readonly modalSelectedAssetsCount = computed(() => this.modalSelectedAssetIds().size);
 
   readonly selectedAssetsCountLabel = computed(() => {
     const count = this.selectedAssets().length;
@@ -365,6 +525,117 @@ export class LoanFormComponent implements OnDestroy {
   clearAssets() {
     this.selectedAssets.set([]);
     this.showAssetsError.set(true);
+  }
+
+  openAssetSearchModal() {
+    this.assetModalQuery.set('');
+    this.selectedAssetCategory.set('all');
+    this.modalSelectedAssetIds.set(new Set());
+    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+    this.isAssetSearchModalOpen.set(true);
+  }
+
+  closeAssetSearchModal() {
+    this.isAssetSearchModalOpen.set(false);
+    this.assetModalQuery.set('');
+    this.modalSelectedAssetIds.set(new Set());
+  }
+
+  setAssetCategory(categoryId: AssetCategoryId) {
+    this.selectedAssetCategory.set(categoryId);
+    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+  }
+
+  onAssetModalSearch(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.assetModalQuery.set(value);
+    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+  }
+
+  toggleAssetGroup(groupKey: string) {
+    this.expandedAssetGroups.update((expandedGroups) => {
+      const nextGroups = new Set(expandedGroups);
+      if (nextGroups.has(groupKey)) {
+        nextGroups.delete(groupKey);
+      } else {
+        nextGroups.add(groupKey);
+      }
+
+      return nextGroups;
+    });
+  }
+
+  isAssetSearchGroupExpanded(groupKey: string): boolean {
+    return this.expandedAssetGroups().has(groupKey);
+  }
+
+  toggleModalAssetSelection(assetId: string) {
+    const asset = this.assetSearchOptions().find((item) => item.id === assetId);
+    if (!asset || this.isModalAssetDisabled(asset)) {
+      return;
+    }
+
+    this.modalSelectedAssetIds.update((selectedIds) => {
+      const nextSelectedIds = new Set(selectedIds);
+      if (nextSelectedIds.has(assetId)) {
+        nextSelectedIds.delete(assetId);
+      } else {
+        nextSelectedIds.add(assetId);
+      }
+
+      return nextSelectedIds;
+    });
+  }
+
+  confirmAssetSelection() {
+    const selectedIds = this.modalSelectedAssetIds();
+    if (selectedIds.size === 0) {
+      this.closeAssetSearchModal();
+      return;
+    }
+
+    const currentIds = new Set(this.selectedAssets().map((asset) => asset.id));
+    const nextAssets = this.assetSearchOptions()
+      .filter((asset) => selectedIds.has(asset.id) && !currentIds.has(asset.id))
+      .map((asset) => ({
+        id: asset.id,
+        name: asset.name,
+        code: asset.code,
+        condition: asset.condition,
+      }));
+
+    if (nextAssets.length > 0) {
+      this.selectedAssets.update((assets) => [...assets, ...nextAssets]);
+      this.showAssetsError.set(false);
+    }
+
+    this.closeAssetSearchModal();
+  }
+
+  isModalAssetSelected(assetId: string): boolean {
+    return this.modalSelectedAssetIds().has(assetId);
+  }
+
+  isModalAssetAlreadyAdded(assetId: string): boolean {
+    return this.selectedAssets().some((asset) => asset.id === assetId);
+  }
+
+  isModalAssetDisabled(asset: AssetSearchOption): boolean {
+    return !this.isAssetSearchOptionAvailable(asset) || this.isModalAssetAlreadyAdded(asset.id);
+  }
+
+  getAssetSearchStatusClass(asset: AssetSearchOption): string {
+    if (this.isModalAssetAlreadyAdded(asset.id)) {
+      return 'bg-base-200 text-base-content/60';
+    }
+
+    return asset.availabilityStatus === 'available'
+      ? 'bg-estado-bueno-bg text-estado-bueno'
+      : 'bg-base-200 text-base-content/60';
+  }
+
+  getAssetSearchStatusLabel(asset: AssetSearchOption): string {
+    return this.isModalAssetAlreadyAdded(asset.id) ? 'Agregado' : asset.modalStatusLabel;
   }
 
   getAssetConditionClass(condition: AssetCondition): string {
@@ -702,6 +973,10 @@ export class LoanFormComponent implements OnDestroy {
 
   private isSupportedImage(mimeType: string, extension: string): boolean {
     return mimeType.startsWith('image/') || ALLOWED_IMAGE_EXTENSIONS.has(extension);
+  }
+
+  private isAssetSearchOptionAvailable(asset: AssetSearchOption): boolean {
+    return asset.availabilityStatus === 'available';
   }
 
   private resolveAssetCode(
