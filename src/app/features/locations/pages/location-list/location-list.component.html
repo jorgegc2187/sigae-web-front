@@ -9,10 +9,11 @@
         [value]="searchQuery()"
         (valueChange)="onSearch($event)"
       />
-      <a routerLink="/locations/new" class="btn btn-primary shadow-sm">
-        <span class="material-symbols-outlined text-[20px]">add</span>
-        Nueva Ubicación
-      </a>
+      <app-action-button
+        label="Nueva Ubicación"
+        icon="add"
+        routerLink="/locations/new"
+      />
     </div>
   </div>
 

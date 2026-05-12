@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { TeacherCardComponent } from '../../components/teacher-card/teacher-card.component';
 import { Teacher } from '../../models/teacher.model';
@@ -7,7 +8,7 @@ import { Teacher } from '../../models/teacher.model';
   selector: 'app-teacher-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TeacherCardComponent, SearchInputComponent],
+  imports: [TeacherCardComponent, SearchInputComponent, ActionButtonComponent],
   templateUrl: './teacher-list.component.html',
 })
 export class TeacherListComponent {

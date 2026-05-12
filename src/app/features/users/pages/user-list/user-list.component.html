@@ -7,24 +7,17 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <button
-        type="button"
-        class="btn btn-outline btn-primary shadow-sm"
-        (click)="onSendInvitation()"
-        id="btn-send-invitation"
-      >
-        <span class="material-symbols-outlined text-[20px]">mail</span>
-        Enviar invitación
-      </button>
-      <button
-        type="button"
-        class="btn btn-primary shadow-sm"
-        (click)="onNewUser()"
-        id="btn-new-user"
-      >
-        <span class="material-symbols-outlined text-[20px]">add</span>
-        Nuevo usuario
-      </button>
+      <app-action-button
+        label="Enviar invitación"
+        icon="mail"
+        variant="outline"
+        (clicked)="onSendInvitation()"
+      />
+      <app-action-button
+        label="Nuevo usuario"
+        icon="add"
+        (clicked)="onNewUser()"
+      />
     </div>
   </div>
 

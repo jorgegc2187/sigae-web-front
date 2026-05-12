@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { LocationCardComponent } from '../../components/location-card/location-card.component';
 import { Location } from '../../models/location.model';
@@ -8,7 +9,7 @@ import { Location } from '../../models/location.model';
   selector: 'app-location-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, LocationCardComponent, SearchInputComponent],
+  imports: [RouterLink, LocationCardComponent, SearchInputComponent, ActionButtonComponent],
   templateUrl: './location-list.component.html',
 })
 export class LocationListComponent {

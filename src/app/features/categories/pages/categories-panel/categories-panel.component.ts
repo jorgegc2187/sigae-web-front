@@ -8,6 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
@@ -49,6 +50,7 @@ interface AttributesModalContext {
   imports: [
     CommonModule,
     FormsModule,
+    ActionButtonComponent,
     SearchInputComponent,
     FormFieldComponent,
     MobilePaginationComponent,

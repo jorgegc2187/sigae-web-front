@@ -13,10 +13,10 @@
         [value]="searchQuery()"
         (valueChange)="onSearch($event)"
       />
-      <button class="btn btn-primary shadow-sm">
-        <span class="material-symbols-outlined text-[20px]">add</span>
-        Agregar Docente
-      </button>
+      <app-action-button
+        label="Agregar Docente"
+        icon="add"
+      />
     </div>
   </div>
 

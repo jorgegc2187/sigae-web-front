@@ -1,0 +1,29 @@
+@if (isLink()) {
+  <a
+    [class]="classes()"
+    [routerLink]="routerLink()"
+    [attr.href]="routerLink() ? null : href()"
+    [attr.aria-label]="resolvedAriaLabel()"
+    [attr.aria-disabled]="disabled()"
+    [attr.tabindex]="disabled() ? -1 : null"
+    (click)="onClick($event)"
+  >
+    @if (icon(); as iconName) {
+      <span [class]="iconClass()">{{ iconName }}</span>
+    }
+    <span>{{ label() }}</span>
+  </a>
+} @else {
+  <button
+    [class]="classes()"
+    [attr.aria-label]="resolvedAriaLabel()"
+    [disabled]="disabled()"
+    [type]="type()"
+    (click)="onClick($event)"
+  >
+    @if (icon(); as iconName) {
+      <span [class]="iconClass()">{{ iconName }}</span>
+    }
+    <span>{{ label() }}</span>
+  </button>
+}

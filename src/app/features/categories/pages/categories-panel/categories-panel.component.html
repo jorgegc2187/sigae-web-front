@@ -4,14 +4,12 @@
   >
     <div class="flex items-center justify-between border-b border-base-300 bg-base-100 p-5">
       <h2 class="text-xl font-bold text-base-content">Categorías</h2>
-      <button
-        type="button"
-        class="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-content shadow-sm transition-colors hover:bg-primary/90"
-        (click)="openCategoryModal()"
-      >
-        <span class="material-symbols-outlined text-[18px]">add</span>
-        Nueva
-      </button>
+      <app-action-button
+        label="Nueva"
+        icon="add"
+        size="sm"
+        (clicked)="openCategoryModal()"
+      />
     </div>
 
     <div class="flex-1 overflow-y-auto">
@@ -84,14 +82,15 @@
         />
       </div>
 
-      <button
-        type="button"
-        class="inline-flex h-12 min-w-[194px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-content shadow-sm transition-colors hover:bg-primary/90"
-        (click)="openCreateTypeModal()"
-      >
-        <span class="material-symbols-outlined text-[20px]">add</span>
-        Nuevo tipo de activo
-      </button>
+      <div class="min-w-[194px]">
+        <app-action-button
+          label="Nuevo tipo de activo"
+          icon="add"
+          size="lg"
+          [fullWidth]="true"
+          (clicked)="openCreateTypeModal()"
+        />
+      </div>
     </div>
 
     <div class="space-y-4">
@@ -165,23 +164,21 @@
 
 <div class="md:hidden">
   <div class="mb-6 grid grid-cols-2 gap-3">
-    <button
-      type="button"
-      class="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-content shadow-sm transition-transform active:scale-[0.98]"
-      (click)="openCategoryModal()"
-    >
-      <span class="material-symbols-outlined text-[19px]">add_circle</span>
-      <span>Nueva Categoría</span>
-    </button>
+    <app-action-button
+      label="Nueva Categoría"
+      icon="add_circle"
+      size="lg"
+      [fullWidth]="true"
+      (clicked)="openCategoryModal()"
+    />
 
-    <button
-      type="button"
-      class="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-content shadow-sm transition-transform active:scale-[0.98]"
-      (click)="openCreateTypeModal()"
-    >
-      <span class="material-symbols-outlined text-[19px]">library_add</span>
-      <span>Nuevo Tipo</span>
-    </button>
+    <app-action-button
+      label="Nuevo Tipo"
+      icon="library_add"
+      size="lg"
+      [fullWidth]="true"
+      (clicked)="openCreateTypeModal()"
+    />
   </div>
 
   <div class="relative mb-6">

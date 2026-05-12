@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { MOCK_USERS, User, UserRole, UserStatus } from '../../models/user.model';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [SearchInputComponent],
+  imports: [SearchInputComponent, ActionButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-list.component.html',
 })
