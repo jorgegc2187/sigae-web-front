@@ -849,21 +849,17 @@
                   <ul class="divide-y divide-base-200">
                     @for (asset of group.assets; track asset.id) {
                       <li
-                        [class]="
-                          isModalAssetDisabled(asset)
-                            ? 'flex items-center justify-between gap-4 bg-base-200/35 px-4 py-3 opacity-75'
-                            : 'group flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-primary/5'
-                        "
+                        [class]="getAssetSearchRowClass(asset)"
                       >
                         <label class="flex min-w-0 flex-1 items-center gap-3">
                           <input
                             type="checkbox"
-                            class="checkbox checkbox-sm shrink-0 border-2 border-base-400 bg-base-100 shadow-sm transition-all hover:border-primary/60 checked:border-primary checked:bg-primary checked:text-primary-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:border-base-300 disabled:bg-base-200"
+                            [class]="getAssetSearchCheckboxClass(asset)"
                             [checked]="isModalAssetSelected(asset.id)"
                             [disabled]="isModalAssetDisabled(asset)"
                             (change)="toggleModalAssetSelection(asset.id)"
                           />
-                          <span class="min-w-0">
+                          <span [class]="getAssetSearchContentClass(asset)">
                             <span class="block text-sm font-medium text-base-content">{{
                               asset.code
                             }}</span>

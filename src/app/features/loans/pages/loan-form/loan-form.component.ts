@@ -35,10 +35,9 @@ interface DestinationOption {
   name: string;
 }
 
-type AssetCondition = 'Bueno' | 'Regular';
 type AssetCategoryId = 'all' | 'technology' | 'furniture' | 'laboratory' | 'sports';
 type AssetLocationId = 'all' | 'central-warehouse' | 'computer-lab' | 'classroom-101' | 'teachers-room';
-type AssetAvailabilityStatus = 'available' | 'maintenance';
+type AssetCondition = 'Bueno' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
 
 interface AssetOption {
   id: string;
@@ -67,8 +66,6 @@ interface AssetSearchMetadata {
   groupIcon: string;
   serial: string;
   location: string;
-  availabilityStatus: AssetAvailabilityStatus;
-  modalStatusLabel: string;
 }
 
 interface AssetSearchOption extends AssetOption, AssetSearchMetadata {}
@@ -189,7 +186,7 @@ export class LoanFormComponent implements OnDestroy {
       id: 'asset-5',
       name: 'Parlante Portátil JBL',
       code: 'AUD-2024-014',
-      condition: 'Bueno',
+      condition: 'Mantenimiento',
     },
     {
       id: 'asset-6',
@@ -219,7 +216,7 @@ export class LoanFormComponent implements OnDestroy {
       id: 'asset-10',
       name: 'Cámara Web Logitech C920',
       code: 'VID-2023-017',
-      condition: 'Regular',
+      condition: 'Malo',
     },
     {
       id: 'asset-11',
@@ -231,7 +228,7 @@ export class LoanFormComponent implements OnDestroy {
       id: 'asset-12',
       name: 'Impresora HP LaserJet Pro',
       code: 'IMP-2022-011',
-      condition: 'Regular',
+      condition: 'Mantenimiento',
     },
     {
       id: 'asset-13',
@@ -243,7 +240,7 @@ export class LoanFormComponent implements OnDestroy {
       id: 'asset-14',
       name: 'Switch de Red Cisco 24 Puertos',
       code: 'NET-2021-004',
-      condition: 'Regular',
+      condition: 'Dado de baja',
     },
     {
       id: 'asset-15',
@@ -262,8 +259,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'laptop_mac',
       serial: 'SN: LNV-T14-4587',
       location: 'Almacén Central',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-2': {
       category: 'technology',
@@ -273,8 +268,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'videocam',
       serial: 'SN: EPS-PL-2022',
       location: 'Laboratorio de Cómputo',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-3': {
       category: 'technology',
@@ -284,8 +277,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'settings_input_hdmi',
       serial: 'SN: HDMI-5M-108',
       location: 'Almacén Central',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-4': {
       category: 'technology',
@@ -295,8 +286,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'mouse',
       serial: 'SN: HP-MSE-021',
       location: 'Aula 101 - Pabellón A',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-5': {
       category: 'laboratory',
@@ -306,8 +295,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'speaker',
       serial: 'SN: JBL-AUD-014',
       location: 'Sala de Profesores',
-      availabilityStatus: 'maintenance',
-      modalStatusLabel: 'Mantenimiento',
     },
     'asset-6': {
       category: 'technology',
@@ -317,8 +304,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'tablet_mac',
       serial: 'SN: SAM-TABA8-008',
       location: 'Almacén Central',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-7': {
       category: 'technology',
@@ -328,8 +313,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'desktop_windows',
       serial: 'SN: LG-MON-031',
       location: 'Laboratorio de Cómputo',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-8': {
       category: 'laboratory',
@@ -339,8 +322,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'mic_external_on',
       serial: 'SN: SHR-MIC-019',
       location: 'Sala de Profesores',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-9': {
       category: 'technology',
@@ -350,8 +331,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'power',
       serial: 'SN: EXT-10M-033',
       location: 'Almacén Central',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-10': {
       category: 'technology',
@@ -361,8 +340,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'videocam',
       serial: 'SN: LOG-C920-017',
       location: 'Laboratorio de Cómputo',
-      availabilityStatus: 'maintenance',
-      modalStatusLabel: 'Mantenimiento',
     },
     'asset-11': {
       category: 'technology',
@@ -372,8 +349,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'router',
       serial: 'SN: TPL-C80-005',
       location: 'Aula 101 - Pabellón A',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-12': {
       category: 'technology',
@@ -383,8 +358,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'print',
       serial: 'SN: HP-LJ-011',
       location: 'Sala de Profesores',
-      availabilityStatus: 'maintenance',
-      modalStatusLabel: 'Mantenimiento',
     },
     'asset-13': {
       category: 'technology',
@@ -394,8 +367,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'ads_click',
       serial: 'SN: KNS-LSR-076',
       location: 'Almacén Central',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
     'asset-14': {
       category: 'technology',
@@ -405,8 +376,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'hub',
       serial: 'SN: CSC-SW24-004',
       location: 'Laboratorio de Cómputo',
-      availabilityStatus: 'maintenance',
-      modalStatusLabel: 'Mantenimiento',
     },
     'asset-15': {
       category: 'technology',
@@ -416,8 +385,6 @@ export class LoanFormComponent implements OnDestroy {
       groupIcon: 'present_to_all',
       serial: 'SN: SCR-PRY-026',
       location: 'Almacén Central',
-      availabilityStatus: 'available',
-      modalStatusLabel: 'Operativo',
     },
   };
 
@@ -503,10 +470,12 @@ export class LoanFormComponent implements OnDestroy {
   });
 
   readonly assetSearchOptions = computed<AssetSearchOption[]>(() =>
-    this.availableAssets().map((asset) => ({
-      ...asset,
-      ...this.assetSearchMetadataById[asset.id]!,
-    })),
+    this.availableAssets()
+      .filter((asset) => asset.condition !== 'Dado de baja')
+      .map((asset) => ({
+        ...asset,
+        ...this.assetSearchMetadataById[asset.id]!,
+      })),
   );
 
   readonly assetCategoryOptions = computed<AssetCategoryOption[]>(() => {
@@ -587,7 +556,7 @@ export class LoanFormComponent implements OnDestroy {
       const group = groups.get(asset.groupKey);
       if (group) {
         group.assets.push(asset);
-        group.availableCount += this.isAssetSearchOptionAvailable(asset) ? 1 : 0;
+        group.availableCount += this.isAssetSearchOptionSelectable(asset) ? 1 : 0;
         continue;
       }
 
@@ -595,7 +564,7 @@ export class LoanFormComponent implements OnDestroy {
         key: asset.groupKey,
         name: asset.groupName,
         icon: asset.groupIcon,
-        availableCount: this.isAssetSearchOptionAvailable(asset) ? 1 : 0,
+        availableCount: this.isAssetSearchOptionSelectable(asset) ? 1 : 0,
         assets: [asset],
       });
     }
@@ -849,27 +818,87 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   isModalAssetDisabled(asset: AssetSearchOption): boolean {
-    return !this.isAssetSearchOptionAvailable(asset) || this.isModalAssetAlreadyAdded(asset.id);
+    return !this.isAssetSearchOptionSelectable(asset) || this.isModalAssetAlreadyAdded(asset.id);
   }
 
   getAssetSearchStatusClass(asset: AssetSearchOption): string {
     if (this.isModalAssetAlreadyAdded(asset.id)) {
-      return 'bg-base-200 text-base-content/60';
+      return 'bg-info/12 text-info';
     }
 
-    return asset.availabilityStatus === 'available'
-      ? 'bg-estado-bueno-bg text-estado-bueno'
-      : 'bg-base-200 text-base-content/60';
+    switch (asset.condition) {
+      case 'Bueno':
+        return 'bg-estado-bueno-bg text-estado-bueno';
+      case 'Regular':
+        return 'bg-estado-regular-bg text-estado-regular';
+      case 'Malo':
+        return 'bg-estado-malo-bg text-estado-malo';
+      case 'Mantenimiento':
+        return 'bg-estado-mant-bg text-estado-mant';
+      case 'Dado de baja':
+        return 'bg-estado-baja-bg text-estado-baja';
+    }
   }
 
   getAssetSearchStatusLabel(asset: AssetSearchOption): string {
-    return this.isModalAssetAlreadyAdded(asset.id) ? 'Agregado' : asset.modalStatusLabel;
+    return this.isModalAssetAlreadyAdded(asset.id) ? 'Agregado' : asset.condition;
   }
 
   getAssetConditionClass(condition: AssetCondition): string {
-    return condition === 'Bueno'
-      ? 'text-estado-bueno bg-estado-bueno-bg'
-      : 'text-estado-regular bg-estado-regular-bg';
+    switch (condition) {
+      case 'Bueno':
+        return 'text-estado-bueno bg-estado-bueno-bg';
+      case 'Regular':
+        return 'text-estado-regular bg-estado-regular-bg';
+      case 'Malo':
+        return 'text-estado-malo bg-estado-malo-bg';
+      case 'Mantenimiento':
+        return 'text-estado-mant bg-estado-mant-bg';
+      case 'Dado de baja':
+        return 'text-estado-baja bg-estado-baja-bg';
+    }
+  }
+
+  getAssetSearchRowClass(asset: AssetSearchOption): string {
+    if (this.isModalAssetAlreadyAdded(asset.id)) {
+      return 'flex items-center justify-between gap-4 bg-base-200/45 px-4 py-3 opacity-70';
+    }
+
+    switch (asset.condition) {
+      case 'Bueno':
+      case 'Regular':
+        return 'group flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-primary/5';
+      case 'Malo':
+        return 'flex items-center justify-between gap-4 bg-base-200/55 px-4 py-3 opacity-65';
+      case 'Mantenimiento':
+        return 'flex items-center justify-between gap-4 bg-base-200/55 px-4 py-3 opacity-65';
+      case 'Dado de baja':
+        return 'hidden';
+    }
+  }
+
+  getAssetSearchContentClass(asset: AssetSearchOption): string {
+    return this.isModalAssetDisabled(asset)
+      ? 'min-w-0 text-base-content/70'
+      : 'min-w-0';
+  }
+
+  getAssetSearchCheckboxClass(asset: AssetSearchOption): string {
+    if (this.isModalAssetAlreadyAdded(asset.id)) {
+      return 'checkbox checkbox-sm shrink-0 cursor-not-allowed border-2 border-base-300 bg-base-100 text-base-content/40 opacity-100 shadow-none';
+    }
+
+    switch (asset.condition) {
+      case 'Bueno':
+      case 'Regular':
+        return 'checkbox checkbox-sm shrink-0 border-2 border-base-400 bg-base-100 shadow-sm transition-all hover:border-primary/60 checked:border-primary checked:bg-primary checked:text-primary-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20';
+      case 'Malo':
+        return 'checkbox checkbox-sm shrink-0 cursor-not-allowed border-2 border-base-300 bg-base-100 text-base-content/35 opacity-100 shadow-none';
+      case 'Mantenimiento':
+        return 'checkbox checkbox-sm shrink-0 cursor-not-allowed border-2 border-base-300 bg-base-100 text-base-content/35 opacity-100 shadow-none';
+      case 'Dado de baja':
+        return 'checkbox checkbox-sm hidden';
+    }
   }
 
   openSignatureModal() {
@@ -1205,8 +1234,8 @@ export class LoanFormComponent implements OnDestroy {
     return mimeType.startsWith('image/') || ALLOWED_IMAGE_EXTENSIONS.has(extension);
   }
 
-  private isAssetSearchOptionAvailable(asset: AssetSearchOption): boolean {
-    return asset.availabilityStatus === 'available';
+  private isAssetSearchOptionSelectable(asset: AssetSearchOption): boolean {
+    return asset.condition === 'Bueno' || asset.condition === 'Regular';
   }
 
   private resolveAssetCode(
