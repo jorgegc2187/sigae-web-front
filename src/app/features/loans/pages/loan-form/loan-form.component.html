@@ -731,7 +731,7 @@
 
       <div class="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
         <aside
-          class="border-b border-base-300 bg-base-200/55 p-4 md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r"
+          class="border-b border-base-300 bg-base-200/55 p-4 md:w-64 md:shrink-0 md:overflow-y-auto md:overscroll-contain md:border-b-0 md:border-r"
         >
           <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-base-content/55">
             Filtro por Categoría
@@ -779,7 +779,7 @@
             />
           </div>
 
-          <div class="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+          <div class="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pr-1">
             @for (group of filteredAssetGroups(); track group.key) {
               <article
                 class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm"

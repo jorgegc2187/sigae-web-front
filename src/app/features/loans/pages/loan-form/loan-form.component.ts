@@ -4,6 +4,7 @@ import {
   ElementRef,
   OnDestroy,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -111,6 +112,7 @@ function dueDateAfterStartDateValidator(control: AbstractControl): ValidationErr
 export class LoanFormComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly modalScrollLockClass = 'overflow-hidden';
 
   readonly teacherSearchContainer = viewChild<ElementRef>('teacherSearchContainer');
   readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
@@ -396,6 +398,12 @@ export class LoanFormComponent implements OnDestroy {
 
   readonly hasSavedSignature = computed(() => !!this.signatureDataUrl());
   readonly hasAttachments = computed(() => this.attachments().length > 0);
+
+  constructor() {
+    effect(() => {
+      document.body.classList.toggle(this.modalScrollLockClass, this.isAssetSearchModalOpen());
+    });
+  }
 
   onClickOutside(event: MouseEvent) {
     const teacherContainer = this.teacherSearchContainer();
@@ -823,6 +831,8 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
+    document.body.classList.remove(this.modalScrollLockClass);
+
     for (const attachment of this.attachments()) {
       if (attachment.previewUrl) {
         URL.revokeObjectURL(attachment.previewUrl);
