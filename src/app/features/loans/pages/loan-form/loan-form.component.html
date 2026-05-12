@@ -733,11 +733,11 @@
         <aside
           class="border-b border-base-300 bg-base-200/55 p-4 md:w-64 md:shrink-0 md:overflow-y-auto md:overscroll-contain md:border-b-0 md:border-r"
         >
-          <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-base-content/55">
-            Filtro por Categoría
+          <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-base-content/65">
+            FILTRO POR CATEGORÍA
           </h3>
 
-          <ul class="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
+          <ul class="flex gap-2 overflow-x-auto pb-1 md:flex-col md:gap-1 md:overflow-visible md:pb-0">
             @for (category of assetCategoryOptions(); track category.id) {
               <li class="shrink-0 md:shrink">
                 <button
@@ -757,6 +757,38 @@
                         : 'rounded-full bg-base-300 px-2 py-0.5 text-xs text-base-content/60'
                     "
                     >{{ category.count }}</span
+                  >
+                </button>
+              </li>
+            }
+          </ul>
+
+          <div class="my-6 border-t border-base-300"></div>
+
+          <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-base-content/65">
+            UBICACIÓN
+          </h3>
+
+          <ul class="flex gap-2 overflow-x-auto pb-1 md:flex-col md:gap-1 md:overflow-visible md:pb-0">
+            @for (location of assetLocationOptions(); track location.id) {
+              <li class="shrink-0 md:shrink">
+                <button
+                  type="button"
+                  [class]="
+                    selectedAssetLocation() === location.id
+                      ? 'flex w-full items-center justify-between gap-3 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors'
+                      : 'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium text-base-content/65 transition-colors hover:bg-base-300/65 hover:text-base-content'
+                  "
+                  (click)="setAssetLocation(location.id)"
+                >
+                  <span>{{ location.name }}</span>
+                  <span
+                    [class]="
+                      selectedAssetLocation() === location.id
+                        ? 'rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary'
+                        : 'rounded-full bg-base-300 px-2 py-0.5 text-xs text-base-content/60'
+                    "
+                    >{{ location.count }}</span
                   >
                 </button>
               </li>

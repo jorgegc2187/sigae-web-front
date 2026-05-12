@@ -37,6 +37,7 @@ interface DestinationOption {
 
 type AssetCondition = 'Bueno' | 'Regular';
 type AssetCategoryId = 'all' | 'technology' | 'furniture' | 'laboratory' | 'sports';
+type AssetLocationId = 'all' | 'central-warehouse' | 'computer-lab' | 'classroom-101' | 'teachers-room';
 type AssetAvailabilityStatus = 'available' | 'maintenance';
 
 interface AssetOption {
@@ -52,8 +53,15 @@ interface AssetCategoryOption {
   count: number;
 }
 
+interface AssetLocationOption {
+  id: AssetLocationId;
+  name: string;
+  count: number;
+}
+
 interface AssetSearchMetadata {
   category: Exclude<AssetCategoryId, 'all'>;
+  locationId: Exclude<AssetLocationId, 'all'>;
   groupKey: string;
   groupName: string;
   groupIcon: string;
@@ -188,6 +196,7 @@ export class LoanFormComponent implements OnDestroy {
   private readonly assetSearchMetadataById: Record<string, AssetSearchMetadata> = {
     'asset-1': {
       category: 'technology',
+      locationId: 'central-warehouse',
       groupKey: 'laptop-lenovo-thinkpad',
       groupName: 'Laptop Lenovo ThinkPad',
       groupIcon: 'laptop_mac',
@@ -198,6 +207,7 @@ export class LoanFormComponent implements OnDestroy {
     },
     'asset-2': {
       category: 'technology',
+      locationId: 'computer-lab',
       groupKey: 'proyector-epson-powerlite',
       groupName: 'Proyector Epson PowerLite',
       groupIcon: 'videocam',
@@ -208,6 +218,7 @@ export class LoanFormComponent implements OnDestroy {
     },
     'asset-3': {
       category: 'technology',
+      locationId: 'central-warehouse',
       groupKey: 'accesorios-audiovisuales',
       groupName: 'Accesorios Audiovisuales',
       groupIcon: 'settings_input_hdmi',
@@ -218,6 +229,7 @@ export class LoanFormComponent implements OnDestroy {
     },
     'asset-4': {
       category: 'technology',
+      locationId: 'classroom-101',
       groupKey: 'perifericos-hp',
       groupName: 'Periféricos HP',
       groupIcon: 'mouse',
@@ -228,6 +240,7 @@ export class LoanFormComponent implements OnDestroy {
     },
     'asset-5': {
       category: 'laboratory',
+      locationId: 'teachers-room',
       groupKey: 'audio-portatil',
       groupName: 'Audio Portátil',
       groupIcon: 'speaker',
@@ -267,6 +280,7 @@ export class LoanFormComponent implements OnDestroy {
   readonly signatureDraft = signal<string | null>(null);
   readonly assetModalQuery = signal('');
   readonly selectedAssetCategory = signal<AssetCategoryId>('all');
+  readonly selectedAssetLocation = signal<AssetLocationId>('all');
   readonly expandedAssetGroups = signal<Set<string>>(new Set(['laptop-lenovo-thinkpad']));
   readonly modalSelectedAssetIds = signal<Set<string>>(new Set());
 
@@ -353,20 +367,50 @@ export class LoanFormComponent implements OnDestroy {
     ];
   });
 
+  readonly assetLocationOptions = computed<AssetLocationOption[]>(() => {
+    const assets = this.assetSearchOptions();
+
+    return [
+      { id: 'all', name: 'Todos', count: assets.length },
+      {
+        id: 'central-warehouse',
+        name: 'Almacén Central',
+        count: assets.filter((asset) => asset.locationId === 'central-warehouse').length,
+      },
+      {
+        id: 'computer-lab',
+        name: 'Laboratorio de Cómputo',
+        count: assets.filter((asset) => asset.locationId === 'computer-lab').length,
+      },
+      {
+        id: 'classroom-101',
+        name: 'Aula 101 - Pabellón A',
+        count: assets.filter((asset) => asset.locationId === 'classroom-101').length,
+      },
+      {
+        id: 'teachers-room',
+        name: 'Sala de Profesores',
+        count: assets.filter((asset) => asset.locationId === 'teachers-room').length,
+      },
+    ];
+  });
+
   readonly filteredAssetGroups = computed<AssetSearchGroup[]>(() => {
     const selectedCategory = this.selectedAssetCategory();
+    const selectedLocation = this.selectedAssetLocation();
     const query = this.assetModalQuery().trim().toLowerCase();
     const groups = new Map<string, AssetSearchGroup>();
 
     const assets = this.assetSearchOptions().filter((asset) => {
       const matchesCategory = selectedCategory === 'all' || asset.category === selectedCategory;
+      const matchesLocation = selectedLocation === 'all' || asset.locationId === selectedLocation;
       const matchesQuery =
         !query ||
         asset.name.toLowerCase().includes(query) ||
         asset.code.toLowerCase().includes(query) ||
         asset.serial.toLowerCase().includes(query);
 
-      return matchesCategory && matchesQuery;
+      return matchesCategory && matchesLocation && matchesQuery;
     });
 
     for (const asset of assets) {
@@ -538,6 +582,7 @@ export class LoanFormComponent implements OnDestroy {
   openAssetSearchModal() {
     this.assetModalQuery.set('');
     this.selectedAssetCategory.set('all');
+    this.selectedAssetLocation.set('all');
     this.modalSelectedAssetIds.set(new Set());
     this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
     this.isAssetSearchModalOpen.set(true);
@@ -551,6 +596,11 @@ export class LoanFormComponent implements OnDestroy {
 
   setAssetCategory(categoryId: AssetCategoryId) {
     this.selectedAssetCategory.set(categoryId);
+    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+  }
+
+  setAssetLocation(locationId: AssetLocationId) {
+    this.selectedAssetLocation.set(locationId);
     this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
   }
 
