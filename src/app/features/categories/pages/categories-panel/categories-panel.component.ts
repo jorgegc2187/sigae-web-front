@@ -10,10 +10,12 @@ import {
 import { FormsModule } from '@angular/forms';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
+import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { AssetType, Attribute, Category } from '../../models/category.model';
 
 type TypeFormMode = 'create' | 'edit';
+type CategoryFilterId = 'all' | string;
 
 interface AttributeDraft {
   id: string;
@@ -44,7 +46,13 @@ interface AttributesModalContext {
 @Component({
   selector: 'app-categories-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchInputComponent, FormFieldComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SearchInputComponent,
+    FormFieldComponent,
+    MobilePaginationComponent,
+  ],
   templateUrl: './categories-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -56,10 +64,12 @@ export class CategoriesPanelComponent {
     viewChild<ElementRef<HTMLDialogElement>>('attributesDialog');
 
   private idSequence = 100;
+  private readonly mobilePageSize = 4;
 
   readonly categories = signal<Category[]>(this.cloneCategories(MOCK_CATEGORIES));
-  readonly selectedCategoryId = signal<string | null>(this.categories()[0]?.id ?? null);
+  readonly activeCategoryFilterId = signal<CategoryFilterId>('all');
   readonly typeSearchQuery = signal('');
+  readonly mobileCurrentPage = signal(1);
 
   readonly categoryDraftName = signal('');
   readonly typeFormMode = signal<TypeFormMode>('create');
@@ -75,9 +85,23 @@ export class CategoriesPanelComponent {
     })),
   );
 
+  readonly categoryFilters = computed(() => [
+    {
+      id: 'all' as const,
+      name: 'Todos',
+      icon: 'grid_view',
+      typesCount: this.categoriesWithMetrics().reduce((total, category) => total + category.types.length, 0),
+      assetsCount: this.categoriesWithMetrics().reduce(
+        (total, category) => total + category.assetsCount,
+        0,
+      ),
+    },
+    ...this.categoriesWithMetrics(),
+  ]);
+
   readonly selectedCategory = computed(() => {
-    const categoryId = this.selectedCategoryId();
-    if (!categoryId) {
+    const categoryId = this.activeCategoryFilterId();
+    if (categoryId === 'all') {
       return null;
     }
 
@@ -86,24 +110,11 @@ export class CategoriesPanelComponent {
 
   readonly isGlobalSearchActive = computed(() => this.typeSearchQuery().trim().length > 0);
 
-  readonly visibleTypeEntries = computed<TypeListEntry[]>(() => {
+  readonly filteredTypeEntries = computed<TypeListEntry[]>(() => {
     const query = this.typeSearchQuery().trim().toLowerCase();
+    const activeFilter = this.activeCategoryFilterId();
 
-    if (!query) {
-      const category = this.selectedCategory();
-      if (!category) {
-        return [];
-      }
-
-      return category.types.map((type) => ({
-        categoryId: category.id,
-        categoryName: category.name,
-        categoryIcon: category.icon,
-        type,
-      }));
-    }
-
-    return this.categoriesWithMetrics().flatMap((category) =>
+    const matchingEntries = this.categoriesWithMetrics().flatMap((category) =>
       category.types
         .filter((type) => {
           const matchesTypeName = type.name.toLowerCase().includes(query);
@@ -121,6 +132,29 @@ export class CategoriesPanelComponent {
           type,
         })),
     );
+
+    if (query) {
+      return matchingEntries;
+    }
+
+    if (activeFilter === 'all') {
+      return matchingEntries;
+    }
+
+    return matchingEntries.filter((entry) => entry.categoryId === activeFilter);
+  });
+
+  readonly visibleTypeEntries = computed<TypeListEntry[]>(() => this.filteredTypeEntries());
+
+  readonly mobileTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredTypeEntries().length / this.mobilePageSize)),
+  );
+
+  readonly mobileVisibleTypeEntries = computed<TypeListEntry[]>(() => {
+    const page = Math.min(this.mobileCurrentPage(), this.mobileTotalPages());
+    const startIndex = (page - 1) * this.mobilePageSize;
+
+    return this.filteredTypeEntries().slice(startIndex, startIndex + this.mobilePageSize);
   });
 
   readonly currentAttributesEntry = computed<TypeListEntry | null>(() => {
@@ -155,15 +189,31 @@ export class CategoriesPanelComponent {
   readonly typeSearchEmptyMessage = computed(() =>
     this.isGlobalSearchActive()
       ? 'No se encontraron tipos que coincidan con la búsqueda.'
-      : 'No hay tipos de activos configurados para esta categoría.',
+      : this.activeCategoryFilterId() === 'all'
+        ? 'No hay tipos de activos configurados todavía.'
+        : 'No hay tipos de activos configurados para esta categoría.',
   );
 
-  selectCategory(categoryId: string) {
-    this.selectedCategoryId.set(categoryId);
+  readonly mobilePageLabel = computed(
+    () => `${Math.min(this.mobileCurrentPage(), this.mobileTotalPages())} de ${this.mobileTotalPages()}`,
+  );
+
+  setActiveCategoryFilter(categoryId: CategoryFilterId) {
+    this.activeCategoryFilterId.set(categoryId);
+    this.mobileCurrentPage.set(1);
   }
 
   onTypeSearch(query: string) {
     this.typeSearchQuery.set(query);
+    this.mobileCurrentPage.set(1);
+  }
+
+  onMobileSearchInput(event: Event) {
+    this.onTypeSearch((event.target as HTMLInputElement).value);
+  }
+
+  onMobilePageChange(page: number) {
+    this.mobileCurrentPage.set(page);
   }
 
   openCategoryModal() {
@@ -191,13 +241,15 @@ export class CategoriesPanelComponent {
     };
 
     this.categories.update((categories) => [...categories, newCategory]);
-    this.selectedCategoryId.set(newCategory.id);
+    this.activeCategoryFilterId.set(newCategory.id);
     this.closeCategoryModal();
   }
 
   openCreateTypeModal(categoryId?: string) {
     const targetCategoryId =
-      categoryId ?? this.selectedCategoryId() ?? this.categoriesWithMetrics()[0]?.id ?? '';
+      categoryId ??
+      (this.activeCategoryFilterId() === 'all' ? this.categoriesWithMetrics()[0]?.id : this.activeCategoryFilterId()) ??
+      '';
 
     this.typeFormMode.set('create');
     this.typeFormOriginCategoryId.set(targetCategoryId);
@@ -349,7 +401,7 @@ export class CategoriesPanelComponent {
       });
     });
 
-    this.selectedCategoryId.set(categoryId);
+    this.activeCategoryFilterId.set(categoryId);
     this.closeTypeModal();
   }
 
@@ -425,7 +477,10 @@ export class CategoriesPanelComponent {
 
   onTypeDialogClose() {
     const fallbackCategoryId =
-      this.selectedCategoryId() ?? this.categoriesWithMetrics()[0]?.id ?? '';
+      (this.activeCategoryFilterId() === 'all'
+        ? this.categoriesWithMetrics()[0]?.id
+        : this.activeCategoryFilterId()) ??
+      '';
     this.typeFormMode.set('create');
     this.typeFormOriginCategoryId.set(null);
     this.typeFormDraft.set(this.createEmptyTypeDraft(fallbackCategoryId));
