@@ -858,7 +858,7 @@
                         <label class="flex min-w-0 flex-1 items-center gap-3">
                           <input
                             type="checkbox"
-                            class="checkbox checkbox-sm border-base-300 checked:border-primary checked:bg-primary"
+                            class="checkbox checkbox-sm shrink-0 border-2 border-base-400 bg-base-100 shadow-sm transition-all hover:border-primary/60 checked:border-primary checked:bg-primary checked:text-primary-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:border-base-300 disabled:bg-base-200"
                             [checked]="isModalAssetSelected(asset.id)"
                             [disabled]="isModalAssetDisabled(asset)"
                             (change)="toggleModalAssetSelection(asset.id)"
