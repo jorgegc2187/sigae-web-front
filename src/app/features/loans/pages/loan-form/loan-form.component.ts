@@ -20,6 +20,17 @@ import { Router, RouterLink } from '@angular/router';
 import { LoanQrScannerComponent } from '../../components/loan-qr-scanner/loan-qr-scanner.component';
 import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
 import { LoanAttachmentDraft, LoanAttachmentSource } from '../../models/loan-attachment-draft.model';
+import {
+  MOCK_ASSET_LOCATIONS,
+  MOCK_CATEGORY_FILTERS,
+  MOCK_INVENTORY_ASSETS,
+  MOCK_LOAN_DESTINATIONS,
+  MockAssetCategoryId,
+  MockAssetCondition,
+  MockAssetLocationId,
+  MockInventoryAsset,
+  isLoanSelectableAssetCondition,
+} from '../../../../shared/models/mock-inventory-catalog.model';
 import { DatePickerComponent } from '../../../../shared/ui/date-picker/date-picker.component';
 
 interface TeacherOption {
@@ -35,16 +46,10 @@ interface DestinationOption {
   name: string;
 }
 
-type AssetCategoryId = 'all' | 'technology' | 'furniture' | 'laboratory' | 'sports';
-type AssetLocationId = 'all' | 'central-warehouse' | 'computer-lab' | 'classroom-101' | 'teachers-room';
-type AssetCondition = 'Bueno' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
-
-interface AssetOption {
-  id: string;
-  name: string;
-  code: string;
-  condition: AssetCondition;
-}
+type AssetCategoryId = 'all' | MockAssetCategoryId;
+type AssetLocationId = 'all' | MockAssetLocationId;
+type AssetCondition = MockAssetCondition;
+type AssetOption = MockInventoryAsset;
 
 interface AssetCategoryOption {
   id: AssetCategoryId;
@@ -57,18 +62,7 @@ interface AssetLocationOption {
   name: string;
   count: number;
 }
-
-interface AssetSearchMetadata {
-  category: Exclude<AssetCategoryId, 'all'>;
-  locationId: Exclude<AssetLocationId, 'all'>;
-  groupKey: string;
-  groupName: string;
-  groupIcon: string;
-  serial: string;
-  location: string;
-}
-
-interface AssetSearchOption extends AssetOption, AssetSearchMetadata {}
+type AssetSearchOption = MockInventoryAsset;
 
 interface AssetSearchGroup {
   key: string;
@@ -150,251 +144,17 @@ export class LoanFormComponent implements OnDestroy {
     },
   ]);
 
-  readonly destinations = signal<DestinationOption[]>([
-    { id: 'dest-1', name: 'Aula 101 - Pabellón A' },
-    { id: 'dest-2', name: 'Laboratorio de Cómputo' },
-    { id: 'dest-3', name: 'Auditorio Principal' },
-    { id: 'dest-4', name: 'Sala de Profesores' },
-  ]);
+  readonly destinations = signal<DestinationOption[]>(MOCK_LOAN_DESTINATIONS.map((destination) => ({ ...destination })));
 
-  readonly availableAssets = signal<AssetOption[]>([
-    {
-      id: 'asset-1',
-      name: 'Laptop Lenovo ThinkPad T14',
-      code: 'CMP-2023-045',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-2',
-      name: 'Proyector Epson PowerLite',
-      code: 'PRY-2022-012',
-      condition: 'Regular',
-    },
-    {
-      id: 'asset-3',
-      name: 'Cable HDMI 5 Metros',
-      code: 'ACC-2023-108',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-4',
-      name: 'Mouse Inalámbrico HP',
-      code: 'ACC-2024-021',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-5',
-      name: 'Parlante Portátil JBL',
-      code: 'AUD-2024-014',
-      condition: 'Mantenimiento',
-    },
-    {
-      id: 'asset-6',
-      name: 'Tablet Samsung Galaxy Tab A8',
-      code: 'TAB-2024-008',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-7',
-      name: 'Monitor LG 24 Pulgadas',
-      code: 'MON-2023-031',
-      condition: 'Regular',
-    },
-    {
-      id: 'asset-8',
-      name: 'Micrófono Inalámbrico Shure',
-      code: 'AUD-2022-019',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-9',
-      name: 'Extensión Eléctrica 10 Metros',
-      code: 'ACC-2024-033',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-10',
-      name: 'Cámara Web Logitech C920',
-      code: 'VID-2023-017',
-      condition: 'Malo',
-    },
-    {
-      id: 'asset-11',
-      name: 'Router TP-Link Archer C80',
-      code: 'NET-2024-005',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-12',
-      name: 'Impresora HP LaserJet Pro',
-      code: 'IMP-2022-011',
-      condition: 'Mantenimiento',
-    },
-    {
-      id: 'asset-13',
-      name: 'Puntero Láser Kensington',
-      code: 'ACC-2023-076',
-      condition: 'Bueno',
-    },
-    {
-      id: 'asset-14',
-      name: 'Switch de Red Cisco 24 Puertos',
-      code: 'NET-2021-004',
-      condition: 'Dado de baja',
-    },
-    {
-      id: 'asset-15',
-      name: 'Pantalla de Proyección Retráctil',
-      code: 'PRY-2023-026',
-      condition: 'Bueno',
-    },
-  ]);
-
-  private readonly assetSearchMetadataById: Record<string, AssetSearchMetadata> = {
-    'asset-1': {
-      category: 'technology',
-      locationId: 'central-warehouse',
-      groupKey: 'laptop-lenovo-thinkpad',
-      groupName: 'Laptop Lenovo ThinkPad',
-      groupIcon: 'laptop_mac',
-      serial: 'SN: LNV-T14-4587',
-      location: 'Almacén Central',
-    },
-    'asset-2': {
-      category: 'technology',
-      locationId: 'computer-lab',
-      groupKey: 'proyector-epson-powerlite',
-      groupName: 'Proyector Epson PowerLite',
-      groupIcon: 'videocam',
-      serial: 'SN: EPS-PL-2022',
-      location: 'Laboratorio de Cómputo',
-    },
-    'asset-3': {
-      category: 'technology',
-      locationId: 'central-warehouse',
-      groupKey: 'accesorios-audiovisuales',
-      groupName: 'Accesorios Audiovisuales',
-      groupIcon: 'settings_input_hdmi',
-      serial: 'SN: HDMI-5M-108',
-      location: 'Almacén Central',
-    },
-    'asset-4': {
-      category: 'technology',
-      locationId: 'classroom-101',
-      groupKey: 'perifericos-hp',
-      groupName: 'Periféricos HP',
-      groupIcon: 'mouse',
-      serial: 'SN: HP-MSE-021',
-      location: 'Aula 101 - Pabellón A',
-    },
-    'asset-5': {
-      category: 'laboratory',
-      locationId: 'teachers-room',
-      groupKey: 'audio-portatil',
-      groupName: 'Audio Portátil',
-      groupIcon: 'speaker',
-      serial: 'SN: JBL-AUD-014',
-      location: 'Sala de Profesores',
-    },
-    'asset-6': {
-      category: 'technology',
-      locationId: 'central-warehouse',
-      groupKey: 'tablets-samsung-galaxy',
-      groupName: 'Tablets Samsung Galaxy',
-      groupIcon: 'tablet_mac',
-      serial: 'SN: SAM-TABA8-008',
-      location: 'Almacén Central',
-    },
-    'asset-7': {
-      category: 'technology',
-      locationId: 'computer-lab',
-      groupKey: 'monitores-lg',
-      groupName: 'Monitores LG',
-      groupIcon: 'desktop_windows',
-      serial: 'SN: LG-MON-031',
-      location: 'Laboratorio de Cómputo',
-    },
-    'asset-8': {
-      category: 'laboratory',
-      locationId: 'teachers-room',
-      groupKey: 'microfonos-inalambricos',
-      groupName: 'Micrófonos Inalámbricos',
-      groupIcon: 'mic_external_on',
-      serial: 'SN: SHR-MIC-019',
-      location: 'Sala de Profesores',
-    },
-    'asset-9': {
-      category: 'technology',
-      locationId: 'central-warehouse',
-      groupKey: 'accesorios-electricos',
-      groupName: 'Accesorios Eléctricos',
-      groupIcon: 'power',
-      serial: 'SN: EXT-10M-033',
-      location: 'Almacén Central',
-    },
-    'asset-10': {
-      category: 'technology',
-      locationId: 'computer-lab',
-      groupKey: 'camaras-web-logitech',
-      groupName: 'Cámaras Web Logitech',
-      groupIcon: 'videocam',
-      serial: 'SN: LOG-C920-017',
-      location: 'Laboratorio de Cómputo',
-    },
-    'asset-11': {
-      category: 'technology',
-      locationId: 'classroom-101',
-      groupKey: 'routers-tp-link',
-      groupName: 'Routers TP-Link',
-      groupIcon: 'router',
-      serial: 'SN: TPL-C80-005',
-      location: 'Aula 101 - Pabellón A',
-    },
-    'asset-12': {
-      category: 'technology',
-      locationId: 'teachers-room',
-      groupKey: 'impresoras-hp-laserjet',
-      groupName: 'Impresoras HP LaserJet',
-      groupIcon: 'print',
-      serial: 'SN: HP-LJ-011',
-      location: 'Sala de Profesores',
-    },
-    'asset-13': {
-      category: 'technology',
-      locationId: 'central-warehouse',
-      groupKey: 'punteros-laser',
-      groupName: 'Punteros Láser',
-      groupIcon: 'ads_click',
-      serial: 'SN: KNS-LSR-076',
-      location: 'Almacén Central',
-    },
-    'asset-14': {
-      category: 'technology',
-      locationId: 'computer-lab',
-      groupKey: 'switches-cisco',
-      groupName: 'Switches Cisco',
-      groupIcon: 'hub',
-      serial: 'SN: CSC-SW24-004',
-      location: 'Laboratorio de Cómputo',
-    },
-    'asset-15': {
-      category: 'technology',
-      locationId: 'central-warehouse',
-      groupKey: 'pantallas-proyeccion',
-      groupName: 'Pantallas de Proyección',
-      groupIcon: 'present_to_all',
-      serial: 'SN: SCR-PRY-026',
-      location: 'Almacén Central',
-    },
-  };
+  readonly availableAssets = signal<AssetOption[]>(MOCK_INVENTORY_ASSETS.map((asset) => ({ ...asset })));
 
   readonly selectedTeacher = signal<TeacherOption | null>(null);
   readonly selectedDestination = signal<DestinationOption | null>(null);
-  readonly selectedAssets = signal<AssetOption[]>([
-    this.availableAssets()[0]!,
-    this.availableAssets()[1]!,
-    this.availableAssets()[2]!,
-  ]);
+  readonly selectedAssets = signal<AssetOption[]>(
+    ['asset-1', 'asset-4', 'asset-14']
+      .map((assetId) => this.availableAssets().find((asset) => asset.id === assetId))
+      .filter((asset): asset is AssetOption => !!asset),
+  );
 
   readonly teacherQuery = signal('');
   readonly locationQuery = signal('');
@@ -455,7 +215,7 @@ export class LoanFormComponent implements OnDestroy {
     const selectedIds = new Set(this.selectedAssets().map((asset) => asset.id));
 
     return this.availableAssets().filter((asset) => {
-      if (selectedIds.has(asset.id)) {
+      if (selectedIds.has(asset.id) || !this.isAssetSearchOptionSelectable(asset)) {
         return false;
       }
 
@@ -470,12 +230,7 @@ export class LoanFormComponent implements OnDestroy {
   });
 
   readonly assetSearchOptions = computed<AssetSearchOption[]>(() =>
-    this.availableAssets()
-      .filter((asset) => asset.condition !== 'Dado de baja')
-      .map((asset) => ({
-        ...asset,
-        ...this.assetSearchMetadataById[asset.id]!,
-      })),
+    this.availableAssets().filter((asset) => asset.condition !== 'Dado de baja'),
   );
 
   readonly assetCategoryOptions = computed<AssetCategoryOption[]>(() => {
@@ -483,26 +238,11 @@ export class LoanFormComponent implements OnDestroy {
 
     return [
       { id: 'all', name: 'Todos', count: assets.length },
-      {
-        id: 'technology',
-        name: 'Tecnología',
-        count: assets.filter((asset) => asset.category === 'technology').length,
-      },
-      {
-        id: 'furniture',
-        name: 'Mobiliario',
-        count: assets.filter((asset) => asset.category === 'furniture').length,
-      },
-      {
-        id: 'laboratory',
-        name: 'Laboratorio',
-        count: assets.filter((asset) => asset.category === 'laboratory').length,
-      },
-      {
-        id: 'sports',
-        name: 'Deportes',
-        count: assets.filter((asset) => asset.category === 'sports').length,
-      },
+      ...MOCK_CATEGORY_FILTERS.map((category) => ({
+        id: category.id,
+        name: category.name,
+        count: assets.filter((asset) => asset.categoryId === category.id).length,
+      })),
     ];
   });
 
@@ -511,26 +251,11 @@ export class LoanFormComponent implements OnDestroy {
 
     return [
       { id: 'all', name: 'Todos', count: assets.length },
-      {
-        id: 'central-warehouse',
-        name: 'Almacén Central',
-        count: assets.filter((asset) => asset.locationId === 'central-warehouse').length,
-      },
-      {
-        id: 'computer-lab',
-        name: 'Laboratorio de Cómputo',
-        count: assets.filter((asset) => asset.locationId === 'computer-lab').length,
-      },
-      {
-        id: 'classroom-101',
-        name: 'Aula 101 - Pabellón A',
-        count: assets.filter((asset) => asset.locationId === 'classroom-101').length,
-      },
-      {
-        id: 'teachers-room',
-        name: 'Sala de Profesores',
-        count: assets.filter((asset) => asset.locationId === 'teachers-room').length,
-      },
+      ...MOCK_ASSET_LOCATIONS.map((location) => ({
+        id: location.id,
+        name: location.name,
+        count: assets.filter((asset) => asset.locationId === location.id).length,
+      })),
     ];
   });
 
@@ -541,7 +266,7 @@ export class LoanFormComponent implements OnDestroy {
     const groups = new Map<string, AssetSearchGroup>();
 
     const assets = this.assetSearchOptions().filter((asset) => {
-      const matchesCategory = selectedCategory === 'all' || asset.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || asset.categoryId === selectedCategory;
       const matchesLocation = selectedLocation === 'all' || asset.locationId === selectedLocation;
       const matchesQuery =
         !query ||
@@ -792,14 +517,9 @@ export class LoanFormComponent implements OnDestroy {
     }
 
     const currentIds = new Set(this.selectedAssets().map((asset) => asset.id));
-    const nextAssets = this.assetSearchOptions()
-      .filter((asset) => selectedIds.has(asset.id) && !currentIds.has(asset.id))
-      .map((asset) => ({
-        id: asset.id,
-        name: asset.name,
-        code: asset.code,
-        condition: asset.condition,
-      }));
+    const nextAssets = this.assetSearchOptions().filter(
+      (asset) => selectedIds.has(asset.id) && !currentIds.has(asset.id),
+    );
 
     if (nextAssets.length > 0) {
       this.selectedAssets.update((assets) => [...assets, ...nextAssets]);
@@ -1235,7 +955,7 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   private isAssetSearchOptionSelectable(asset: AssetSearchOption): boolean {
-    return asset.condition === 'Bueno' || asset.condition === 'Regular';
+    return isLoanSelectableAssetCondition(asset.condition);
   }
 
   private resolveAssetCode(
@@ -1266,6 +986,14 @@ export class LoanFormComponent implements OnDestroy {
 
     if (!asset) {
       this.assetLookupError.set('No se encontró un activo disponible con ese código o nombre.');
+      this.assetDropdownOpen.set(options.openDropdownOnFailure);
+      return false;
+    }
+
+    if (!this.isAssetSearchOptionSelectable(asset)) {
+      this.assetLookupError.set(
+        `El activo no está disponible para préstamo por su estado actual: ${asset.condition}.`,
+      );
       this.assetDropdownOpen.set(options.openDropdownOnFailure);
       return false;
     }

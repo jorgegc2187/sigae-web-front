@@ -9,8 +9,9 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
-import { AssetType, Attribute, Category, MOCK_CATEGORIES } from '../../models/category.model';
+import { AssetType, Attribute, Category } from '../../models/category.model';
 
 type TypeFormMode = 'create' | 'edit';
 
