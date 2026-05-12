@@ -490,15 +490,19 @@
 
             @if (selectedAssets().length === 0) {
               <div
-                class="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-base-content/45"
+                class="grid min-h-[320px] flex-1 place-items-center px-6 py-10"
               >
-                <span class="material-symbols-outlined text-[44px]">inventory_2</span>
-                <p class="text-base font-semibold text-base-content/65">
-                  Aún no hay activos seleccionados
-                </p>
-                <p class="max-w-sm text-sm">
-                  Escanee un código o busque un activo para agregarlo a este préstamo.
-                </p>
+                <div class="flex max-w-sm flex-col items-center gap-4 text-center">
+                  <div
+                    class="flex h-14 w-14 items-center justify-center rounded-full bg-base-200/60 text-base-content/45"
+                  >
+                    <span class="material-symbols-outlined text-[30px]">inventory_2</span>
+                  </div>
+                  <p class="text-sm font-medium leading-6 text-base-content/60">
+                    Aún no hay activos seleccionados. Busque un activo o escanee un código QR para
+                    agregarlo a este préstamo.
+                  </p>
+                </div>
               </div>
             } @else {
               <ul class="flex-1 divide-y divide-base-200 overflow-y-auto">
