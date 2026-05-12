@@ -1,0 +1,1011 @@
+<!doctype html>
+<html class="light" lang="es">
+  <head></head>
+  <body class="text-on-surface antialiased flex h-screen overflow-hidden">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Categorías y Tipos - SIGAE</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'primary-fixed-dim': '#b7c4ff',
+              'on-primary-container': '#cad3ff',
+              'inverse-surface': '#2d3133',
+              'inverse-on-surface': '#eff1f3',
+              'surface-container-low': '#f2f4f6',
+              'outline-variant': '#c4c5d7',
+              'on-secondary-fixed-variant': '#003ea8',
+              'surface-variant': '#e0e3e5',
+              'surface-dim': '#d8dadc',
+              'on-secondary-fixed': '#00174b',
+              'surface-container-lowest': '#ffffff',
+              'primary-container': '#1d4ed8',
+              'error-container': '#ffdad6',
+              'surface-container-high': '#e6e8ea',
+              surface: '#f7f9fb',
+              'on-error': '#ffffff',
+              'tertiary-fixed-dim': '#ffb59c',
+              'on-secondary': '#ffffff',
+              primary: '#0037b0',
+              'secondary-fixed-dim': '#b4c5ff',
+              'on-tertiary-fixed': '#390c00',
+              tertiary: '#7f2500',
+              'surface-container-highest': '#e0e3e5',
+              'on-primary': '#ffffff',
+              'on-tertiary-fixed-variant': '#832700',
+              'tertiary-container': '#a73400',
+              'on-primary-fixed-variant': '#0039b5',
+              'on-secondary-container': '#fefcff',
+              'on-error-container': '#93000a',
+              background: '#f7f9fb',
+              'secondary-container': '#316bf3',
+              'on-primary-fixed': '#001551',
+              'on-background': '#191c1e',
+              'on-surface': '#191c1e',
+              'tertiary-fixed': '#ffdbcf',
+              secondary: '#0051d5',
+              'on-surface-variant': '#434655',
+              'primary-fixed': '#dce1ff',
+              'on-tertiary': '#ffffff',
+              'secondary-fixed': '#dbe1ff',
+              'surface-bright': '#f7f9fb',
+              error: '#ba1a1a',
+              'surface-container': '#eceef0',
+              'surface-tint': '#2151da',
+              'on-tertiary-container': '#ffc9b7',
+              'inverse-primary': '#b7c4ff',
+              outline: '#747686',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+            },
+            fontFamily: {
+              headline: ['Inter', 'sans-serif'],
+              display: ['Inter', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+              label: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+    </style>
+    <!-- SideNavBar (Updated to match SCREEN_94) -->
+    <aside
+      class="fixed left-0 top-0 h-full w-[240px] z-50 bg-slate-50 border-r border-slate-200 flex flex-col py-6 px-4"
+    >
+      <div class="mb-8 px-2 flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+          <span
+            class="material-symbols-outlined text-white"
+            style="font-variation-settings: 'FILL' 1"
+            >account_balance</span
+          >
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight text-blue-700 leading-tight">SIGAE</h1>
+          <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500">
+            Gestión Global
+          </p>
+        </div>
+      </div>
+      <nav class="flex-1 space-y-1">
+        <a
+          class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all duration-200 cursor-pointer active:scale-95"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >grid_view</span
+          >
+          <span class="text-sm">Dashboard</span>
+        </a>
+        <a
+          class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all duration-200 cursor-pointer active:scale-95"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >inventory_2</span
+          >
+          <span class="text-sm">Inventario</span>
+        </a>
+        <a
+          class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all duration-200 cursor-pointer active:scale-95"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >location_on</span
+          >
+          <span class="text-sm">Ubicaciones</span>
+        </a>
+        <a
+          class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all duration-200 cursor-pointer active:scale-95"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >swap_horiz</span
+          >
+          <span class="text-sm flex-1">Préstamos</span>
+          <span class="bg-[#B91C1C] text-white text-[11px] font-bold px-2 py-0.5 rounded-full"
+            >3</span
+          >
+        </a>
+        <a
+          class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all duration-200 cursor-pointer active:scale-95"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >group</span
+          >
+          <span class="text-sm">Docentes</span>
+        </a>
+        <a
+          class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all duration-200 cursor-pointer active:scale-95"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >person</span
+          >
+          <span class="text-sm">Usuarios</span>
+        </a>
+        <a
+          class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all duration-200 cursor-pointer active:scale-95"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >bar_chart</span
+          >
+          <span class="text-sm">Reportes</span>
+        </a>
+        <div class="my-2 border-t border-[#E2E8F0]"></div>
+        <div>
+          <div
+            class="flex items-center justify-between px-3 py-2.5 text-slate-900 font-semibold cursor-pointer"
+          >
+            <div class="flex items-center">
+              <span
+                class="material-symbols-outlined mr-4 !text-[18px]"
+                style="color: rgb(100, 116, 139)"
+                >settings</span
+              >
+              <span class="text-sm">Configuración</span>
+            </div>
+            <span class="material-symbols-outlined text-[18px]">expand_more</span>
+          </div>
+          <ul class="mt-1 space-y-1">
+            <li class="">
+              <a
+                class="flex items-center pl-12 pr-3 py-2.5 bg-[#DBEAFE] text-[#1D4ED8] border-l-[3px] border-[#1D4ED8] font-semibold text-sm cursor-pointer"
+                href="#"
+              >
+                Categorías y Tipos
+              </a>
+            </li>
+            <li class="">
+              <a
+                class="flex items-center pl-12 pr-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all text-sm cursor-pointer"
+                href="#"
+              >
+                Usuarios
+              </a>
+            </li>
+            <li class="">
+              <a
+                class="flex items-center pl-12 pr-3 py-2.5 text-slate-600 hover:bg-slate-100 transition-all text-sm cursor-pointer"
+                href="#"
+              >
+                Sistema
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 ml-[240px] flex flex-col min-w-0 bg-[#F8FAFC]">
+      <!-- TopNavBar (Updated to match SCREEN_94) -->
+      <header
+        class="fixed top-0 right-0 left-[240px] h-16 z-40 bg-white border-b border-slate-200 shadow-sm flex justify-between items-center px-8"
+      >
+        <div class="flex-1"></div>
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-3">
+            <button
+              class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+              <span
+                class="absolute top-1 right-1 w-4 h-4 bg-[#B91C1C] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"
+                >5</span
+              >
+            </button>
+            <button
+              class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            >
+              <span class="material-symbols-outlined">settings</span>
+            </button>
+          </div>
+          <div class="h-8 w-px bg-slate-200"></div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <p class="text-[13px] font-bold text-slate-900 leading-none">Admin Principal</p>
+              <p class="text-[11px] text-slate-400 leading-none mt-1">Gestión Global</p>
+            </div>
+            <button class="flex items-center gap-2 cursor-pointer transition-all">
+              <img
+                alt="Avatar"
+                class="w-9 h-9 rounded-full border-2 border-white shadow-sm"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhSpeB-0zdwNAlwwa2GSVzRA0K6w-s_fIFAiZkl7llNZbHyhqA0pi2d8KP8X9WggBUDjwYca6DhkH5WiJEQUq-A03jS18qqIvK_SdzRWANDFfLTnG83tGZcC8EKQgX03tFmh-AVbst2vUj0M95_3AsXZXKTbJYwUnKt3stjNKgSCLyoEQRXSbaayq1INRWrvp6AHsFtesL4TNSyCF_WHpO3At0eIo67lcnf9guSVw73mF9nQ93YWOCabwnKxxrOpEomakjOte9sLjM"
+              />
+            </button>
+          </div>
+        </div>
+      </header>
+      <!-- Page Content -->
+      <main class="flex-1 mt-16 p-6 flex gap-6 overflow-hidden relative">
+        <!-- Left Panel: Categorías (30%) -->
+        <section
+          class="w-[30%] flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-shrink-0"
+        >
+          <!-- Header & Action -->
+          <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+            <h2 class="text-xl font-bold font-headline text-slate-900">Categorías</h2>
+            <button
+              class="h-9 px-4 bg-[#1D4ED8] text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+              onclick="document.getElementById('new-category-modal').classList.remove('hidden')"
+            >
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              Nueva
+            </button>
+          </div>
+          <!-- Search Filter -->
+          <!-- List -->
+          <div class="flex-1 overflow-y-auto">
+            <ul class="flex flex-col">
+              <li class="">
+                <button
+                  class="w-full text-left px-5 py-4 border-l-[3px] border-[#1D4ED8] bg-[#DBEAFE] flex items-center justify-between group transition-colors"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-[#1D4ED8] flex items-center justify-center text-white"
+                    >
+                      <span class="material-symbols-outlined">grid_view</span>
+                    </div>
+                    <div>
+                      <span class="block font-semibold text-[#1D4ED8] text-sm">Todos</span>
+                    </div>
+                  </div>
+                </button>
+              </li>
+              <li class="">
+                <button
+                  class="w-full text-left px-5 py-4 border-b border-slate-100 hover:bg-slate-50 border-l-[3px] border-transparent flex items-center justify-between group transition-colors"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-200 transition-colors"
+                    >
+                      <span class="material-symbols-outlined">devices</span>
+                    </div>
+                    <div>
+                      <span
+                        class="block font-medium text-slate-900 text-sm group-hover:text-[#1D4ED8] transition-colors"
+                        >Tecnología</span
+                      >
+                    </div>
+                  </div>
+                </button>
+              </li>
+              <li class="">
+                <button
+                  class="w-full text-left px-5 py-4 border-b border-slate-100 hover:bg-slate-50 border-l-[3px] border-transparent flex items-center justify-between group transition-colors"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-200 transition-colors"
+                    >
+                      <span class="material-symbols-outlined">chair</span>
+                    </div>
+                    <div>
+                      <span
+                        class="block font-medium text-slate-900 text-sm group-hover:text-[#1D4ED8] transition-colors"
+                        >Mobiliario</span
+                      >
+                    </div>
+                  </div>
+                </button>
+              </li>
+              <li class="">
+                <button
+                  class="w-full text-left px-5 py-4 border-b border-slate-100 hover:bg-slate-50 border-l-[3px] border-transparent flex items-center justify-between group transition-colors"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-200 transition-colors"
+                    >
+                      <span class="material-symbols-outlined">science</span>
+                    </div>
+                    <div>
+                      <span
+                        class="block font-medium text-slate-900 text-sm group-hover:text-[#1D4ED8] transition-colors"
+                        >Laboratorio</span
+                      >
+                    </div>
+                  </div>
+                </button>
+              </li>
+              <li class="">
+                <button
+                  class="w-full text-left px-5 py-4 border-b border-slate-100 hover:bg-slate-50 border-l-[3px] border-transparent flex items-center justify-between group transition-colors"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-200 transition-colors"
+                    >
+                      <span class="material-symbols-outlined">sports_soccer</span>
+                    </div>
+                    <div>
+                      <span
+                        class="block font-medium text-slate-900 text-sm group-hover:text-[#1D4ED8] transition-colors"
+                        >Deportes</span
+                      >
+                    </div>
+                  </div>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+        <!-- Right Panel: Tipos de Activos (70%) -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-y-auto pr-2 pb-6">
+          <!-- Global Search (Relocated) -->
+          <div class="mb-6 flex gap-4 items-center">
+            <div class="flex-1 relative">
+              <span
+                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-[20px]"
+                >search</span
+              >
+              <input
+                class="w-full h-12 pl-12 pr-4 rounded-xl border border-slate-300 bg-white text-base text-slate-900 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-all shadow-sm"
+                placeholder="Buscar tipo en todas las categorías..."
+                type="text"
+              />
+            </div>
+            <button
+              class="bg-[#1D4ED8] hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors shadow-sm h-12"
+              onclick="document.getElementById('new-asset-type-modal').classList.remove('hidden')"
+            >
+              <span class="material-symbols-outlined text-[20px]">add</span>
+              Nuevo tipo de activo
+            </button>
+          </div>
+          <!-- Header & Breadcrumb -->
+          <!-- List of Asset Types -->
+          <div class="space-y-4">
+            <!-- Card: Laptop -->
+            <div
+              class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div class="p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-slate-400">laptop_mac</span>
+                  <div>
+                    <h3 class="text-[16px] font-semibold text-slate-900">Laptop</h3>
+                    <p class="text-xs text-slate-500">4 atributos configurados</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-100 flex items-center gap-1.5"
+                    onclick="document.getElementById('attributes-modal').classList.remove('hidden')"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    Ver atributos
+                  </button>
+                  <div class="w-px h-6 bg-slate-200"></div>
+                  <button
+                    class="text-slate-400 hover:text-blue-600 rounded-lg transition-colors p-1"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Card: Desktop -->
+            <div
+              class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div class="p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-slate-400">desktop_windows</span>
+                  <div>
+                    <h3 class="text-[16px] font-semibold text-slate-900">Desktop</h3>
+                    <p class="text-xs text-slate-500">6 atributos configurados</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-100 flex items-center gap-1.5"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    Ver atributos
+                  </button>
+                  <div class="w-px h-6 bg-slate-200"></div>
+                  <button
+                    class="text-slate-400 hover:text-blue-600 rounded-lg transition-colors p-1"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Card: Projector -->
+            <div
+              class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div class="p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-slate-400">videocam</span>
+                  <div>
+                    <h3 class="text-[16px] font-semibold text-slate-900">Proyector</h3>
+                    <p class="text-xs text-slate-500">3 atributos configurados</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-100 flex items-center gap-1.5"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    Ver atributos
+                  </button>
+                  <div class="w-px h-6 bg-slate-200"></div>
+                  <button
+                    class="text-slate-400 hover:text-blue-600 rounded-lg transition-colors p-1"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modal: Atributos de Laptop (Hidden by default) -->
+        <div
+          class="fixed inset-0 z-[100] flex items-center justify-center hidden"
+          id="attributes-modal"
+        >
+          <div
+            class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            onclick="document.getElementById('attributes-modal').classList.add('hidden')"
+          ></div>
+          <div
+            class="relative bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] m-4"
+          >
+            <!-- Header -->
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"
+                >
+                  <span class="material-symbols-outlined">laptop_mac</span>
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-slate-900 leading-tight">Atributos: Laptop</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">Categoría: Tecnología</p>
+                </div>
+              </div>
+              <button
+                class="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
+                onclick="document.getElementById('attributes-modal').classList.add('hidden')"
+              >
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <!-- Content (Table) -->
+            <div class="overflow-y-auto p-0 flex-1">
+              <table class="w-full text-left border-collapse">
+                <thead class="sticky top-0 bg-slate-50 z-10">
+                  <tr class="border-b border-slate-200">
+                    <th
+                      class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-1/3"
+                    >
+                      Atributo
+                    </th>
+                    <th
+                      class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-1/3"
+                    >
+                      Descripción
+                    </th>
+                    <th
+                      class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center w-1/6"
+                    >
+                      Obligatorio
+                    </th>
+                    <th
+                      class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right w-1/6"
+                    >
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-sm">
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-5 py-3 font-medium text-slate-900">Marca</td>
+                    <td class="px-5 py-3 text-slate-600">Fabricante del equipo</td>
+                    <td class="px-5 py-3 text-center">
+                      <div
+                        class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"
+                      >
+                        <input
+                          checked=""
+                          class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-blue-600 bg-blue-600"
+                          id="toggle1_modal"
+                          name="toggle"
+                          style="right: 0"
+                          type="checkbox"
+                        />
+                        <label
+                          class="toggle-label block overflow-hidden h-5 rounded-full bg-blue-600 cursor-pointer"
+                          for="toggle1_modal"
+                        ></label>
+                      </div>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                      <button class="text-slate-400 hover:text-red-600 transition-colors p-1">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-5 py-3 font-medium text-slate-900">Modelo</td>
+                    <td class="px-5 py-3 text-slate-600">Modelo específico</td>
+                    <td class="px-5 py-3 text-center">
+                      <div
+                        class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"
+                      >
+                        <input
+                          checked=""
+                          class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-blue-600 bg-blue-600"
+                          id="toggle2_modal"
+                          name="toggle"
+                          style="right: 0"
+                          type="checkbox"
+                        />
+                        <label
+                          class="toggle-label block overflow-hidden h-5 rounded-full bg-blue-600 cursor-pointer"
+                          for="toggle2_modal"
+                        ></label>
+                      </div>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                      <button class="text-slate-400 hover:text-red-600 transition-colors p-1">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-5 py-3 font-medium text-slate-900">Procesador</td>
+                    <td class="px-5 py-3 text-slate-600">CPU instalada</td>
+                    <td class="px-5 py-3 text-center">
+                      <div
+                        class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"
+                      >
+                        <input
+                          class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer"
+                          id="toggle3_modal"
+                          name="toggle"
+                          style="right: 1.25rem"
+                          type="checkbox"
+                        />
+                        <label
+                          class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer"
+                          for="toggle3_modal"
+                        ></label>
+                      </div>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                      <button class="text-slate-400 hover:text-red-600 transition-colors p-1">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-5 py-3 font-medium text-slate-900">RAM (GB)</td>
+                    <td class="px-5 py-3 text-slate-600">Capacidad de memoria RAM</td>
+                    <td class="px-5 py-3 text-center">
+                      <div
+                        class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in"
+                      >
+                        <input
+                          class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer"
+                          id="toggle4_modal"
+                          name="toggle"
+                          style="right: 1.25rem"
+                          type="checkbox"
+                        />
+                        <label
+                          class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer"
+                          for="toggle4_modal"
+                        ></label>
+                      </div>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                      <button class="text-slate-400 hover:text-red-600 transition-colors p-1">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Footer -->
+            <div
+              class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center"
+            >
+              <button
+                class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1.5"
+              >
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Agregar atributo
+              </button>
+              <button
+                class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm"
+                onclick="document.getElementById('attributes-modal').classList.add('hidden')"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Modal: Nueva Categoría -->
+        <div
+          class="fixed inset-0 z-[110] flex items-center justify-center hidden"
+          id="new-category-modal"
+        >
+          <div
+            class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            onclick="document.getElementById('new-category-modal').classList.add('hidden')"
+          ></div>
+          <div
+            class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col m-4"
+          >
+            <!-- Header -->
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+              <h2 class="text-lg font-bold text-slate-900 leading-tight font-headline">
+                Nueva Categoría
+              </h2>
+              <button
+                class="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
+                onclick="document.getElementById('new-category-modal').classList.add('hidden')"
+              >
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <!-- Content -->
+            <div class="p-6">
+              <div class="space-y-2">
+                <label class="text-sm font-semibold text-slate-700" for="category-name"
+                  >Nombre de la Categoría</label
+                >
+                <input
+                  class="w-full h-11 px-4 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-all"
+                  id="category-name"
+                  placeholder="Ej. Mobiliario, Laboratorio"
+                  type="text"
+                />
+                <p class="text-[12px] text-slate-500">
+                  Define un nombre descriptivo para agrupar diferentes tipos de activos.
+                </p>
+              </div>
+            </div>
+            <!-- Footer -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+              <button
+                class="px-4 py-2 text-slate-600 text-sm font-medium hover:bg-slate-200 rounded-lg transition-colors"
+                onclick="document.getElementById('new-category-modal').classList.add('hidden')"
+              >
+                Cancelar
+              </button>
+              <button
+                class="px-5 py-2 bg-[#1D4ED8] hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+              >
+                Crear Categoría
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Modal: Nuevo Tipo de Activo -->
+        <div
+          class="fixed inset-0 z-[110] flex items-center justify-center hidden"
+          id="new-asset-type-modal"
+        >
+          <div
+            class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            onclick="document.getElementById('new-asset-type-modal').classList.add('hidden')"
+          ></div>
+          <div
+            class="relative bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col m-4 max-h-[90vh]"
+          >
+            <!-- Header -->
+            <div class="p-6 border-b border-slate-200 bg-white">
+              <div class="flex justify-between items-center mb-2">
+                <h2 class="text-xl font-bold text-slate-900 leading-tight font-headline">
+                  Nuevo tipo de activo
+                </h2>
+                <button
+                  class="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
+                  onclick="document.getElementById('new-asset-type-modal').classList.add('hidden')"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <p class="text-sm text-slate-500">
+                Defina la estructura y atributos para este nuevo tipo de activo.
+              </p>
+            </div>
+            <!-- Content -->
+            <div class="p-6 overflow-y-auto">
+              <div class="space-y-5">
+                <!-- Basic Info -->
+                <div class="space-y-4">
+                  <div>
+                    <label
+                      class="block text-sm font-semibold text-slate-700 mb-1"
+                      for="asset-type-name"
+                      >Nombre del tipo</label
+                    >
+                    <input
+                      class="w-full h-11 px-4 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-all"
+                      id="asset-type-name"
+                      placeholder="Ej. Escáner 3D"
+                      type="text"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm font-semibold text-slate-700 mb-1"
+                      for="asset-category"
+                      >Categoría</label
+                    >
+                    <select
+                      class="w-full h-11 px-4 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-all"
+                      id="asset-category"
+                    >
+                      <option disabled="" selected="" value="">Seleccione una categoría</option>
+                      <option value="tecnologia">Tecnología</option>
+                      <option value="mobiliario">Mobiliario</option>
+                      <option value="laboratorio">Laboratorio</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="border-t border-slate-200 pt-5">
+                  <label class="block text-sm font-semibold text-slate-700 mb-3"
+                    >Seleccionar Icono</label
+                  >
+                  <div class="space-y-3">
+                    <div class="relative">
+                      <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+                        >search</span
+                      >
+                      <input
+                        class="w-full h-9 pl-9 pr-4 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-blue-600 outline-none"
+                        placeholder="Buscar icono..."
+                        type="text"
+                      />
+                    </div>
+                    <div
+                      class="grid grid-cols-6 gap-2 p-3 border border-slate-200 rounded-lg bg-slate-50 max-h-32 overflow-y-auto"
+                    >
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-600 text-blue-600 shadow-sm"
+                      >
+                        <span class="material-symbols-outlined">laptop_mac</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">desktop_windows</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">print</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">smartphone</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">chair</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">table_restaurant</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">memory</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">router</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">videocam</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">headphones</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">kitchen</span>
+                      </button>
+                      <button
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                      >
+                        <span class="material-symbols-outlined">ac_unit</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="border-t border-slate-200 pt-5">
+                  <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-slate-900">Atributos dinámicos</h3>
+                    <button
+                      class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">add</span>
+                      Agregar atributo
+                    </button>
+                  </div>
+                  <div class="space-y-3">
+                    <!-- Attribute Row: Marca -->
+                    <div class="flex gap-4 items-center py-2 border-b border-slate-100">
+                      <div class="flex-1">
+                        <input
+                          class="w-full h-10 px-3 rounded-lg border border-slate-300 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
+                          placeholder="Nombre (ej. Marca)"
+                          type="text"
+                          value="Marca"
+                        />
+                      </div>
+                      <div class="flex items-center gap-2 px-2">
+                        <span class="text-xs text-slate-500 font-medium">Obligatorio</span>
+                        <div
+                          class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in"
+                        >
+                          <input
+                            checked=""
+                            class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-blue-600 bg-blue-600"
+                            id="toggle_attr_1"
+                            name="toggle"
+                            style="right: 0"
+                            type="checkbox"
+                          />
+                          <label
+                            class="toggle-label block overflow-hidden h-5 rounded-full bg-blue-600 cursor-pointer"
+                            for="toggle_attr_1"
+                          ></label>
+                        </div>
+                      </div>
+                      <button
+                        class="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </div>
+                    <!-- Attribute Row: Modelo -->
+                    <div class="flex gap-4 items-center py-2 border-b border-slate-100">
+                      <div class="flex-1">
+                        <input
+                          class="w-full h-10 px-3 rounded-lg border border-slate-300 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
+                          placeholder="Nombre (ej. Modelo)"
+                          type="text"
+                          value="Modelo"
+                        />
+                      </div>
+                      <div class="flex items-center gap-2 px-2">
+                        <span class="text-xs text-slate-500 font-medium">Obligatorio</span>
+                        <div
+                          class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in"
+                        >
+                          <input
+                            checked=""
+                            class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-blue-600 bg-blue-600"
+                            id="toggle_attr_2"
+                            name="toggle"
+                            style="right: 0"
+                            type="checkbox"
+                          />
+                          <label
+                            class="toggle-label block overflow-hidden h-5 rounded-full bg-blue-600 cursor-pointer"
+                            for="toggle_attr_2"
+                          ></label>
+                        </div>
+                      </div>
+                      <button
+                        class="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Footer -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+              <button
+                class="px-4 py-2 text-slate-600 text-sm font-medium hover:bg-slate-200 rounded-lg transition-colors"
+                onclick="document.getElementById('new-asset-type-modal').classList.add('hidden')"
+              >
+                Cancelar
+              </button>
+              <button
+                class="px-5 py-2 bg-[#1D4ED8] hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+              >
+                Crear Tipo
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
