@@ -92,6 +92,15 @@ function dueDateAfterStartDateValidator(control: AbstractControl): ValidationErr
   return dueDate >= startDate ? null : { dueDateBeforeStartDate: true };
 }
 
+function getTodayIsoDate(): string {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = `${today.getMonth() + 1}`.padStart(2, '0');
+  const day = `${today.getDate()}`.padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
 @Component({
   selector: 'app-loan-form',
   standalone: true,
@@ -178,12 +187,12 @@ export class LoanFormComponent implements OnDestroy {
   readonly assetModalQuery = signal('');
   readonly selectedAssetCategory = signal<AssetCategoryId>('all');
   readonly selectedAssetLocation = signal<AssetLocationId>('all');
-  readonly expandedAssetGroups = signal<Set<string>>(new Set(['laptop-lenovo-thinkpad']));
+  readonly expandedAssetGroups = signal<Set<string>>(new Set());
   readonly modalSelectedAssetIds = signal<Set<string>>(new Set());
 
   readonly form = this.fb.group({
       destinationId: ['', Validators.required],
-      startDate: ['2026-05-03', Validators.required],
+      startDate: [getTodayIsoDate(), Validators.required],
       dueDate: ['', Validators.required],
       notes: [''],
     },
@@ -230,7 +239,7 @@ export class LoanFormComponent implements OnDestroy {
   });
 
   readonly assetSearchOptions = computed<AssetSearchOption[]>(() =>
-    this.availableAssets().filter((asset) => asset.condition !== 'Dado de baja'),
+    this.availableAssets().filter((asset) => this.isAssetVisibleInSearchModal(asset)),
   );
 
   readonly assetCategoryOptions = computed<AssetCategoryOption[]>(() => {
@@ -281,7 +290,7 @@ export class LoanFormComponent implements OnDestroy {
       const group = groups.get(asset.groupKey);
       if (group) {
         group.assets.push(asset);
-        group.availableCount += this.isAssetSearchOptionSelectable(asset) ? 1 : 0;
+        group.availableCount += this.isAssetSearchOptionCurrentlyAvailable(asset) ? 1 : 0;
         continue;
       }
 
@@ -289,12 +298,12 @@ export class LoanFormComponent implements OnDestroy {
         key: asset.groupKey,
         name: asset.groupName,
         icon: asset.groupIcon,
-        availableCount: this.isAssetSearchOptionSelectable(asset) ? 1 : 0,
+        availableCount: this.isAssetSearchOptionCurrentlyAvailable(asset) ? 1 : 0,
         assets: [asset],
       });
     }
 
-    return Array.from(groups.values());
+    return Array.from(groups.values()).filter((group) => group.availableCount > 0);
   });
 
   readonly modalSelectedAssetsCount = computed(() => this.modalSelectedAssetIds().size);
@@ -448,7 +457,7 @@ export class LoanFormComponent implements OnDestroy {
     this.selectedAssetCategory.set('all');
     this.selectedAssetLocation.set('all');
     this.modalSelectedAssetIds.set(new Set());
-    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+    this.expandedAssetGroups.set(new Set());
     this.isAssetSearchModalOpen.set(true);
   }
 
@@ -460,18 +469,18 @@ export class LoanFormComponent implements OnDestroy {
 
   setAssetCategory(categoryId: AssetCategoryId) {
     this.selectedAssetCategory.set(categoryId);
-    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+    this.expandedAssetGroups.set(new Set());
   }
 
   setAssetLocation(locationId: AssetLocationId) {
     this.selectedAssetLocation.set(locationId);
-    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+    this.expandedAssetGroups.set(new Set());
   }
 
   onAssetModalSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.assetModalQuery.set(value);
-    this.expandedAssetGroups.set(new Set(this.filteredAssetGroups().map((group) => group.key)));
+    this.expandedAssetGroups.set(new Set());
   }
 
   toggleAssetGroup(groupKey: string) {
@@ -956,6 +965,14 @@ export class LoanFormComponent implements OnDestroy {
 
   private isAssetSearchOptionSelectable(asset: AssetSearchOption): boolean {
     return isLoanSelectableAssetCondition(asset.condition);
+  }
+
+  private isAssetVisibleInSearchModal(asset: AssetOption): boolean {
+    return asset.condition === 'Bueno' || asset.condition === 'Regular';
+  }
+
+  private isAssetSearchOptionCurrentlyAvailable(asset: AssetSearchOption): boolean {
+    return this.isAssetSearchOptionSelectable(asset) && !this.isModalAssetAlreadyAdded(asset.id);
   }
 
   private resolveAssetCode(
