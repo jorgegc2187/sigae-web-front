@@ -328,17 +328,20 @@
       class="flex flex-col-reverse gap-3 border-t border-base-300 bg-base-200/40 px-4 py-4 sm:flex-row sm:justify-end"
     >
       <form method="dialog">
-        <button type="submit" class="btn btn-ghost w-full text-base-content/70 sm:w-auto">
-          Cancelar
-        </button>
+        <app-action-button
+          label="Cancelar"
+          variant="ghost"
+          [fullWidth]="true"
+          className="sm:w-auto"
+          type="submit"
+        />
       </form>
-      <button
-        type="button"
-        class="btn btn-primary w-full shadow-sm sm:w-auto"
-        (click)="submitCategory()"
-      >
-        Crear Categoría
-      </button>
+      <app-action-button
+        label="Crear Categoría"
+        [fullWidth]="true"
+        className="shadow-sm sm:w-auto"
+        (clicked)="submitCategory()"
+      />
     </div>
   </div>
 
@@ -466,17 +469,20 @@
       class="flex flex-col-reverse gap-3 border-t border-base-300 bg-base-200/40 px-4 py-4 sm:flex-row sm:justify-end"
     >
       <form method="dialog">
-        <button type="submit" class="btn btn-ghost w-full text-base-content/70 sm:w-auto">
-          Cancelar
-        </button>
+        <app-action-button
+          label="Cancelar"
+          variant="ghost"
+          [fullWidth]="true"
+          className="sm:w-auto"
+          type="submit"
+        />
       </form>
-      <button
-        type="button"
-        class="btn btn-primary w-full shadow-sm sm:w-auto"
-        (click)="submitTypeForm()"
-      >
-        {{ typeFormSubmitLabel() }}
-      </button>
+      <app-action-button
+        [label]="typeFormSubmitLabel()"
+        [fullWidth]="true"
+        className="shadow-sm sm:w-auto"
+        (clicked)="submitTypeForm()"
+      />
     </div>
   </div>
 
@@ -597,12 +603,12 @@
           Agregar atributo
         </button>
         <form method="dialog">
-          <button
+          <app-action-button
+            label="Cerrar"
+            variant="neutral"
+            className="shadow-sm"
             type="submit"
-            class="btn border border-base-300 bg-base-100 text-base-content shadow-sm"
-          >
-            Cerrar
-          </button>
+          />
         </form>
       </div>
     }

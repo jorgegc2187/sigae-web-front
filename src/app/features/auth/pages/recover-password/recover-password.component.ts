@@ -7,12 +7,13 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 
 @Component({
   selector: 'app-recover-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, FormFieldComponent],
+  imports: [ReactiveFormsModule, RouterLink, FormFieldComponent, ActionButtonComponent],
   templateUrl: './recover-password.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

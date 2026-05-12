@@ -137,11 +137,15 @@
 
 <!-- Sticky Footer -->
 <div class="fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-200 p-4 px-4 md:left-[240px] md:px-6 flex justify-end gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30">
-  <a routerLink="/locations" class="btn btn-ghost border border-base-300">
-    Cancelar
-  </a>
-  <button type="submit" class="btn btn-primary shadow-sm" (click)="onSubmit()">
-    <span class="material-symbols-outlined text-[18px]">save</span>
-    Guardar Ubicación
-  </button>
+  <app-action-button
+    label="Cancelar"
+    variant="neutral"
+    routerLink="/locations"
+  />
+  <app-action-button
+    label="Guardar Ubicación"
+    icon="save"
+    className="shadow-sm"
+    (clicked)="onSubmit()"
+  />
 </div>

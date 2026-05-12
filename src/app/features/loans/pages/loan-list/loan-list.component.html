@@ -113,14 +113,14 @@
     }
 
     <div class="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-base-200 via-base-200/95 to-transparent px-4 pb-4 pt-8 md:hidden">
-      <button
-        type="button"
-        class="btn btn-primary h-12 w-full rounded-xl text-sm font-bold shadow-lg pointer-events-auto"
-        (click)="onCreateLoan()"
-      >
-        <span class="material-symbols-outlined text-[20px]">add</span>
-        Nuevo préstamo
-      </button>
+      <app-action-button
+        label="Nuevo préstamo"
+        icon="add"
+        size="lg"
+        [fullWidth]="true"
+        className="pointer-events-auto shadow-lg"
+        (clicked)="onCreateLoan()"
+      />
     </div>
   </div>
 
@@ -153,10 +153,12 @@
           (valueChange)="onSearch($event)"
         />
 
-        <button type="button" class="btn btn-primary shadow-sm" (click)="onCreateLoan()">
-          <span class="material-symbols-outlined text-[20px]">add</span>
-          Nuevo préstamo
-        </button>
+        <app-action-button
+          label="Nuevo préstamo"
+          icon="add"
+          className="shadow-sm"
+          (clicked)="onCreateLoan()"
+        />
       </div>
     </div>
 

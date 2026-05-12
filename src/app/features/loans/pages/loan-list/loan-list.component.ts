@@ -5,6 +5,7 @@ import { DataListingComponent } from '../../../../shared/ui/data-listing/data-li
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import {
   SegmentedFilterTabItem,
   SegmentedFilterTabsComponent,
@@ -26,6 +27,7 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
     LoanStatusBadgeComponent,
     MobilePaginationComponent,
     SearchInputComponent,
+    ActionButtonComponent,
     SegmentedFilterTabsComponent,
   ],
   templateUrl: './loan-list.component.html',

@@ -31,6 +31,7 @@ import {
   MockInventoryAsset,
   isLoanSelectableAssetCondition,
 } from '../../../../shared/models/mock-inventory-catalog.model';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DatePickerComponent } from '../../../../shared/ui/date-picker/date-picker.component';
 
 interface TeacherOption {
@@ -110,6 +111,7 @@ function getTodayIsoDate(): string {
     LoanSignaturePadComponent,
     LoanQrScannerComponent,
     DatePickerComponent,
+    ActionButtonComponent,
   ],
   templateUrl: './loan-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -4,26 +4,44 @@
     [routerLink]="routerLink()"
     [attr.href]="routerLink() ? null : href()"
     [attr.aria-label]="resolvedAriaLabel()"
-    [attr.aria-disabled]="disabled()"
-    [attr.tabindex]="disabled() ? -1 : null"
+    [attr.aria-disabled]="isDisabled()"
+    [attr.aria-busy]="loading() ? 'true' : null"
+    [attr.tabindex]="isDisabled() ? -1 : null"
     (click)="onClick($event)"
   >
-    @if (icon(); as iconName) {
-      <span [class]="iconClass()">{{ iconName }}</span>
+    @if (loading()) {
+      <span [class]="spinnerClass()"></span>
+      <span>{{ displayLabel() }}</span>
+    } @else {
+      @if (iconPosition() === 'start' && icon(); as iconName) {
+        <span [class]="iconClass()">{{ iconName }}</span>
+      }
+      <span>{{ label() }}</span>
+      @if (iconPosition() === 'end' && icon(); as iconName) {
+        <span [class]="iconClass()">{{ iconName }}</span>
+      }
     }
-    <span>{{ label() }}</span>
   </a>
 } @else {
   <button
     [class]="classes()"
     [attr.aria-label]="resolvedAriaLabel()"
-    [disabled]="disabled()"
+    [attr.aria-busy]="loading() ? 'true' : null"
+    [disabled]="isDisabled()"
     [type]="type()"
     (click)="onClick($event)"
   >
-    @if (icon(); as iconName) {
-      <span [class]="iconClass()">{{ iconName }}</span>
+    @if (loading()) {
+      <span [class]="spinnerClass()"></span>
+      <span>{{ displayLabel() }}</span>
+    } @else {
+      @if (iconPosition() === 'start' && icon(); as iconName) {
+        <span [class]="iconClass()">{{ iconName }}</span>
+      }
+      <span>{{ label() }}</span>
+      @if (iconPosition() === 'end' && icon(); as iconName) {
+        <span [class]="iconClass()">{{ iconName }}</span>
+      }
     }
-    <span>{{ label() }}</span>
   </button>
 }

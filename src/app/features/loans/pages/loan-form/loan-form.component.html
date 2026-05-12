@@ -126,16 +126,13 @@
                 }
               </div>
 
-              <button
-                type="button"
-                class="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-primary bg-base-100 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
-                (click)="openSignatureModal()"
-              >
-                <span class="material-symbols-outlined text-[18px]">
-                  {{ hasSavedSignature() ? 'edit' : 'draw' }}
-                </span>
-                {{ hasSavedSignature() ? 'Editar Firma' : 'Agregar Firma' }}
-              </button>
+              <app-action-button
+                [label]="hasSavedSignature() ? 'Editar Firma' : 'Agregar Firma'"
+                [icon]="hasSavedSignature() ? 'edit' : 'draw'"
+                variant="outline"
+                [fullWidth]="true"
+                (clicked)="openSignatureModal()"
+              />
 
               @if (hasSavedSignature()) {
                 <div class="rounded-xl border border-base-300 bg-base-200/20 p-3">
@@ -450,24 +447,23 @@
           </div>
 
           <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <button
-              type="button"
-              class="flex h-11 items-center justify-center gap-2 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-semibold text-base-content shadow-sm transition-all duration-200 hover:border-base-content/30 hover:bg-base-200/40 active:scale-[0.99]"
-              (click)="openAssetSearchModal()"
-            >
-              <span class="material-symbols-outlined text-primary text-[20px]">search</span>
-              Buscar Activo
-            </button>
+            <app-action-button
+              label="Buscar Activo"
+              icon="search"
+              variant="neutral"
+              [fullWidth]="true"
+              className="active:scale-[0.99]"
+              (clicked)="openAssetSearchModal()"
+            />
 
-            <button
-              type="button"
-              class="flex h-11 items-center justify-center gap-2 rounded-lg border border-primary bg-primary px-4 text-sm font-semibold text-primary-content shadow-sm transition-all duration-200 hover:bg-primary/90 active:scale-[0.99]"
-              (click)="openQrScanner()"
-              aria-label="Escanear etiqueta QR del activo"
-            >
-              <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>
-              Escanear QR
-            </button>
+            <app-action-button
+              label="Escanear QR"
+              icon="qr_code_scanner"
+              [fullWidth]="true"
+              ariaLabel="Escanear etiqueta QR del activo"
+              className="active:scale-[0.99]"
+              (clicked)="openQrScanner()"
+            />
           </div>
 
             <div
@@ -584,13 +580,11 @@
       >
         Limpiar
       </button>
-      <button
-        type="button"
-        class="btn btn-primary h-11 min-h-11 rounded-lg px-6 text-sm font-medium shadow-sm"
-        (click)="saveSignature()"
-      >
-        Guardar Firma
-      </button>
+      <app-action-button
+        label="Guardar Firma"
+        className="h-11 min-h-11 px-6 shadow-sm"
+        (clicked)="saveSignature()"
+      />
     </div>
   </div>
 
@@ -687,13 +681,12 @@
       </div>
 
       <div class="mt-6 border-t border-base-200 pt-3">
-        <button
-          type="button"
-          class="btn btn-ghost w-full text-base-content/70"
-          (click)="closeAttachmentSourceModal()"
-        >
-          Cancelar
-        </button>
+        <app-action-button
+          label="Cancelar"
+          variant="ghost"
+          [fullWidth]="true"
+          (clicked)="closeAttachmentSourceModal()"
+        />
       </div>
     </div>
   </div>
@@ -914,21 +907,17 @@
         </p>
 
         <div class="flex gap-3">
-          <button
-            type="button"
-            class="btn btn-ghost border border-base-300 bg-base-100"
-            (click)="closeAssetSearchModal()"
-          >
-            Atrás
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary shadow-sm"
+          <app-action-button
+            label="Atrás"
+            variant="neutral"
+            (clicked)="closeAssetSearchModal()"
+          />
+          <app-action-button
+            label="Confirmar Selección"
+            className="shadow-sm"
             [disabled]="modalSelectedAssetsCount() === 0"
-            (click)="confirmAssetSelection()"
-          >
-            Confirmar Selección
-          </button>
+            (clicked)="confirmAssetSelection()"
+          />
         </div>
       </div>
     </div>
@@ -984,39 +973,39 @@
     </div>
 
     <div class="flex flex-col gap-3 sm:flex-row">
-      <button type="button" class="btn btn-ghost border border-base-300" (click)="onCancel()">
-        Cancelar
-      </button>
-      <button
-        type="button"
-        class="btn btn-primary shadow-sm"
+      <app-action-button
+        label="Cancelar"
+        variant="neutral"
+        (clicked)="onCancel()"
+      />
+      <app-action-button
+        label="Registrar Préstamo"
+        icon="check_circle"
+        className="shadow-sm"
         [disabled]="isSubmitting()"
-        (click)="onSubmit()"
-      >
-        <span class="material-symbols-outlined text-[18px]">check_circle</span>
-        Registrar Préstamo
-      </button>
+        (clicked)="onSubmit()"
+      />
     </div>
   </div>
 
   <div class="flex gap-3 lg:hidden">
-    <button
-      type="button"
-      class="flex h-12 flex-1 items-center justify-center rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-medium text-base-content transition-colors hover:bg-base-200/70 active:scale-[0.99]"
-      (click)="onCancel()"
-    >
-      Cancelar
-    </button>
-    <button
-      type="button"
-      class="flex h-12 flex-[2] items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-content shadow-sm transition-colors hover:bg-primary/92 active:scale-[0.99]"
+    <app-action-button
+      label="Cancelar"
+      variant="neutral"
+      size="lg"
+      hostClass="flex-1"
+      className="active:scale-[0.99]"
+      (clicked)="onCancel()"
+    />
+    <app-action-button
+      label="Registrar Préstamo"
+      icon="check_circle"
+      iconPosition="end"
+      size="lg"
+      hostClass="flex-[2]"
+      className="shadow-sm active:scale-[0.99]"
       [disabled]="isSubmitting()"
-      (click)="onSubmit()"
-    >
-      <span class="inline-flex items-center justify-center gap-2">
-        Registrar Préstamo
-        <span class="material-symbols-outlined text-[18px]">check_circle</span>
-      </span>
-    </button>
+      (clicked)="onSubmit()"
+    />
   </div>
 </div>

@@ -16,12 +16,15 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <button type="button" class="btn border border-base-300 bg-base-100 shadow-sm">
-          Editar
-        </button>
-        <button type="button" class="btn btn-primary shadow-sm">
-          {{ actionLabel() }}
-        </button>
+        <app-action-button
+          label="Editar"
+          variant="neutral"
+          className="shadow-sm"
+        />
+        <app-action-button
+          [label]="actionLabel()"
+          className="shadow-sm"
+        />
       </div>
     </div>
 
@@ -187,10 +190,12 @@
         <p class="mt-2 max-w-md text-sm leading-6 text-base-content/60">
           El identificador solicitado no corresponde a un préstamo disponible en esta vista.
         </p>
-        <a routerLink="/loans" class="btn btn-primary mt-6 shadow-sm">
-          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          Volver a préstamos
-        </a>
+        <app-action-button
+          label="Volver a préstamos"
+          icon="arrow_back"
+          className="mt-6 shadow-sm"
+          routerLink="/loans"
+        />
       </div>
     </section>
   }

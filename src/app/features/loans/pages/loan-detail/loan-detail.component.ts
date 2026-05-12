@@ -2,13 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { Loan, LoanActivity, LoanAssetStatus, LoanStatus, MOCK_LOANS } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
 
 @Component({
   selector: 'app-loan-detail',
   standalone: true,
-  imports: [RouterLink, LoanStatusBadgeComponent],
+  imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent],
   templateUrl: './loan-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
