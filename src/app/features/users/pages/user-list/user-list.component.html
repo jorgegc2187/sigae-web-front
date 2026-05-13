@@ -1,12 +1,41 @@
-<div>
-  <!-- Page Header -->
-  <div class="mb-8 flex items-center justify-between">
-    <div>
-      <h2 class="text-2xl font-bold text-base-content">Usuarios del Sistema</h2>
-      <p class="text-sm text-base-content/60 mt-1">Gestión de accesos y roles del personal.</p>
+<app-data-listing
+  [isLoading]="false"
+  [isEmpty]="filteredUsers().length === 0"
+  [resultLabel]="resultLabel()"
+  [currentPage]="currentPage()"
+  [totalPages]="totalPages()"
+  (pageChange)="onPageChange($event)"
+>
+  <div listing-toolbar class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <app-search-input
+        widthClass="w-full sm:w-[320px]"
+        placeholder="Buscar por nombre o correo..."
+        [value]="searchQuery()"
+        (valueChange)="onSearch($event)"
+      />
+
+      <div class="relative">
+        <select
+          id="select-role-filter"
+          class="select min-w-[180px] cursor-pointer rounded-lg border border-base-300 bg-base-100 pr-8 text-sm focus:border-primary"
+          [value]="selectedRole()"
+          (change)="onRoleFilter($event)"
+        >
+          <option value="">Todos los roles</option>
+          <option value="Administrador">Administrador</option>
+          <option value="Encargado">Encargado</option>
+          <option value="Director">Director</option>
+        </select>
+      </div>
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <span class="text-sm text-base-content/50 sm:mr-1">
+        <span class="font-semibold text-base-content">{{ filteredUsers().length }}</span>
+        {{ filteredUsers().length === 1 ? 'usuario encontrado' : 'usuarios encontrados' }}
+      </span>
+
       <app-action-button
         label="Enviar invitación"
         icon="mail"
@@ -21,173 +50,99 @@
     </div>
   </div>
 
-  <!-- Toolbar: Search & Filters -->
-  <div class="bg-base-100 border border-base-300 rounded-xl p-4 mb-6 shadow-sm flex flex-wrap items-center gap-4">
-    <!-- Search -->
-    <app-search-input
-      widthClass="w-[320px]"
-      placeholder="Buscar por nombre o correo..."
-      [value]="searchQuery()"
-      (valueChange)="onSearch($event)"
-    />
+  <th listing-head class="w-[35%] px-6 py-3">Usuario</th>
+  <th listing-head class="w-[15%] px-6 py-3">Rol</th>
+  <th listing-head class="w-[22%] px-6 py-3">Ubicaciones</th>
+  <th listing-head class="w-[10%] px-6 py-3 text-center">Estado</th>
+  <th listing-head class="w-[13%] px-6 py-3">Último acceso</th>
+  <th listing-head class="w-[5%] px-6 py-3"></th>
 
-    <!-- Role Filter -->
-    <div class="relative">
-      <select
-        class="select border border-base-300 rounded-lg text-sm bg-base-100 focus:border-primary pr-8 min-w-[180px] cursor-pointer"
-        id="select-role-filter"
-        (change)="onRoleFilter($event)"
-      >
-        <option value="">Todos los roles</option>
-        <option value="Administrador">Administrador</option>
-        <option value="Encargado">Encargado</option>
-        <option value="Director">Director</option>
-      </select>
-    </div>
+  @for (user of paginatedUsers(); track user.id) {
+    <tr listing-body class="group/row h-[60px] transition-colors duration-150 hover:bg-base-200/40">
+      <td class="px-6">
+        <div class="flex items-center gap-3">
+          <div class="avatar placeholder flex-shrink-0">
+            <div
+              class="{{ user.avatarColor }} flex w-9 select-none items-center justify-center rounded-full text-primary-content"
+            >
+              <span class="text-xs font-bold">{{ user.initials }}</span>
+            </div>
+          </div>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-semibold leading-tight text-base-content">{{ user.name }}</p>
+            <p class="truncate text-xs text-base-content/50">{{ user.email }}</p>
+          </div>
+        </div>
+      </td>
 
-    <!-- Result count -->
-    <span class="text-sm text-base-content/50 ml-auto">
-      <span class="font-semibold text-base-content">{{ filteredUsers().length }}</span>
-      {{ filteredUsers().length === 1 ? 'usuario encontrado' : 'usuarios encontrados' }}
-    </span>
-  </div>
+      <td class="px-6">
+        <span class="badge badge-soft {{ getRoleBadgeClass(user.role) }} badge-sm whitespace-nowrap font-medium">
+          {{ user.role }}
+        </span>
+      </td>
 
-  <!-- Users Table -->
-  <div class="bg-base-100 border border-base-300 rounded-xl shadow-sm overflow-hidden">
-    <table class="w-full text-left border-collapse">
-      <thead class="bg-base-200/60 border-b border-base-300">
-        <tr>
-          <th class="px-6 py-3 w-[35%] text-[11px] font-bold text-base-content/50 uppercase tracking-wider">Usuario</th>
-          <th class="px-6 py-3 w-[15%] text-[11px] font-bold text-base-content/50 uppercase tracking-wider">Rol</th>
-          <th class="px-6 py-3 w-[22%] text-[11px] font-bold text-base-content/50 uppercase tracking-wider">Ubicaciones</th>
-          <th class="px-6 py-3 w-[10%] text-[11px] font-bold text-base-content/50 uppercase tracking-wider text-center">Estado</th>
-          <th class="px-6 py-3 w-[13%] text-[11px] font-bold text-base-content/50 uppercase tracking-wider">Último acceso</th>
-          <th class="px-6 py-3 w-[5%]"></th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-base-200">
-
-        @if (filteredUsers().length === 0) {
-          <tr>
-            <td colspan="6" class="px-6 py-16 text-center">
-              <div class="flex flex-col items-center gap-3 text-base-content/40">
-                <span class="material-symbols-outlined text-[48px]">manage_search</span>
-                <p class="font-medium text-base-content/60">No se encontraron usuarios</p>
-                <p class="text-sm">Prueba ajustando los filtros de búsqueda.</p>
-              </div>
-            </td>
-          </tr>
+      <td class="px-6">
+        @if (user.locations) {
+          <span class="block max-w-[200px] truncate text-sm text-base-content/70" [title]="user.locations">
+            {{ user.locations }}
+          </span>
+        } @else {
+          <span class="flex items-center gap-1.5 text-sm italic text-base-content/40">
+            <span class="material-symbols-outlined text-[14px]">public</span>
+            Acceso global
+          </span>
         }
+      </td>
 
-        @for (user of filteredUsers(); track user.id) {
-          <tr class="hover:bg-base-200/40 transition-colors duration-150 h-[60px] group/row">
+      <td class="px-6 text-center">
+        <app-status-badge [label]="user.status" [tone]="getStatusBadgeTone(user.status)" [compact]="true" />
+      </td>
 
-            <!-- Usuario: Avatar + Nombre + Email -->
-            <td class="px-6">
-              <div class="flex items-center gap-3">
-                <div class="avatar placeholder flex-shrink-0">
-                  <div class="{{ user.avatarColor }} text-primary-content w-9 rounded-full flex items-center justify-center select-none">
-                    <span class="text-xs font-bold">{{ user.initials }}</span>
-                  </div>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-sm font-semibold text-base-content leading-tight truncate">{{ user.name }}</p>
-                  <p class="text-xs text-base-content/50 truncate">{{ user.email }}</p>
-                </div>
-              </div>
-            </td>
+      <td class="px-6">
+        <span class="text-sm text-base-content/60">{{ user.lastAccess }}</span>
+      </td>
 
-            <!-- Rol -->
-            <td class="px-6">
-              <span class="badge badge-soft {{ getRoleBadgeClass(user.role) }} badge-sm font-medium whitespace-nowrap">
-                {{ user.role }}
-              </span>
-            </td>
+      <td class="px-6 text-right">
+        <div class="dropdown dropdown-end">
+          <button
+            tabindex="0"
+            type="button"
+            class="btn btn-square btn-ghost btn-sm text-base-content/30 opacity-0 transition-opacity hover:bg-primary/10 hover:text-primary group-hover/row:opacity-100"
+            aria-label="Más acciones"
+          >
+            <span class="material-symbols-outlined">more_vert</span>
+          </button>
+          <ul
+            tabindex="0"
+            class="dropdown-content menu rounded-box z-20 w-44 border border-base-300 bg-base-100 p-2 shadow-md"
+          >
+            <li>
+              <a class="text-sm" (click)="onEdit(user.id)">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+                Editar usuario
+              </a>
+            </li>
+            <li class="divider my-1"></li>
+            <li>
+              <a class="text-sm" (click)="onToggleStatus(user)">
+                @if (user.status === 'Activo') {
+                  <span class="material-symbols-outlined text-[18px] text-warning">block</span>
+                  Desactivar
+                } @else {
+                  <span class="material-symbols-outlined text-[18px] text-success">check_circle</span>
+                  Activar
+                }
+              </a>
+            </li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+  }
 
-            <!-- Ubicaciones -->
-            <td class="px-6">
-              @if (user.locations) {
-                <span class="text-sm text-base-content/70 truncate block max-w-[200px]" [title]="user.locations">{{ user.locations }}</span>
-              } @else {
-                <span class="text-sm text-base-content/40 italic flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[14px]">public</span>
-                  Acceso global
-                </span>
-              }
-            </td>
-
-            <!-- Estado -->
-            <td class="px-6 text-center">
-              <span class="badge badge-soft {{ getStatusBadgeClass(user.status) }} badge-sm font-semibold gap-1.5 whitespace-nowrap">
-                <span class="w-1.5 h-1.5 rounded-full {{ user.status === 'Activo' ? 'bg-success' : 'bg-base-content/30' }}"></span>
-                {{ user.status }}
-              </span>
-            </td>
-
-            <!-- Último acceso -->
-            <td class="px-6">
-              <span class="text-sm text-base-content/60">{{ user.lastAccess }}</span>
-            </td>
-
-            <!-- Acciones -->
-            <td class="px-6 text-right">
-              <div class="dropdown dropdown-end">
-                <button
-                  tabindex="0"
-                  type="button"
-                  class="btn btn-ghost btn-sm btn-square text-base-content/30 hover:text-primary hover:bg-primary/10 opacity-0 group-hover/row:opacity-100 transition-opacity"
-                  aria-label="Más acciones"
-                >
-                  <span class="material-symbols-outlined">more_vert</span>
-                </button>
-                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-20 w-44 p-2 shadow-md border border-base-300">
-                  <li>
-                    <a class="text-sm" (click)="onEdit(user.id)">
-                      <span class="material-symbols-outlined text-[18px]">edit</span>
-                      Editar usuario
-                    </a>
-                  </li>
-                  <li class="divider my-1"></li>
-                  <li>
-                    <a class="text-sm" (click)="onToggleStatus(user)">
-                      @if (user.status === 'Activo') {
-                        <span class="material-symbols-outlined text-[18px] text-warning">block</span>
-                        Desactivar
-                      } @else {
-                        <span class="material-symbols-outlined text-[18px] text-success">check_circle</span>
-                        Activar
-                      }
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </td>
-
-          </tr>
-        }
-
-      </tbody>
-    </table>
-
-    <!-- Table Footer / Pagination -->
-    <div class="px-6 py-4 bg-base-200/40 border-t border-base-200 flex items-center justify-between">
-      <p class="text-sm text-base-content/60">
-        Mostrando
-        <span class="font-semibold text-base-content">{{ filteredUsers().length }}</span>
-        de
-        <span class="font-semibold text-base-content">{{ filteredUsers().length }}</span>
-        usuarios
-      </p>
-      <div class="join">
-        <button class="join-item btn btn-sm bg-base-100 border border-base-300" disabled>
-          <span class="material-symbols-outlined text-sm">chevron_left</span>
-        </button>
-        <button class="join-item btn btn-sm btn-primary">1</button>
-        <button class="join-item btn btn-sm bg-base-100 border border-base-300" disabled>
-          <span class="material-symbols-outlined text-sm">chevron_right</span>
-        </button>
-      </div>
-    </div>
+  <div listing-empty class="flex flex-col items-center gap-3 text-center text-base-content/40">
+    <span class="material-symbols-outlined text-[48px]">manage_search</span>
+    <p class="font-medium text-base-content/60">No se encontraron usuarios</p>
+    <p class="text-sm">Prueba ajustando los filtros de búsqueda.</p>
   </div>
-
-</div>
+</app-data-listing>

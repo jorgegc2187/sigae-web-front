@@ -1,18 +1,25 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
+import {
+  StatusBadgeComponent,
+  StatusBadgeTone,
+} from '../../../../shared/ui/status-badge/status-badge.component';
 import { MOCK_USERS, User, UserRole, UserStatus } from '../../models/user.model';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [SearchInputComponent, ActionButtonComponent],
+  imports: [SearchInputComponent, ActionButtonComponent, DataListingComponent, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent {
   searchQuery = signal('');
   selectedRole = signal<UserRole | ''>('');
+  currentPage = signal(1);
+  readonly pageSize = 10;
 
   private readonly allUsers = signal<User[]>(MOCK_USERS);
 
@@ -30,12 +37,36 @@ export class UserListComponent {
     });
   });
 
+  totalPages = computed(() => Math.max(1, Math.ceil(this.filteredUsers().length / this.pageSize)));
+
+  paginatedUsers = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this.filteredUsers().slice(start, start + this.pageSize);
+  });
+
+  resultLabel = computed(() => {
+    const total = this.filteredUsers().length;
+    if (total === 0) {
+      return 'Mostrando 0 usuarios';
+    }
+
+    const start = (this.currentPage() - 1) * this.pageSize + 1;
+    const end = Math.min(start + this.pageSize - 1, total);
+    return `Mostrando ${start}-${end} de ${total} usuarios`;
+  });
+
   onSearch(value: string) {
     this.searchQuery.set(value);
+    this.currentPage.set(1);
   }
 
   onRoleFilter(event: Event) {
     this.selectedRole.set((event.target as HTMLSelectElement).value as UserRole | '');
+    this.currentPage.set(1);
+  }
+
+  onPageChange(page: number) {
+    this.currentPage.set(page);
   }
 
   onEdit(userId: number) {
@@ -63,7 +94,7 @@ export class UserListComponent {
     return map[role];
   }
 
-  getStatusBadgeClass(status: UserStatus): string {
-    return status === 'Activo' ? 'badge-success' : 'badge-ghost';
+  getStatusBadgeTone(status: UserStatus): StatusBadgeTone {
+    return status === 'Activo' ? 'success' : 'neutral';
   }
 }
