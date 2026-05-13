@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   computed,
+  inject,
   signal,
   viewChild,
 } from '@angular/core';
@@ -12,6 +13,7 @@ import { ActionButtonComponent } from '../../../../shared/ui/action-button/actio
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { inferAssetTypeIcon, inferCategoryIcon } from '../../../../shared/utils/icon-inference.util';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
@@ -75,6 +77,8 @@ interface DeleteTarget {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesPanelComponent {
+  private readonly notifications = inject(NotificationService);
+
   private readonly categoryDialog =
     viewChild<ElementRef<HTMLDialogElement>>('categoryDialog');
   private readonly typeDialog = viewChild<ElementRef<HTMLDialogElement>>('typeDialog');
@@ -343,6 +347,7 @@ export class CategoriesPanelComponent {
         ),
       );
       this.activeCategoryFilterId.set(draft.id);
+      this.notifications.success({ message: `Categoría "${name}" actualizada correctamente.` });
     } else {
       const newCategory: Category = {
         id: this.createId('category'),
@@ -355,6 +360,7 @@ export class CategoriesPanelComponent {
 
       this.categories.update((categories) => [...categories, newCategory]);
       this.activeCategoryFilterId.set(newCategory.id);
+      this.notifications.success({ message: `Categoría "${name}" creada correctamente.` });
     }
 
     this.resetPagination();
@@ -549,6 +555,11 @@ export class CategoriesPanelComponent {
       this.clampDesktopPage();
       this.clampMobilePage();
     }
+    this.notifications.success({
+      message: isCreateMode
+        ? `Tipo de activo "${typeName}" creado correctamente.`
+        : `Tipo de activo "${typeName}" actualizado correctamente.`,
+    });
     this.closeTypeModal();
   }
 
@@ -606,6 +617,7 @@ export class CategoriesPanelComponent {
       if (attributesContext?.categoryId === target.id) {
         this.closeAttributesModal();
       }
+      this.notifications.success({ message: `Categoría "${target.label}" eliminada correctamente.` });
     } else if (target.categoryId) {
       const attributesContext = this.attributesModalContext();
       if (
@@ -623,8 +635,11 @@ export class CategoriesPanelComponent {
                 types: category.types.filter((type) => type.id !== target.id),
               })
             : category,
-        ),
+          ),
       );
+      this.notifications.success({
+        message: `Tipo de activo "${target.label}" eliminado correctamente.`,
+      });
     }
 
     this.clampDesktopPage();
@@ -651,6 +666,7 @@ export class CategoriesPanelComponent {
         },
       ],
     }));
+    this.notifications.success({ message: 'Atributo agregado correctamente.' });
   }
 
   onToggleAttributeRequired(categoryId: string, typeId: string, attributeId: string) {
@@ -662,6 +678,7 @@ export class CategoriesPanelComponent {
           : attribute,
       ),
     }));
+    this.notifications.success({ message: 'Atributo actualizado correctamente.' });
   }
 
   onDeleteAttribute(categoryId: string, typeId: string, attributeId: string) {
@@ -669,6 +686,7 @@ export class CategoriesPanelComponent {
       ...type,
       attributes: type.attributes.filter((attribute) => attribute.id !== attributeId),
     }));
+    this.notifications.success({ message: 'Atributo eliminado correctamente.' });
   }
 
   getCategoryToneClasses(categoryId: string): string {

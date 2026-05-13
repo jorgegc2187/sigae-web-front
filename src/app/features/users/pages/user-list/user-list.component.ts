@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import {
   StatusBadgeComponent,
@@ -16,6 +17,8 @@ import { MOCK_USERS, User, UserRole, UserStatus } from '../../models/user.model'
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent {
+  private readonly notifications = inject(NotificationService);
+
   searchQuery = signal('');
   selectedRole = signal<UserRole | ''>('');
   currentPage = signal(1);
@@ -71,18 +74,27 @@ export class UserListComponent {
 
   onEdit(userId: number) {
     console.log('Editar usuario:', userId);
+    this.notifications.info({ message: 'Edición de usuario pendiente de conectar.' });
   }
 
   onToggleStatus(user: User) {
     console.log('Toggle status:', user.id, user.status);
+    this.notifications.success({
+      message:
+        user.status === 'Activo'
+          ? `Usuario ${user.name} desactivado correctamente.`
+          : `Usuario ${user.name} activado correctamente.`,
+    });
   }
 
   onSendInvitation() {
     console.log('Enviar invitación');
+    this.notifications.success({ message: 'Invitación enviada correctamente.' });
   }
 
   onNewUser() {
     console.log('Nuevo usuario');
+    this.notifications.info({ message: 'Creación de usuario pendiente de conectar.' });
   }
 
   getRoleBadgeClass(role: UserRole): string {

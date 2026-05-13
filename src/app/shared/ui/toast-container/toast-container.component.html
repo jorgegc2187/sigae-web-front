@@ -1,0 +1,30 @@
+<div class="toast toast-end toast-top z-[100] w-full max-w-sm pt-20 md:pt-4">
+  @for (toast of notifications.toasts(); track toast.id) {
+    <div
+      role="status"
+      aria-live="polite"
+      class="alert w-full items-start gap-3 border border-base-300 shadow-lg"
+      [class]="getAlertClass(toast.type)"
+    >
+      <span class="material-symbols-outlined mt-0.5 text-[20px]">
+        {{ getIcon(toast.type) }}
+      </span>
+
+      <div class="min-w-0 flex-1">
+        @if (toast.title) {
+          <p class="text-sm font-bold leading-5">{{ toast.title }}</p>
+        }
+        <p class="text-sm leading-5">{{ toast.message }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-ghost btn-xs btn-square -mr-1 -mt-1"
+        [attr.aria-label]="'Cerrar notificación: ' + toast.message"
+        (click)="dismiss(toast)"
+      >
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
+    </div>
+  }
+</div>

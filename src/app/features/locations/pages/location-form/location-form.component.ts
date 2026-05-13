@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, signal, viewChild, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 
@@ -22,6 +23,7 @@ interface UserOption {
 })
 export class LocationFormComponent {
   private fb = inject(FormBuilder);
+  private notifications = inject(NotificationService);
 
   allUsers = signal<UserOption[]>([
     { id: '1', name: 'Juan Pérez', initials: 'JP' },
@@ -87,5 +89,6 @@ export class LocationFormComponent {
       return;
     }
     console.log('Submit', { ...this.form.value, managers: this.selectedManagers() });
+    this.notifications.success({ message: 'Ubicación registrada correctamente.' });
   }
 }

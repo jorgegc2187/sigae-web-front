@@ -33,6 +33,7 @@ import {
 } from '../../../../shared/models/mock-inventory-catalog.model';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DatePickerComponent } from '../../../../shared/ui/date-picker/date-picker.component';
+import { NotificationService } from '../../../../shared/services/notification.service';
 
 interface TeacherOption {
   id: string;
@@ -122,6 +123,7 @@ function getTodayIsoDate(): string {
 export class LoanFormComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly notifications = inject(NotificationService);
   private readonly modalScrollLockClass = 'overflow-hidden';
 
   readonly teacherSearchContainer = viewChild<ElementRef>('teacherSearchContainer');
@@ -427,6 +429,7 @@ export class LoanFormComponent implements OnDestroy {
     this.assetDropdownOpen.set(false);
     this.assetLookupError.set('');
     this.showAssetsError.set(false);
+    this.notifications.info({ message: `Activo "${asset.name}" agregado al préstamo.` });
   }
 
   addAssetFromQuery() {
@@ -446,12 +449,17 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   removeAsset(assetId: string) {
+    const removedAsset = this.selectedAssets().find((asset) => asset.id === assetId);
     this.selectedAssets.update((assets) => assets.filter((asset) => asset.id !== assetId));
+    if (removedAsset) {
+      this.notifications.info({ message: `Activo "${removedAsset.name}" retirado del préstamo.` });
+    }
   }
 
   clearAssets() {
     this.selectedAssets.set([]);
     this.showAssetsError.set(true);
+    this.notifications.warning({ message: 'Lista de activos seleccionados limpiada.' });
   }
 
   openAssetSearchModal() {
@@ -535,6 +543,9 @@ export class LoanFormComponent implements OnDestroy {
     if (nextAssets.length > 0) {
       this.selectedAssets.update((assets) => [...assets, ...nextAssets]);
       this.showAssetsError.set(false);
+      this.notifications.info({
+        message: `${nextAssets.length} activo${nextAssets.length === 1 ? '' : 's'} agregado${nextAssets.length === 1 ? '' : 's'} al préstamo.`,
+      });
     }
 
     this.closeAssetSearchModal();
@@ -662,12 +673,14 @@ export class LoanFormComponent implements OnDestroy {
     const signatureDataUrl = this.signaturePad()?.getSignatureDataUrl() ?? null;
     this.signatureDraft.set(signatureDataUrl);
     this.signatureDataUrl.set(signatureDataUrl);
+    this.notifications.success({ message: 'Firma guardada correctamente.' });
     this.closeSignatureModal();
   }
 
   removeSignature() {
     this.signatureDraft.set(null);
     this.signatureDataUrl.set(null);
+    this.notifications.info({ message: 'Firma eliminada.' });
   }
 
   openQrScanner() {
@@ -753,6 +766,7 @@ export class LoanFormComponent implements OnDestroy {
     );
 
     this.attachmentFeedback.set(null);
+    this.notifications.info({ message: 'Archivo adjunto eliminado.' });
   }
 
   getAttachmentTypeLabel(attachment: LoanAttachmentDraft): string {
@@ -842,6 +856,7 @@ export class LoanFormComponent implements OnDestroy {
     this.isSubmitting.set(true);
 
     console.log('Registrar préstamo', this.buildLoanSubmissionPayload());
+    this.notifications.success({ message: 'Préstamo registrado correctamente.' });
 
     queueMicrotask(() => this.isSubmitting.set(false));
   }
@@ -904,6 +919,9 @@ export class LoanFormComponent implements OnDestroy {
 
     if (nextAttachments.length > 0) {
       this.attachments.update((attachments) => [...attachments, ...nextAttachments]);
+      this.notifications.success({
+        message: `${nextAttachments.length} archivo${nextAttachments.length === 1 ? '' : 's'} agregado${nextAttachments.length === 1 ? '' : 's'}.`,
+      });
     }
 
     this.attachmentFeedback.set(

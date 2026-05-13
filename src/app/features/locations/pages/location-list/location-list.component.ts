@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { LocationCardComponent } from '../../components/location-card/location-card.component';
@@ -13,6 +14,8 @@ import { Location } from '../../models/location.model';
   templateUrl: './location-list.component.html',
 })
 export class LocationListComponent {
+  private readonly notifications = inject(NotificationService);
+
   readonly searchQuery = signal('');
 
   readonly mockLocations = signal<Location[]>([
@@ -96,9 +99,11 @@ export class LocationListComponent {
 
   onEdit(id: string) {
     console.log('Editar ubicación', id);
+    this.notifications.info({ message: 'Edición de ubicación pendiente de conectar.' });
   }
 
   onDelete(id: string) {
     console.log('Eliminar ubicación', id);
+    this.notifications.success({ message: 'Ubicación eliminada correctamente.' });
   }
 }
