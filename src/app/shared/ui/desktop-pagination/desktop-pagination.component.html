@@ -1,0 +1,52 @@
+<div [class]="containerClasses()">
+  <p class="text-sm font-medium text-base-content/60">
+    {{ resultLabel() }}
+  </p>
+
+  @if (hasMultiplePages()) {
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded-lg text-base-content/35 transition-all hover:bg-base-100 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-45"
+        [disabled]="!canGoPrevious()"
+        (click)="onPreviousPage()"
+        aria-label="Página anterior"
+      >
+        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+      </button>
+
+      @for (page of pages(); track page; let index = $index) {
+        @if (showLeadingEllipsis(page, index)) {
+          <span class="px-2 text-sm font-medium text-base-content/35">...</span>
+        }
+
+        <button
+          type="button"
+          class="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-all"
+          [class.bg-primary]="page === currentPage()"
+          [class.text-primary-content]="page === currentPage()"
+          [class.shadow-sm]="page === currentPage()"
+          [class.border]="page !== currentPage()"
+          [class.border-base-300]="page !== currentPage()"
+          [class.bg-base-100]="page !== currentPage()"
+          [class.text-base-content/70]="page !== currentPage()"
+          [class.hover:bg-base-200/60]="page !== currentPage()"
+          [class.hover:text-primary]="page !== currentPage()"
+          (click)="pageChange.emit(page)"
+        >
+          {{ page }}
+        </button>
+      }
+
+      <button
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded-lg text-base-content/35 transition-all hover:bg-base-100 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-45"
+        [disabled]="!canGoNext()"
+        (click)="onNextPage()"
+        aria-label="Página siguiente"
+      >
+        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+      </button>
+    </div>
+  }
+</div>

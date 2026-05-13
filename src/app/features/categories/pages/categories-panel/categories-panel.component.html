@@ -65,7 +65,7 @@
     </div>
   </section>
 
-  <div class="flex min-w-0 flex-1 flex-col overflow-y-auto pb-6 pt-0.5 pr-2">
+  <div class="flex min-w-0 flex-1 flex-col overflow-hidden pt-0.5 pr-2">
     <div class="mb-6 flex items-center gap-3 xl:gap-4">
       <div class="min-w-0 flex-[1.65]">
         <app-search-input
@@ -88,72 +88,84 @@
       </div>
     </div>
 
-    <div class="space-y-4">
-      @if (visibleTypeEntries().length === 0) {
-        <div
-          class="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-100 px-6 text-center text-base-content/50"
-        >
-          <span class="material-symbols-outlined mb-3 text-[48px]">category</span>
-          <p class="font-medium">{{ typeSearchEmptyMessage() }}</p>
-          <p class="mt-1 text-sm">
-            {{
-              isGlobalSearchActive()
-                ? 'Pruebe con otro término para encontrar tipos en todas las categorías.'
-                : 'Crea el primer tipo para continuar.'
-            }}
-          </p>
-        </div>
-      }
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      <div class="space-y-4 pb-4">
+        @if (desktopVisibleTypeEntries().length === 0) {
+          <div
+            class="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-100 px-6 text-center text-base-content/50"
+          >
+            <span class="material-symbols-outlined mb-3 text-[48px]">category</span>
+            <p class="font-medium">{{ typeSearchEmptyMessage() }}</p>
+            <p class="mt-1 text-sm">
+              {{
+                isGlobalSearchActive()
+                  ? 'Pruebe con otro término para encontrar tipos en todas las categorías.'
+                  : 'Crea el primer tipo para continuar.'
+              }}
+            </p>
+          </div>
+        }
 
-      @for (entry of visibleTypeEntries(); track entry.categoryId + ':' + entry.type.id) {
-        <div
-          class="rounded-xl border border-base-300 bg-base-100 shadow-sm transition-shadow hover:shadow-md"
-        >
-          <div class="flex items-center justify-between p-4">
-            <div class="flex min-w-0 items-center gap-3">
-              <span class="material-symbols-outlined text-base-content/35">{{
-                entry.type.icon
-              }}</span>
-              <div class="min-w-0">
-                <h3 class="truncate text-[16px] font-semibold text-base-content">
-                  {{ entry.type.name }}
-                </h3>
-                <p class="text-xs text-base-content/55">
-                  {{ entry.type.attributes.length }} atributos configurados
-                </p>
-                @if (activeCategoryFilterId() === 'all' || isGlobalSearchActive()) {
-                  <p class="mt-1 text-[11px] font-medium text-base-content/45">
-                    {{ entry.categoryName }}
+        @for (entry of desktopVisibleTypeEntries(); track entry.categoryId + ':' + entry.type.id) {
+          <div
+            class="rounded-xl border border-base-300 bg-base-100 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div class="flex items-center justify-between p-4">
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="material-symbols-outlined text-base-content/35">{{
+                  entry.type.icon
+                }}</span>
+                <div class="min-w-0">
+                  <h3 class="truncate text-[16px] font-semibold text-base-content">
+                    {{ entry.type.name }}
+                  </h3>
+                  <p class="text-xs text-base-content/55">
+                    {{ entry.type.attributes.length }} atributos configurados
                   </p>
-                }
+                  @if (activeCategoryFilterId() === 'all' || isGlobalSearchActive()) {
+                    <p class="mt-1 text-[11px] font-medium text-base-content/45">
+                      {{ entry.categoryName }}
+                    </p>
+                  }
+                </div>
+              </div>
+
+              <div class="ml-4 flex shrink-0 items-center gap-2.5">
+                <button
+                  type="button"
+                  class="flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-[13px] font-medium text-primary transition-colors hover:border-primary/10 hover:bg-primary/5 hover:text-primary/85"
+                  (click)="openAttributesModal(entry)"
+                >
+                  <span class="material-symbols-outlined text-[18px]">visibility</span>
+                  Ver atributos
+                </button>
+
+                <div class="h-6 w-px bg-base-300"></div>
+
+                <button
+                  type="button"
+                  class="rounded-lg p-1 text-base-content/35 transition-colors hover:text-primary"
+                  (click)="openEditTypeModal(entry)"
+                  aria-label="Editar tipo de activo"
+                >
+                  <span class="material-symbols-outlined text-[20px]">edit</span>
+                </button>
               </div>
             </div>
-
-            <div class="ml-4 flex shrink-0 items-center gap-2.5">
-              <button
-                type="button"
-                class="flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-[13px] font-medium text-primary transition-colors hover:border-primary/10 hover:bg-primary/5 hover:text-primary/85"
-                (click)="openAttributesModal(entry)"
-              >
-                <span class="material-symbols-outlined text-[18px]">visibility</span>
-                Ver atributos
-              </button>
-
-              <div class="h-6 w-px bg-base-300"></div>
-
-              <button
-                type="button"
-                class="rounded-lg p-1 text-base-content/35 transition-colors hover:text-primary"
-                (click)="openEditTypeModal(entry)"
-                aria-label="Editar tipo de activo"
-              >
-                <span class="material-symbols-outlined text-[20px]">edit</span>
-              </button>
-            </div>
           </div>
-        </div>
-      }
+        }
+      </div>
     </div>
+
+    @if (desktopVisibleTypeEntries().length > 0) {
+      <app-desktop-pagination
+        [currentPage]="desktopCurrentPage()"
+        [totalPages]="desktopTotalPages()"
+        [resultLabel]="desktopResultLabel()"
+        [sticky]="true"
+        (pageChange)="onDesktopPageChange($event)"
+      />
+    }
   </div>
 </div>
 

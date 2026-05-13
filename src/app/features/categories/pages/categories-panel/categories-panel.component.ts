@@ -4,11 +4,13 @@ import {
   Component,
   ElementRef,
   computed,
+  effect,
   signal,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
@@ -51,6 +53,7 @@ interface AttributesModalContext {
     CommonModule,
     FormsModule,
     ActionButtonComponent,
+    DesktopPaginationComponent,
     SearchInputComponent,
     FormFieldComponent,
     MobilePaginationComponent,
@@ -66,11 +69,13 @@ export class CategoriesPanelComponent {
     viewChild<ElementRef<HTMLDialogElement>>('attributesDialog');
 
   private idSequence = 100;
+  private readonly desktopPageSize = 5;
   private readonly mobilePageSize = 4;
 
   readonly categories = signal<Category[]>(this.cloneCategories(MOCK_CATEGORIES));
   readonly activeCategoryFilterId = signal<CategoryFilterId>('all');
   readonly typeSearchQuery = signal('');
+  readonly desktopCurrentPage = signal(1);
   readonly mobileCurrentPage = signal(1);
 
   readonly categoryDraftName = signal('');
@@ -148,6 +153,42 @@ export class CategoriesPanelComponent {
 
   readonly visibleTypeEntries = computed<TypeListEntry[]>(() => this.filteredTypeEntries());
 
+  readonly desktopTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredTypeEntries().length / this.desktopPageSize)),
+  );
+
+  readonly desktopVisibleTypeEntries = computed<TypeListEntry[]>(() => {
+    const page = Math.min(this.desktopCurrentPage(), this.desktopTotalPages());
+    const startIndex = (page - 1) * this.desktopPageSize;
+
+    return this.filteredTypeEntries().slice(startIndex, startIndex + this.desktopPageSize);
+  });
+
+  readonly desktopStartItem = computed(() => {
+    if (this.filteredTypeEntries().length === 0) {
+      return 0;
+    }
+
+    const page = Math.min(this.desktopCurrentPage(), this.desktopTotalPages());
+    return (page - 1) * this.desktopPageSize + 1;
+  });
+
+  readonly desktopEndItem = computed(() => {
+    if (this.filteredTypeEntries().length === 0) {
+      return 0;
+    }
+
+    return Math.min(
+      this.desktopStartItem() + this.desktopVisibleTypeEntries().length - 1,
+      this.filteredTypeEntries().length,
+    );
+  });
+
+  readonly desktopResultLabel = computed(
+    () =>
+      `Mostrando ${this.desktopStartItem()}-${this.desktopEndItem()} de ${this.filteredTypeEntries().length} tipos`,
+  );
+
   readonly mobileTotalPages = computed(() =>
     Math.max(1, Math.ceil(this.filteredTypeEntries().length / this.mobilePageSize)),
   );
@@ -200,18 +241,31 @@ export class CategoriesPanelComponent {
     () => `${Math.min(this.mobileCurrentPage(), this.mobileTotalPages())} de ${this.mobileTotalPages()}`,
   );
 
+  constructor() {
+    effect(() => {
+      this.filteredTypeEntries();
+      this.desktopCurrentPage.set(1);
+    });
+  }
+
   setActiveCategoryFilter(categoryId: CategoryFilterId) {
     this.activeCategoryFilterId.set(categoryId);
+    this.desktopCurrentPage.set(1);
     this.mobileCurrentPage.set(1);
   }
 
   onTypeSearch(query: string) {
     this.typeSearchQuery.set(query);
+    this.desktopCurrentPage.set(1);
     this.mobileCurrentPage.set(1);
   }
 
   onMobileSearchInput(event: Event) {
     this.onTypeSearch((event.target as HTMLInputElement).value);
+  }
+
+  onDesktopPageChange(page: number) {
+    this.desktopCurrentPage.set(page);
   }
 
   onMobilePageChange(page: number) {
