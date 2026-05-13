@@ -13,6 +13,7 @@ import { ActionButtonComponent } from '../../../../shared/ui/action-button/actio
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
+import { inferAssetTypeIcon, inferCategoryIcon } from '../../../../shared/utils/icon-inference.util';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { AssetType, Attribute, Category } from '../../models/category.model';
@@ -69,7 +70,7 @@ export class CategoriesPanelComponent {
     viewChild<ElementRef<HTMLDialogElement>>('attributesDialog');
 
   private idSequence = 100;
-  private readonly desktopPageSize = 5;
+  private readonly desktopPageSize = 10;
   private readonly mobilePageSize = 4;
 
   readonly categories = signal<Category[]>(this.cloneCategories(MOCK_CATEGORIES));
@@ -290,7 +291,7 @@ export class CategoriesPanelComponent {
     const newCategory: Category = {
       id: this.createId('category'),
       name,
-      icon: 'category',
+      icon: inferCategoryIcon(name),
       typesCount: 0,
       assetsCount: 0,
       types: [],
@@ -356,7 +357,7 @@ export class CategoriesPanelComponent {
         this.createAttributeDraft({
           name: '',
           description: '',
-          isRequired: true,
+          isRequired: false,
         }),
       ],
     }));
@@ -383,10 +384,19 @@ export class CategoriesPanelComponent {
   }
 
   removeDraftAttribute(attributeId: string) {
-    this.typeFormDraft.update((draft) => ({
-      ...draft,
-      attributes: draft.attributes.filter((attribute) => attribute.id !== attributeId),
-    }));
+    this.typeFormDraft.update((draft) => {
+      const remainingAttributes = draft.attributes.filter(
+        (attribute) => attribute.id !== attributeId,
+      );
+
+      return {
+        ...draft,
+        attributes:
+          remainingAttributes.length > 0
+            ? remainingAttributes
+            : [this.createAttributeDraft({ name: '', description: '', isRequired: false })],
+      };
+    });
   }
 
   submitTypeForm() {
@@ -399,10 +409,13 @@ export class CategoriesPanelComponent {
     }
 
     const attributes = this.normalizeDraftAttributes(draft.attributes);
-    const icon =
-      this.typeFormMode() === 'edit'
-        ? this.findTypeById(draft.id ?? '', this.typeFormOriginCategoryId())?.icon ?? 'inventory_2'
-        : 'inventory_2';
+    const categoryName =
+      this.categoriesWithMetrics().find((category) => category.id === categoryId)?.name ?? '';
+    const icon = inferAssetTypeIcon({
+      name: typeName,
+      categoryId,
+      categoryName,
+    });
 
     const normalizedType: AssetType = {
       id: draft.id ?? this.createId('type'),
@@ -547,18 +560,19 @@ export class CategoriesPanelComponent {
   }
 
   private normalizeDraftAttributes(attributes: AttributeDraft[]): Attribute[] {
-    return attributes.map((attribute, index) => {
-      const fallbackName = `Atributo ${index + 1}`;
-      const name = attribute.name.trim() || fallbackName;
-      const description = attribute.description.trim() || name;
-
-      return {
+    return attributes
+      .map((attribute) => ({
+        ...attribute,
+        name: attribute.name.trim(),
+        description: attribute.description.trim(),
+      }))
+      .filter((attribute) => attribute.name.length > 0)
+      .map((attribute) => ({
         id: attribute.id || this.createId('attr'),
-        name,
-        description,
+        name: attribute.name,
+        description: attribute.description || attribute.name,
         isRequired: attribute.isRequired,
-      };
-    });
+      }));
   }
 
   private updateType(
@@ -580,18 +594,6 @@ export class CategoriesPanelComponent {
     );
   }
 
-  private findTypeById(typeId: string, categoryId: string | null) {
-    if (!typeId || !categoryId) {
-      return null;
-    }
-
-    return (
-      this.categories()
-        .find((category) => category.id === categoryId)
-        ?.types.find((type) => type.id === typeId) ?? null
-    );
-  }
-
   private syncCategoryMetrics(category: Category): Category {
     return {
       ...category,
@@ -606,14 +608,9 @@ export class CategoriesPanelComponent {
       categoryId,
       attributes: [
         this.createAttributeDraft({
-          name: 'Marca',
-          description: 'Marca',
-          isRequired: true,
-        }),
-        this.createAttributeDraft({
-          name: 'Modelo',
-          description: 'Modelo',
-          isRequired: true,
+          name: '',
+          description: '',
+          isRequired: false,
         }),
       ],
     };
