@@ -37,15 +37,9 @@
       </span>
 
       <app-action-button
-        label="Enviar invitación"
-        icon="mail"
-        variant="outline"
-        (clicked)="onSendInvitation()"
-      />
-      <app-action-button
         label="Nuevo usuario"
         icon="add"
-        (clicked)="onNewUser()"
+        routerLink="/settings/users/new"
       />
     </div>
   </div>

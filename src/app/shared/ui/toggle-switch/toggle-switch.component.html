@@ -1,0 +1,16 @@
+<label class="relative inline-flex h-6 w-11 cursor-pointer items-center">
+  <input
+    type="checkbox"
+    class="peer sr-only"
+    [attr.aria-label]="ariaLabel()"
+    [checked]="checked()"
+    [disabled]="disabled()"
+    (change)="onChange($event)"
+  />
+  <span
+    class="inline-block h-6 w-11 rounded-full border border-base-300 bg-base-300/70 transition-all duration-200 peer-checked:border-primary peer-checked:bg-primary/90 peer-focus-visible:ring-4 peer-focus-visible:ring-primary/15 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+  ></span>
+  <span
+    class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-base-100 shadow-sm transition-transform duration-200 peer-checked:translate-x-5 peer-disabled:opacity-80"
+  ></span>
+</label>

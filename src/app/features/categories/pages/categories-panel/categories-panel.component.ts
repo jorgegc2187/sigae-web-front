@@ -17,6 +17,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
 import { inferAssetTypeIcon, inferCategoryIcon } from '../../../../shared/utils/icon-inference.util';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
+import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
 import { AssetType, Attribute, Category } from '../../models/category.model';
 
 type TypeFormMode = 'create' | 'edit';
@@ -72,6 +73,7 @@ interface DeleteTarget {
     SearchInputComponent,
     FormFieldComponent,
     MobilePaginationComponent,
+    ToggleSwitchComponent,
   ],
   templateUrl: './categories-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -7,7 +7,8 @@ import {
   StatusBadgeComponent,
   StatusBadgeTone,
 } from '../../../../shared/ui/status-badge/status-badge.component';
-import { MOCK_USERS, User, UserRole, UserStatus } from '../../models/user.model';
+import { User, UserRole, UserStatus } from '../../models/user.model';
+import { UsersMockStore } from '../../services/users-mock-store.service';
 
 @Component({
   selector: 'app-user-list',
@@ -18,19 +19,18 @@ import { MOCK_USERS, User, UserRole, UserStatus } from '../../models/user.model'
 })
 export class UserListComponent {
   private readonly notifications = inject(NotificationService);
+  private readonly usersStore = inject(UsersMockStore);
 
   searchQuery = signal('');
   selectedRole = signal<UserRole | ''>('');
   currentPage = signal(1);
   readonly pageSize = 10;
 
-  private readonly allUsers = signal<User[]>(MOCK_USERS);
-
   filteredUsers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const role = this.selectedRole();
 
-    return this.allUsers().filter((u) => {
+    return this.usersStore.users().filter((u) => {
       const matchesQuery =
         !query ||
         u.name.toLowerCase().includes(query) ||
@@ -85,16 +85,6 @@ export class UserListComponent {
           ? `Usuario ${user.name} desactivado correctamente.`
           : `Usuario ${user.name} activado correctamente.`,
     });
-  }
-
-  onSendInvitation() {
-    console.log('Enviar invitación');
-    this.notifications.success({ message: 'Invitación enviada correctamente.' });
-  }
-
-  onNewUser() {
-    console.log('Nuevo usuario');
-    this.notifications.info({ message: 'Creación de usuario pendiente de conectar.' });
   }
 
   getRoleBadgeClass(role: UserRole): string {

@@ -1,0 +1,214 @@
+<div class="mx-auto max-w-[800px] pb-24">
+  <div class="mb-8 flex items-center justify-between">
+    <div>
+      <div class="breadcrumbs mb-2 p-0 text-sm text-base-content/60">
+        <ul>
+          <li>
+            <a routerLink="/settings/users" class="transition-colors hover:text-primary">Usuarios</a>
+          </li>
+          <li class="font-medium text-base-content">Crear Nuevo Usuario</li>
+        </ul>
+      </div>
+      <h2 class="text-2xl font-bold text-base-content">Crear Nuevo Usuario</h2>
+    </div>
+  </div>
+
+  <section class="card card-border bg-base-100 shadow-sm">
+    <div class="card-body p-6">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+          <span class="material-symbols-outlined text-primary text-[20px]">person</span>
+          Información Personal
+        </h3>
+
+        <div class="mb-8 grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+          <app-form-field
+            label="Nombre"
+            fieldId="userFirstName"
+            [required]="true"
+            [error]="firstNameControl.invalid && firstNameControl.touched ? 'El nombre es obligatorio.' : null"
+          >
+            <input
+              id="userFirstName"
+              type="text"
+              formControlName="firstName"
+              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+              placeholder="Ej. Juan"
+            />
+          </app-form-field>
+
+          <app-form-field
+            label="Apellido"
+            fieldId="userLastName"
+            [required]="true"
+            [error]="lastNameControl.invalid && lastNameControl.touched ? 'El apellido es obligatorio.' : null"
+          >
+            <input
+              id="userLastName"
+              type="text"
+              formControlName="lastName"
+              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+              placeholder="Ej. Pérez"
+            />
+          </app-form-field>
+
+          <app-form-field
+            label="Correo electrónico"
+            fieldId="userEmail"
+            [required]="true"
+            [error]="
+              emailControl.invalid && emailControl.touched
+                ? emailControl.hasError('required')
+                  ? 'El correo es obligatorio.'
+                  : 'Ingrese un correo electrónico válido.'
+                : null
+            "
+            class="md:col-span-2"
+          >
+            <input
+              id="userEmail"
+              type="email"
+              formControlName="email"
+              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+              placeholder="ejemplo@institucion.edu.pe"
+              autocomplete="email"
+            />
+          </app-form-field>
+        </div>
+
+        <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+          <span class="material-symbols-outlined text-primary text-[20px]">badge</span>
+          Rol y Acceso
+        </h3>
+
+        <div class="mb-8 grid grid-cols-1 gap-y-5">
+          <app-form-field
+            label="Rol"
+            fieldId="userRole"
+            [required]="true"
+            [error]="roleControl.invalid && roleControl.touched ? 'Seleccione un rol.' : null"
+          >
+            <select
+              id="userRole"
+              formControlName="role"
+              class="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 pr-8 text-sm text-base-content focus:outline-none"
+            >
+              <option value="" disabled>Selecciona un rol</option>
+              @for (role of roles; track role) {
+                <option [value]="role">{{ role }}</option>
+              }
+            </select>
+            <span formFieldSuffix class="material-symbols-outlined pointer-events-none text-[18px] text-base-content/40">
+              expand_more
+            </span>
+          </app-form-field>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">Ubicaciones asignadas</legend>
+
+            <div
+              #locationSearchContainer
+              class="relative flex min-h-11 w-full cursor-text flex-wrap items-center gap-2 rounded-lg border border-base-300 bg-base-100 p-1.5 shadow-sm transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary"
+            >
+              @for (location of selectedLocations(); track location.id) {
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200 px-2 py-1 text-xs font-medium text-base-content">
+                  {{ location.name }}
+                  <button
+                    type="button"
+                    class="inline-flex h-4 w-4 items-center justify-center rounded-full text-base-content/55 transition-colors hover:bg-base-content/15 hover:text-base-content"
+                    [attr.aria-label]="'Quitar ' + location.name"
+                    (click)="removeLocation(location.id)"
+                  >
+                    <span class="material-symbols-outlined text-[13px] leading-none">close</span>
+                  </button>
+                </span>
+              }
+
+              <input
+                type="text"
+                class="h-7 min-w-[140px] flex-1 border-0 bg-transparent px-1 py-0 text-sm outline-none placeholder-shown:opacity-50"
+                placeholder="Añadir ubicación..."
+                [value]="locationQuery()"
+                (input)="onLocationInput($event)"
+                (focus)="onLocationFocus()"
+              />
+
+              @if (isLocationDropdownOpen() && filteredLocations().length > 0) {
+                <ul class="absolute left-0 top-full z-30 mt-1 max-h-52 w-72 overflow-y-auto rounded-lg border border-base-300 bg-base-100 p-1 shadow-lg">
+                  @for (location of filteredLocations(); track location.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-base-200"
+                        (click)="addLocation(location)"
+                      >
+                        <span class="material-symbols-outlined text-[17px] text-base-content/45">location_on</span>
+                        {{ location.name }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </fieldset>
+        </div>
+
+        <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+          <span class="material-symbols-outlined text-primary text-[20px]">security</span>
+          Seguridad
+        </h3>
+
+        <div class="space-y-5">
+          <div>
+            <div class="flex items-center">
+              <app-toggle-switch
+                ariaLabel="Enviar invitación por correo"
+                [checked]="sendInvitationControl.value ?? true"
+                (checkedChange)="onSendInvitationChange($event)"
+              />
+              <span class="ml-3 text-sm font-medium text-base-content">
+              Enviar invitación por correo
+              </span>
+            </div>
+            <p class="ml-[52px] mt-1 text-xs text-base-content/55">
+              @if (shouldShowPassword) {
+                Esta contraseña se usará como acceso inicial del usuario.
+              } @else {
+                El usuario recibirá un enlace para establecer su contraseña.
+              }
+            </p>
+          </div>
+
+          @if (shouldShowPassword) {
+            <app-form-field
+              label="Contraseña temporal"
+              fieldId="userPassword"
+              [required]="true"
+              [error]="
+                passwordControl.invalid && passwordControl.touched
+                  ? passwordControl.hasError('required')
+                    ? 'La contraseña temporal es obligatoria.'
+                    : 'La contraseña debe tener al menos 8 caracteres.'
+                  : null
+              "
+            >
+              <input
+                id="userPassword"
+                type="password"
+                formControlName="password"
+                class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+                placeholder="Mínimo 8 caracteres"
+                autocomplete="new-password"
+              />
+            </app-form-field>
+          }
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<div class="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-base-200 bg-base-100 p-4 px-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:left-[240px] md:px-6">
+  <app-action-button label="Cancelar" variant="neutral" routerLink="/settings/users" />
+  <app-action-button label="Crear Usuario" icon="save" className="shadow-sm" (clicked)="onSubmit()" />
+</div>
