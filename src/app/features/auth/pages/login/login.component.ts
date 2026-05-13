@@ -11,6 +11,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { APP_CONFIG } from '../../../../core/config/app.tokens';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 
@@ -24,7 +25,9 @@ import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private appConfig = inject(APP_CONFIG);
 
+  readonly appName = this.appConfig.appName;
   isSubmitting = signal(false);
   showPassword = signal(false);
   loginError = signal<string | null>(null);
@@ -61,15 +64,13 @@ export class LoginComponent {
     this.isSubmitting.set(true);
     this.loginError.set(null);
 
-    // TODO: Reemplazar con llamada real al AuthService
+    // TODO: Reemplazar con llamada real al AuthService usando appConfig.apiUrl.
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Simulación: credenciales mock
-    const { email, password } = this.form.getRawValue();
-    if (email === 'admin@sigae.edu.pe' && password === 'admin123') {
+    if (this.appConfig.enableMockAuth) {
       this.router.navigate(['/dashboard']);
     } else {
-      this.loginError.set('Credenciales incorrectas. Intente nuevamente.');
+      this.loginError.set('La autenticación con API aún no está conectada.');
     }
 
     this.isSubmitting.set(false);

@@ -4,7 +4,6 @@ import {
   Component,
   ElementRef,
   computed,
-  effect,
   signal,
   viewChild,
 } from '@angular/core';
@@ -281,13 +280,6 @@ export class CategoriesPanelComponent {
       : `Se eliminará el tipo de activo "${target.label}". Esta acción no se puede deshacer.`;
   });
 
-  constructor() {
-    effect(() => {
-      this.filteredTypeEntries();
-      this.desktopCurrentPage.set(1);
-    });
-  }
-
   setActiveCategoryFilter(categoryId: CategoryFilterId) {
     this.activeCategoryFilterId.set(categoryId);
     this.desktopCurrentPage.set(1);
@@ -477,6 +469,9 @@ export class CategoriesPanelComponent {
     const draft = this.typeFormDraft();
     const typeName = draft.name.trim();
     const categoryId = draft.categoryId;
+    const isCreateMode = this.typeFormMode() === 'create';
+    const originCategoryId = this.typeFormOriginCategoryId();
+    const previousTypeId = draft.id;
 
     if (!typeName || !categoryId) {
       return;
@@ -499,12 +494,11 @@ export class CategoriesPanelComponent {
     };
 
     this.categories.update((categories) => {
-      const originCategoryId = this.typeFormOriginCategoryId();
       return categories.map((category) => {
         const isOriginCategory = category.id === originCategoryId;
         const isTargetCategory = category.id === categoryId;
 
-        if (this.typeFormMode() === 'create') {
+        if (isCreateMode) {
           if (!isTargetCategory) {
             return category;
           }
@@ -544,7 +538,17 @@ export class CategoriesPanelComponent {
       });
     });
 
+    if (isCreateMode && this.isGlobalSearchActive()) {
+      this.typeSearchQuery.set('');
+    }
+
     this.activeCategoryFilterId.set(categoryId);
+    if (isCreateMode || originCategoryId !== categoryId) {
+      this.goToTypeEntry(categoryId, normalizedType.id);
+    } else if (previousTypeId === normalizedType.id) {
+      this.clampDesktopPage();
+      this.clampMobilePage();
+    }
     this.closeTypeModal();
   }
 
@@ -623,7 +627,8 @@ export class CategoriesPanelComponent {
       );
     }
 
-    this.resetPagination();
+    this.clampDesktopPage();
+    this.clampMobilePage();
     this.closeDeleteDialog();
   }
 
@@ -786,6 +791,28 @@ export class CategoriesPanelComponent {
   private resetPagination() {
     this.desktopCurrentPage.set(1);
     this.mobileCurrentPage.set(1);
+  }
+
+  private goToTypeEntry(categoryId: string, typeId: string) {
+    const categoryEntries = this.filteredTypeEntries().filter((entry) => entry.categoryId === categoryId);
+    const entryIndex = categoryEntries.findIndex((entry) => entry.type.id === typeId);
+
+    if (entryIndex < 0) {
+      this.clampDesktopPage();
+      this.clampMobilePage();
+      return;
+    }
+
+    this.desktopCurrentPage.set(Math.floor(entryIndex / this.desktopPageSize) + 1);
+    this.mobileCurrentPage.set(Math.floor(entryIndex / this.mobilePageSize) + 1);
+  }
+
+  private clampDesktopPage() {
+    this.desktopCurrentPage.set(Math.min(this.desktopCurrentPage(), this.desktopTotalPages()));
+  }
+
+  private clampMobilePage() {
+    this.mobileCurrentPage.set(Math.min(this.mobileCurrentPage(), this.mobileTotalPages()));
   }
 
   private cloneCategories(categories: Category[]): Category[] {

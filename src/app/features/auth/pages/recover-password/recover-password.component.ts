@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { APP_CONFIG } from '../../../../core/config/app.tokens';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 
@@ -19,7 +20,9 @@ import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.
 })
 export class RecoverPasswordComponent {
   private fb = inject(FormBuilder);
+  private appConfig = inject(APP_CONFIG);
 
+  readonly appName = this.appConfig.appName;
   isSubmitting = signal(false);
   successMessage = signal<string | null>(null);
   errorMessage = signal<string | null>(null);

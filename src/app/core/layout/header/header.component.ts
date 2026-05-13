@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, output } from '@a
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
+import { APP_CONFIG } from '../../config/app.tokens';
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class HeaderComponent {
   readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly appConfig = inject(APP_CONFIG);
 
   private readonly activeRouteData = toSignal(
     this.router.events.pipe(
@@ -24,7 +26,7 @@ export class HeaderComponent {
     { initialValue: this.getDeepestRouteData() },
   );
 
-  readonly pageTitle = computed(() => this.activeRouteData()?.['pageTitle'] ?? 'SIGAE');
+  readonly pageTitle = computed(() => this.activeRouteData()?.['pageTitle'] ?? this.appConfig.appName);
   readonly pageSubtitle = computed(() => this.activeRouteData()?.['pageSubtitle'] ?? '');
 
   onMenuClick() {

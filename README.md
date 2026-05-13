@@ -12,6 +12,15 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Environment configuration
+
+Public frontend configuration lives in `src/environments`.
+
+- `environment.development.ts` is used by `ng serve`.
+- `environment.ts` is used by production builds.
+- Only public values belong here, such as `apiUrl`, `appName`, and temporary feature flags.
+- Never place secrets, database credentials, or JWT keys in Angular environments because they are bundled into browser code.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
