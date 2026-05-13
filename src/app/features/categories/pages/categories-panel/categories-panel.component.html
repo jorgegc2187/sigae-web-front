@@ -11,23 +11,25 @@
       <ul class="flex flex-col gap-1 px-3 py-3">
         @for (category of categoryFilters(); track category.id) {
           <li>
-            <button
-              type="button"
-              class="group relative flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all"
+            <div
+              class="group relative flex items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all"
               [ngClass]="{
                 'border-primary/15 bg-primary/10 shadow-sm':
                   activeCategoryFilterId() === category.id,
                 'border-transparent hover:bg-base-200/55': activeCategoryFilterId() !== category.id,
               }"
-              (click)="setActiveCategoryFilter(category.id)"
             >
-              @if (activeCategoryFilterId() === category.id) {
-                <span class="absolute inset-y-3 left-0 w-1 rounded-r-full bg-primary"></span>
-              }
+              <button
+                type="button"
+                class="min-w-0 flex flex-1 items-center gap-3 text-left"
+                (click)="setActiveCategoryFilter(category.id)"
+              >
+                @if (activeCategoryFilterId() === category.id) {
+                  <span class="absolute inset-y-3 left-0 w-1 rounded-r-full bg-primary"></span>
+                }
 
-              <div class="flex items-center gap-3">
                 <div
-                  class="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors"
                   [ngClass]="{
                     'bg-primary text-primary-content shadow-sm':
                       activeCategoryFilterId() === category.id,
@@ -38,7 +40,7 @@
                   <span class="material-symbols-outlined">{{ category.icon }}</span>
                 </div>
                 <span
-                  class="block text-sm font-semibold transition-colors"
+                  class="block truncate text-sm font-semibold transition-colors"
                   [ngClass]="{
                     'text-primary': activeCategoryFilterId() === category.id,
                     'text-base-content group-hover:text-primary':
@@ -47,18 +49,41 @@
                 >
                   {{ category.name }}
                 </span>
-              </div>
+              </button>
 
-              <span
-                class="material-symbols-outlined transition-colors"
-                [ngClass]="{
-                  'text-primary': activeCategoryFilterId() === category.id,
-                  'text-base-content/35': activeCategoryFilterId() !== category.id,
-                }"
-              >
-                chevron_right
-              </span>
-            </button>
+              @if (category.id === 'all') {
+                <span
+                  class="material-symbols-outlined transition-colors"
+                  [ngClass]="{
+                    'text-primary': activeCategoryFilterId() === category.id,
+                    'text-base-content/35': activeCategoryFilterId() !== category.id,
+                  }"
+                >
+                  chevron_right
+                </span>
+              } @else {
+                <div class="ml-3 flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button
+                    type="button"
+                    class="rounded-lg p-1 text-primary transition-colors hover:bg-primary/10 hover:text-primary/85"
+                    (click)="openEditCategoryModal($any(category))"
+                    aria-label="Editar categoría"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-lg p-1 text-error transition-colors hover:bg-error/10 hover:text-error/85"
+                    (click)="openDeleteCategoryDialog($any(category))"
+                    aria-label="Eliminar categoría"
+                    title="Eliminar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              }
+            </div>
           </li>
         }
       </ul>
@@ -147,8 +172,19 @@
                   class="rounded-lg p-1 text-base-content/35 transition-colors hover:text-primary"
                   (click)="openEditTypeModal(entry)"
                   aria-label="Editar tipo de activo"
+                  title="Editar"
                 >
                   <span class="material-symbols-outlined text-[20px]">edit</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="rounded-lg p-1 text-base-content/35 transition-colors hover:text-error"
+                  (click)="openDeleteTypeDialog(entry)"
+                  aria-label="Eliminar tipo de activo"
+                  title="Eliminar"
+                >
+                  <span class="material-symbols-outlined text-[20px]">delete</span>
                 </button>
               </div>
             </div>
@@ -302,7 +338,7 @@
     <div
       class="flex items-center justify-between border-b border-base-300 bg-base-100 px-4 py-4 sm:px-5"
     >
-      <h2 class="text-lg font-bold text-base-content">Nueva Categoría</h2>
+      <h2 class="text-lg font-bold text-base-content">{{ categoryFormTitle() }}</h2>
       <form method="dialog">
         <button
           type="submit"
@@ -325,8 +361,8 @@
           type="text"
           class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
           placeholder="Ej. Mobiliario, Laboratorio"
-          [ngModel]="categoryDraftName()"
-          (ngModelChange)="categoryDraftName.set($event)"
+          [ngModel]="categoryFormDraft().name"
+          (ngModelChange)="updateCategoryDraftName($event)"
         />
       </app-form-field>
     </div>
@@ -344,10 +380,60 @@
         />
       </form>
       <app-action-button
-        label="Crear Categoría"
+        [label]="categoryFormSubmitLabel()"
         [fullWidth]="true"
         className="shadow-sm sm:w-auto"
         (clicked)="submitCategory()"
+      />
+    </div>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>Cerrar</button>
+  </form>
+</dialog>
+
+<dialog #deleteDialog class="modal" (close)="onDeleteDialogClose()">
+  <div
+    class="modal-box mx-3 flex max-h-[calc(100dvh-1.5rem)] w-auto max-w-md flex-col rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl sm:mx-0 sm:w-full sm:rounded-xl"
+  >
+    <div
+      class="flex items-center justify-between border-b border-base-300 bg-base-100 px-4 py-4 sm:px-5"
+    >
+      <h2 class="text-lg font-bold text-base-content">{{ deleteDialogTitle() }}</h2>
+      <form method="dialog">
+        <button
+          type="submit"
+          class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+          aria-label="Cerrar confirmación de eliminación"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="overflow-y-auto px-4 py-5 text-sm text-base-content/70 sm:px-6">
+      <p>{{ deleteDialogMessage() }}</p>
+    </div>
+
+    <div
+      class="flex flex-col-reverse gap-3 border-t border-base-300 bg-base-200/40 px-4 py-4 sm:flex-row sm:justify-end"
+    >
+      <form method="dialog">
+        <app-action-button
+          label="Cancelar"
+          variant="ghost"
+          [fullWidth]="true"
+          className="sm:w-auto"
+          type="submit"
+        />
+      </form>
+      <app-action-button
+        label="Eliminar"
+        variant="neutral"
+        [fullWidth]="true"
+        className="sm:w-auto"
+        (clicked)="confirmDeleteTarget()"
       />
     </div>
   </div>

@@ -19,6 +19,7 @@ import { SearchInputComponent } from '../../../../shared/ui/search-input/search-
 import { AssetType, Attribute, Category } from '../../models/category.model';
 
 type TypeFormMode = 'create' | 'edit';
+type CategoryFormMode = 'create' | 'edit';
 type CategoryFilterId = 'all' | string;
 
 interface AttributeDraft {
@@ -47,6 +48,18 @@ interface AttributesModalContext {
   typeId: string;
 }
 
+interface CategoryFormDraft {
+  id: string | null;
+  name: string;
+}
+
+interface DeleteTarget {
+  type: 'category' | 'assetType';
+  id: string;
+  categoryId?: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-categories-panel',
   standalone: true,
@@ -68,6 +81,7 @@ export class CategoriesPanelComponent {
   private readonly typeDialog = viewChild<ElementRef<HTMLDialogElement>>('typeDialog');
   private readonly attributesDialog =
     viewChild<ElementRef<HTMLDialogElement>>('attributesDialog');
+  private readonly deleteDialog = viewChild<ElementRef<HTMLDialogElement>>('deleteDialog');
 
   private idSequence = 100;
   private readonly desktopPageSize = 10;
@@ -79,11 +93,13 @@ export class CategoriesPanelComponent {
   readonly desktopCurrentPage = signal(1);
   readonly mobileCurrentPage = signal(1);
 
-  readonly categoryDraftName = signal('');
+  readonly categoryFormMode = signal<CategoryFormMode>('create');
+  readonly categoryFormDraft = signal<CategoryFormDraft>(this.createEmptyCategoryDraft());
   readonly typeFormMode = signal<TypeFormMode>('create');
   readonly typeFormOriginCategoryId = signal<string | null>(null);
   readonly typeFormDraft = signal<TypeFormDraft>(this.createEmptyTypeDraft());
   readonly attributesModalContext = signal<AttributesModalContext | null>(null);
+  readonly deleteTarget = signal<DeleteTarget | null>(null);
 
   readonly categoriesWithMetrics = computed(() =>
     this.categories().map((category) => ({
@@ -242,6 +258,29 @@ export class CategoriesPanelComponent {
     () => `${Math.min(this.mobileCurrentPage(), this.mobileTotalPages())} de ${this.mobileTotalPages()}`,
   );
 
+  readonly categoryFormTitle = computed(() =>
+    this.categoryFormMode() === 'edit' ? 'Editar Categoría' : 'Nueva Categoría',
+  );
+
+  readonly categoryFormSubmitLabel = computed(() =>
+    this.categoryFormMode() === 'edit' ? 'Guardar cambios' : 'Crear Categoría',
+  );
+
+  readonly deleteDialogTitle = computed(() =>
+    this.deleteTarget()?.type === 'category' ? 'Eliminar categoría' : 'Eliminar tipo de activo',
+  );
+
+  readonly deleteDialogMessage = computed(() => {
+    const target = this.deleteTarget();
+    if (!target) {
+      return '';
+    }
+
+    return target.type === 'category'
+      ? `Se eliminará la categoría "${target.label}" con todos sus tipos asociados. Esta acción no se puede deshacer.`
+      : `Se eliminará el tipo de activo "${target.label}". Esta acción no se puede deshacer.`;
+  });
+
   constructor() {
     effect(() => {
       this.filteredTypeEntries();
@@ -274,7 +313,17 @@ export class CategoriesPanelComponent {
   }
 
   openCategoryModal() {
-    this.categoryDraftName.set('');
+    this.categoryFormMode.set('create');
+    this.categoryFormDraft.set(this.createEmptyCategoryDraft());
+    this.categoryDialog()?.nativeElement.showModal();
+  }
+
+  openEditCategoryModal(category: Category) {
+    this.categoryFormMode.set('edit');
+    this.categoryFormDraft.set({
+      id: category.id,
+      name: category.name,
+    });
     this.categoryDialog()?.nativeElement.showModal();
   }
 
@@ -283,22 +332,40 @@ export class CategoriesPanelComponent {
   }
 
   submitCategory() {
-    const name = this.categoryDraftName().trim();
+    const draft = this.categoryFormDraft();
+    const name = draft.name.trim();
     if (!name) {
       return;
     }
 
-    const newCategory: Category = {
-      id: this.createId('category'),
-      name,
-      icon: inferCategoryIcon(name),
-      typesCount: 0,
-      assetsCount: 0,
-      types: [],
-    };
+    if (this.categoryFormMode() === 'edit' && draft.id) {
+      this.categories.update((categories) =>
+        categories.map((category) =>
+          category.id === draft.id
+            ? {
+                ...category,
+                name,
+                icon: inferCategoryIcon(name),
+              }
+            : category,
+        ),
+      );
+      this.activeCategoryFilterId.set(draft.id);
+    } else {
+      const newCategory: Category = {
+        id: this.createId('category'),
+        name,
+        icon: inferCategoryIcon(name),
+        typesCount: 0,
+        assetsCount: 0,
+        types: [],
+      };
 
-    this.categories.update((categories) => [...categories, newCategory]);
-    this.activeCategoryFilterId.set(newCategory.id);
+      this.categories.update((categories) => [...categories, newCategory]);
+      this.activeCategoryFilterId.set(newCategory.id);
+    }
+
+    this.resetPagination();
     this.closeCategoryModal();
   }
 
@@ -337,6 +404,13 @@ export class CategoriesPanelComponent {
 
   updateTypeDraftName(name: string) {
     this.typeFormDraft.update((draft) => ({
+      ...draft,
+      name,
+    }));
+  }
+
+  updateCategoryDraftName(name: string) {
+    this.categoryFormDraft.update((draft) => ({
       ...draft,
       name,
     }));
@@ -486,6 +560,73 @@ export class CategoriesPanelComponent {
     this.attributesDialog()?.nativeElement.close();
   }
 
+  openDeleteCategoryDialog(category: Category) {
+    this.deleteTarget.set({
+      type: 'category',
+      id: category.id,
+      label: category.name,
+    });
+    this.deleteDialog()?.nativeElement.showModal();
+  }
+
+  openDeleteTypeDialog(entry: TypeListEntry) {
+    this.deleteTarget.set({
+      type: 'assetType',
+      id: entry.type.id,
+      categoryId: entry.categoryId,
+      label: entry.type.name,
+    });
+    this.deleteDialog()?.nativeElement.showModal();
+  }
+
+  closeDeleteDialog() {
+    this.deleteDialog()?.nativeElement.close();
+  }
+
+  confirmDeleteTarget() {
+    const target = this.deleteTarget();
+    if (!target) {
+      return;
+    }
+
+    if (target.type === 'category') {
+      this.categories.update((categories) =>
+        categories.filter((category) => category.id !== target.id),
+      );
+
+      if (this.activeCategoryFilterId() === target.id) {
+        this.activeCategoryFilterId.set('all');
+      }
+
+      const attributesContext = this.attributesModalContext();
+      if (attributesContext?.categoryId === target.id) {
+        this.closeAttributesModal();
+      }
+    } else if (target.categoryId) {
+      const attributesContext = this.attributesModalContext();
+      if (
+        attributesContext?.categoryId === target.categoryId &&
+        attributesContext.typeId === target.id
+      ) {
+        this.closeAttributesModal();
+      }
+
+      this.categories.update((categories) =>
+        categories.map((category) =>
+          category.id === target.categoryId
+            ? this.syncCategoryMetrics({
+                ...category,
+                types: category.types.filter((type) => type.id !== target.id),
+              })
+            : category,
+        ),
+      );
+    }
+
+    this.resetPagination();
+    this.closeDeleteDialog();
+  }
+
   addAttributeFromDetails() {
     const entry = this.currentAttributesEntry();
     if (!entry) {
@@ -541,7 +682,8 @@ export class CategoriesPanelComponent {
   }
 
   onCategoryDialogClose() {
-    this.categoryDraftName.set('');
+    this.categoryFormMode.set('create');
+    this.categoryFormDraft.set(this.createEmptyCategoryDraft());
   }
 
   onTypeDialogClose() {
@@ -557,6 +699,10 @@ export class CategoriesPanelComponent {
 
   onAttributesDialogClose() {
     this.attributesModalContext.set(null);
+  }
+
+  onDeleteDialogClose() {
+    this.deleteTarget.set(null);
   }
 
   private normalizeDraftAttributes(attributes: AttributeDraft[]): Attribute[] {
@@ -601,6 +747,13 @@ export class CategoriesPanelComponent {
     };
   }
 
+  private createEmptyCategoryDraft(): CategoryFormDraft {
+    return {
+      id: null,
+      name: '',
+    };
+  }
+
   private createEmptyTypeDraft(categoryId = ''): TypeFormDraft {
     return {
       id: null,
@@ -628,6 +781,11 @@ export class CategoriesPanelComponent {
   private createId(prefix: string): string {
     this.idSequence += 1;
     return `${prefix}-${this.idSequence}`;
+  }
+
+  private resetPagination() {
+    this.desktopCurrentPage.set(1);
+    this.mobileCurrentPage.set(1);
   }
 
   private cloneCategories(categories: Category[]): Category[] {
