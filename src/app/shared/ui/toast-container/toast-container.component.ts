@@ -14,12 +14,12 @@ import {
 export class ToastContainerComponent {
   readonly notifications = inject(NotificationService);
 
-  getAlertClass(type: NotificationType): string {
+  getToastClass(type: NotificationType): string {
     const map: Record<NotificationType, string> = {
-      success: 'alert-success',
-      error: 'alert-error',
-      warning: 'alert-warning',
-      info: 'alert-info',
+      success: 'border-success bg-success text-success-content',
+      error: 'border-error bg-error text-error-content',
+      warning: 'border-warning bg-warning text-warning-content',
+      info: 'border-info bg-info text-info-content',
     };
 
     return map[type];

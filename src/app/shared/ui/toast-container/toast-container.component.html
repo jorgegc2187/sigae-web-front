@@ -3,8 +3,8 @@
     <div
       role="status"
       aria-live="polite"
-      class="alert w-full items-start gap-3 border border-base-300 shadow-lg"
-      [class]="getAlertClass(toast.type)"
+      class="flex w-full items-start gap-3 rounded-xl border px-4 py-3 shadow-lg"
+      [class]="getToastClass(toast.type)"
     >
       <span class="material-symbols-outlined mt-0.5 text-[20px]">
         {{ getIcon(toast.type) }}
@@ -19,7 +19,7 @@
 
       <button
         type="button"
-        class="btn btn-ghost btn-xs btn-square -mr-1 -mt-1"
+        class="-mr-1 -mt-1 inline-flex h-7 w-7 items-center justify-center rounded-lg text-current/80 transition-colors hover:bg-white/15 hover:text-current focus:outline-none focus:ring-2 focus:ring-white/35"
         [attr.aria-label]="'Cerrar notificación: ' + toast.message"
         (click)="dismiss(toast)"
       >
