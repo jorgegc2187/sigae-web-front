@@ -482,7 +482,7 @@
           <app-form-field label="Categoría" fieldId="type-category" controlType="select">
             <select
               id="type-category"
-              class="w-full appearance-none border-0 bg-transparent p-0 pr-8 text-sm text-base-content focus:outline-none"
+              class="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 pr-10 text-sm text-base-content focus:outline-none"
               [ngModel]="typeFormDraft().categoryId"
               (ngModelChange)="updateTypeDraftCategory($event)"
             >
@@ -491,6 +491,12 @@
                 <option [value]="category.id">{{ category.name }}</option>
               }
             </select>
+            <span
+              formFieldSuffix
+              class="material-symbols-outlined pointer-events-none text-[20px] text-base-content/40"
+            >
+              expand_more
+            </span>
           </app-form-field>
         </div>
 

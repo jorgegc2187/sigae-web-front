@@ -19,7 +19,9 @@
       <div class="min-w-0 flex-1">
         <ng-content />
       </div>
-      <ng-content select="[formFieldSuffix]" />
+      <div class="flex shrink-0 items-center">
+        <ng-content select="[formFieldSuffix]" />
+      </div>
     }
   </div>
 
