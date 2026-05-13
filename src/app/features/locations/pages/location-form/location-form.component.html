@@ -48,19 +48,16 @@
           </app-form-field>
 
           <!-- Descripción -->
-          <app-form-field
-            label="Descripción"
-            fieldId="locationDescription"
-            controlType="textarea"
-          >
+          <fieldset class="fieldset w-full">
+            <label for="locationDescription" class="fieldset-legend">Descripción</label>
             <textarea
               id="locationDescription"
               formControlName="description"
-              class="w-full resize-y border-0 bg-transparent px-0 py-3 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+              class="min-h-24 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Detalles adicionales sobre la ubicación..."
               rows="4"
             ></textarea>
-          </app-form-field>
+          </fieldset>
         </div>
 
         <!-- Section: Asignación de Encargados -->
