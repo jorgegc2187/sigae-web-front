@@ -4,12 +4,7 @@
   >
     <div class="flex items-center justify-between border-b border-base-300 bg-base-100 p-5">
       <h2 class="text-xl font-bold text-base-content">Categorías</h2>
-      <app-action-button
-        label="Nueva"
-        icon="add"
-        size="sm"
-        (clicked)="openCategoryModal()"
-      />
+      <app-action-button label="Nueva" icon="add" size="sm" (clicked)="openCategoryModal()" />
     </div>
 
     <div class="flex-1 overflow-y-auto">
@@ -603,12 +598,7 @@
           Agregar atributo
         </button>
         <form method="dialog">
-          <app-action-button
-            label="Cerrar"
-            variant="neutral"
-            className="shadow-sm"
-            type="submit"
-          />
+          <app-action-button label="Cerrar" variant="neutral" className="shadow-sm" type="submit" />
         </form>
       </div>
     }
