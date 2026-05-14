@@ -43,7 +43,7 @@
                 (change)="updateAssetCategory($event)"
               >
                 <option value="all">Todas las categorias</option>
-                @for (category of assetCategories; track category.id) {
+                @for (category of assetCategories(); track category.id) {
                   <option [value]="category.id">{{ category.name }}</option>
                 }
               </select>
@@ -62,7 +62,7 @@
                 (change)="updateAssetLocation($event)"
               >
                 <option value="all">Todas las ubicaciones</option>
-                @for (location of assetLocations; track location.id) {
+                @for (location of assetLocations(); track location.id) {
                   <option [value]="location.id">{{ location.name }}</option>
                 }
               </select>

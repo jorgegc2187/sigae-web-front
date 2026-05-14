@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { map } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
 
 export type ReportExportFormat = 'pdf' | 'excel' | 'word';
@@ -30,11 +31,27 @@ export interface ReportsSummary {
   lowStockCategories: number;
 }
 
+export interface ReportFilterOption {
+  id: string;
+  name: string;
+}
+
+interface CategoryResponse {
+  id: string;
+  name: string;
+}
+
+interface LocationResponse {
+  id: string;
+  name: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
   private readonly http = inject(HttpClient);
   private readonly appConfig = inject(APP_CONFIG);
   private readonly baseUrl = `${this.appConfig.apiUrl}/reports`;
+  private readonly catalogBaseUrl = this.appConfig.apiUrl;
 
   summary() {
     return this.http.get<ReportsSummary>(`${this.baseUrl}/summary`);
@@ -44,6 +61,18 @@ export class ReportsService {
     return this.http.get<AssetReportRow[]>(`${this.baseUrl}/assets`, {
       params: this.buildParams(filters),
     });
+  }
+
+  listAssetCategories() {
+    return this.http
+      .get<CategoryResponse[]>(`${this.catalogBaseUrl}/categories`)
+      .pipe(map((categories) => categories.map((category) => ({ id: category.id, name: category.name }))));
+  }
+
+  listAssetLocations() {
+    return this.http
+      .get<LocationResponse[]>(`${this.catalogBaseUrl}/locations`)
+      .pipe(map((locations) => locations.map((location) => ({ id: location.id, name: location.name }))));
   }
 
   downloadAssetsReport(filters: AssetReportFilters, format: ReportExportFormat) {
