@@ -4,7 +4,6 @@ import { ToastContainerComponent } from './shared/ui/toast-container/toast-conta
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [RouterOutlet, ToastContainerComponent],
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 
 @Component({
   selector: 'app-data-listing',
-  standalone: true,
   templateUrl: './data-listing.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

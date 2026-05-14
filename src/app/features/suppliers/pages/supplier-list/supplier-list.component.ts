@@ -1,34 +1,28 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
-import { MOCK_SUPPLIERS } from '../../../inventory/data/inventory.mock';
 import { Supplier } from '../../models/supplier.model';
+import { SuppliersService } from '../../services/suppliers.service';
 
 type SupplierDraft = { name: string; ruc: string; email: string; phone: string; address: string };
 
 @Component({
   selector: 'app-supplier-list',
-  standalone: true,
   imports: [FormsModule, ActionButtonComponent, DataListingComponent, SearchInputComponent, StatusBadgeComponent],
   templateUrl: './supplier-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SupplierListComponent {
   private readonly notifications = inject(NotificationService);
+  private readonly suppliersService = inject(SuppliersService);
 
-  readonly suppliers = signal<Supplier[]>(
-    MOCK_SUPPLIERS.map((supplier, index) => ({
-      ...supplier,
-      email: `contacto${index + 1}@proveedor.edu.pe`,
-      phone: `999 000 00${index + 1}`,
-      address: 'Lima, Perú',
-      assetsCount: index + 2,
-    })),
-  );
+  readonly suppliers = toSignal(this.suppliersService.list(), { initialValue: [] });
   readonly query = signal('');
   readonly isModalOpen = signal(false);
   readonly editingSupplierId = signal<string | null>(null);
@@ -70,36 +64,34 @@ export class SupplierListComponent {
     this.draft.update((draft) => ({ ...draft, [field]: value }));
   }
 
-  saveSupplier(): void {
+  async saveSupplier(): Promise<void> {
     const draft = this.draft();
     if (!draft.name.trim()) return;
 
     const editingId = this.editingSupplierId();
-    if (editingId) {
-      this.suppliers.update((items) =>
-        items.map((item) => item.id === editingId ? { ...item, ...draft } : item),
-      );
-      this.notifications.success({ message: 'Proveedor actualizado correctamente.' });
-    } else {
-      this.suppliers.update((items) => [
-        ...items,
-        {
-          id: `supplier-${Date.now()}`,
-          ...draft,
-          status: 'Activo',
-          assetsCount: 0,
-        },
-      ]);
-      this.notifications.success({ message: 'Proveedor registrado correctamente.' });
-    }
+    try {
+      if (editingId) {
+        await firstValueFrom(this.suppliersService.update(editingId, this.suppliersService.toRequest({ ...draft, status: 'Activo' })));
+        this.notifications.success({ message: 'Proveedor actualizado correctamente.' });
+      } else {
+        await firstValueFrom(this.suppliersService.create(this.suppliersService.toRequest({ ...draft, status: 'Activo' })));
+        this.notifications.success({ message: 'Proveedor registrado correctamente.' });
+      }
 
-    this.closeModal();
+      window.location.reload();
+      this.closeModal();
+    } catch {
+      this.notifications.error({ message: 'No se pudo guardar el proveedor.' });
+    }
   }
 
-  deactivate(supplier: Supplier): void {
-    this.suppliers.update((items) =>
-      items.map((item) => item.id === supplier.id ? { ...item, status: 'Inactivo' } : item),
-    );
-    this.notifications.info({ message: 'Proveedor desactivado.' });
+  async deactivate(supplier: Supplier): Promise<void> {
+    try {
+      await firstValueFrom(this.suppliersService.deactivate(supplier.id));
+      window.location.reload();
+      this.notifications.info({ message: 'Proveedor desactivado.' });
+    } catch {
+      this.notifications.error({ message: 'No se pudo desactivar el proveedor.' });
+    }
   }
 }

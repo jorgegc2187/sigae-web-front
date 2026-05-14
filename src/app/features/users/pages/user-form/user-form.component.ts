@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
 import { UserRole } from '../../models/user.model';
-import { UsersMockStore } from '../../services/users-mock-store.service';
+import { UsersService } from '../../services/users.service';
+import { LocationsService } from '../../../locations/services/locations.service';
 
 interface LocationOption {
   id: string;
@@ -15,7 +17,6 @@ interface LocationOption {
 
 @Component({
   selector: 'app-user-form',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     RouterLink,
@@ -30,25 +31,20 @@ interface LocationOption {
   },
 })
 export class UserFormComponent {
-  private readonly fb = inject(FormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
   private readonly router = inject(Router);
-  private readonly usersStore = inject(UsersMockStore);
+  private readonly usersService = inject(UsersService);
+  private readonly locationsService = inject(LocationsService);
   private readonly notifications = inject(NotificationService);
 
   readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
 
   readonly roles: UserRole[] = ['Administrador', 'Encargado', 'Solo Lectura'];
-  readonly locations = signal<LocationOption[]>([
-    { id: 'location-1', name: 'Aula de Cómputo' },
-    { id: 'location-2', name: 'Biblioteca' },
-    { id: 'location-3', name: 'Dirección' },
-    { id: 'location-4', name: 'Sala de Profesores' },
-    { id: 'location-5', name: 'Aula 1A' },
-    { id: 'location-6', name: 'Laboratorio de Ciencias' },
-  ]);
-  readonly selectedLocations = signal<LocationOption[]>([
-    { id: 'location-1', name: 'Aula de Cómputo' },
-  ]);
+  private readonly locationsResource = this.locationsService.listResource();
+  readonly locations = computed<LocationOption[]>(() =>
+    this.locationsResource.value().map((location) => ({ id: location.id, name: location.name })),
+  );
+  readonly selectedLocations = signal<LocationOption[]>([]);
   readonly locationQuery = signal('');
   readonly isLocationDropdownOpen = signal(false);
 
@@ -56,7 +52,7 @@ export class UserFormComponent {
     firstName: ['', [Validators.required]],
     lastName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
-    role: ['', [Validators.required]],
+    role: this.fb.control<UserRole | ''>('', [Validators.required]),
     sendInvitation: [true],
     password: [''],
   });
@@ -137,24 +133,35 @@ export class UserFormComponent {
     }
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     const value = this.form.getRawValue();
-    const user = this.usersStore.createUser({
-      firstName: value.firstName ?? '',
-      lastName: value.lastName ?? '',
-      email: value.email ?? '',
-      role: value.role as UserRole,
-      locations: this.selectedLocations().map((location) => location.name),
-      password: value.sendInvitation ? undefined : (value.password ?? ''),
-    });
+    const fullName = `${value.firstName.trim()} ${value.lastName.trim()}`.trim();
 
-    this.notifications.success({ message: `Usuario "${user.name}" creado correctamente.` });
-    this.router.navigate(['/settings/users']);
+    try {
+      const user = await firstValueFrom(
+        this.usersService.create({
+          fullName,
+          email: value.email,
+          password: value.sendInvitation ? this.createTemporaryPassword() : value.password,
+          role: this.usersService.toApiRole(value.role as UserRole),
+          status: 'ACTIVE',
+        }),
+      );
+
+      this.notifications.success({ message: `Usuario "${user.fullName}" creado correctamente.` });
+      await this.router.navigate(['/settings/users']);
+    } catch {
+      this.notifications.error({ message: 'No se pudo crear el usuario.' });
+    }
+  }
+
+  private createTemporaryPassword(): string {
+    return `SIGAE-${globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)}`;
   }
 
   private syncPasswordValidators(sendInvitation: boolean): void {

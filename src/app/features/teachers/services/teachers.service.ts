@@ -4,10 +4,12 @@ import { APP_CONFIG } from '../../../core/config/app.tokens';
 
 export interface TeacherDto {
   id: string;
+  dni: string;
   fullName: string;
-  documentNumber?: string;
+  specialty?: string;
   email?: string;
-  status?: 'Activo' | 'Inactivo';
+  phone?: string;
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 @Injectable({ providedIn: 'root' })

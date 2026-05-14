@@ -8,29 +8,31 @@ import {
   StatusBadgeTone,
 } from '../../../../shared/ui/status-badge/status-badge.component';
 import { User, UserRole, UserStatus } from '../../models/user.model';
-import { UsersMockStore } from '../../services/users-mock-store.service';
+import { UsersService } from '../../services/users.service';
 
 @Component({
   selector: 'app-user-list',
-  standalone: true,
   imports: [SearchInputComponent, ActionButtonComponent, DataListingComponent, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent {
   private readonly notifications = inject(NotificationService);
-  private readonly usersStore = inject(UsersMockStore);
+  private readonly usersService = inject(UsersService);
+  private readonly usersResource = this.usersService.listResource();
 
   searchQuery = signal('');
   selectedRole = signal<UserRole | ''>('');
   currentPage = signal(1);
   readonly pageSize = 10;
+  readonly isLoading = computed(() => this.usersResource.isLoading());
 
   filteredUsers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const role = this.selectedRole();
+    const users = this.usersResource.value().map((user) => this.usersService.toUser(user));
 
-    return this.usersStore.users().filter((u) => {
+    return users.filter((u) => {
       const matchesQuery =
         !query ||
         u.name.toLowerCase().includes(query) ||
@@ -72,18 +74,26 @@ export class UserListComponent {
     this.currentPage.set(page);
   }
 
-  onEdit(userId: number) {
+  onEdit(userId: string) {
     console.log('Editar usuario:', userId);
     this.notifications.info({ message: 'Edición de usuario pendiente de conectar.' });
   }
 
   onToggleStatus(user: User) {
-    console.log('Toggle status:', user.id, user.status);
-    this.notifications.success({
-      message:
-        user.status === 'Activo'
-          ? `Usuario ${user.name} desactivado correctamente.`
-          : `Usuario ${user.name} activado correctamente.`,
+    const nextStatus: UserStatus = user.status === 'Activo' ? 'Inactivo' : 'Activo';
+    this.usersService.updateStatus(user.id, this.usersService.toApiStatus(nextStatus)).subscribe({
+      next: () => {
+        this.usersResource.reload();
+        this.notifications.success({
+          message:
+            nextStatus === 'Inactivo'
+              ? `Usuario ${user.name} desactivado correctamente.`
+              : `Usuario ${user.name} activado correctamente.`,
+        });
+      },
+      error: () => {
+        this.notifications.error({ message: 'No se pudo actualizar el estado del usuario.' });
+      },
     });
   }
 

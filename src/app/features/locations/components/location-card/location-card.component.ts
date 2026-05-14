@@ -3,7 +3,6 @@ import { Location } from '../../models/location.model';
 
 @Component({
   selector: 'app-location-card',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './location-card.component.html',
   host: {

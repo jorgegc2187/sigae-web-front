@@ -1,9 +1,12 @@
 import { ChangeDetectionStrategy, Component, ElementRef, signal, viewChild, computed, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule, NonNullableFormBuilder, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { UsersService } from '../../../users/services/users.service';
+import { LocationsService } from '../../services/locations.service';
 
 interface UserOption {
   id: string;
@@ -13,7 +16,6 @@ interface UserOption {
 
 @Component({
   selector: 'app-location-form',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, RouterLink, FormFieldComponent, ActionButtonComponent],
   templateUrl: './location-form.component.html',
@@ -22,18 +24,20 @@ interface UserOption {
   },
 })
 export class LocationFormComponent {
-  private fb = inject(FormBuilder);
+  private fb = inject(NonNullableFormBuilder);
   private notifications = inject(NotificationService);
+  private router = inject(Router);
+  private usersService = inject(UsersService);
+  private locationsService = inject(LocationsService);
+  private usersResource = this.usersService.listResource();
 
-  allUsers = signal<UserOption[]>([
-    { id: '1', name: 'Juan Pérez', initials: 'JP' },
-    { id: '2', name: 'María Gómez', initials: 'MG' },
-    { id: '3', name: 'Carlos Huaman', initials: 'CH' },
-    { id: '4', name: 'Ana Mori', initials: 'AM' },
-    { id: '5', name: 'Pedro Vera', initials: 'PV' },
-    { id: '6', name: 'Rosa Luna', initials: 'RL' },
-    { id: '7', name: 'Luis Castro', initials: 'LC' },
-  ]);
+  allUsers = computed<UserOption[]>(() =>
+    this.usersResource.value().map((user) => ({
+      id: user.id,
+      name: user.fullName,
+      initials: user.fullName.split(/\s+/).slice(0, 2).map((part) => part[0] ?? '').join('').toUpperCase(),
+    })),
+  );
 
   selectedManagers = signal<UserOption[]>([]);
   userSearchQuery = signal('');
@@ -49,12 +53,12 @@ export class LocationFormComponent {
     );
   });
 
-  form: FormGroup = this.fb.group({
+  form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     description: [''],
   });
 
-  get nameControl() { return this.form.get('name')!; }
+  get nameControl() { return this.form.controls.name; }
 
   onClickOutside(event: MouseEvent) {
     const container = this.searchContainer();
@@ -83,12 +87,23 @@ export class LocationFormComponent {
     this.dropdownOpen.set(true);
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    console.log('Submit', { ...this.form.value, managers: this.selectedManagers() });
-    this.notifications.success({ message: 'Ubicación registrada correctamente.' });
+
+    const value = this.form.getRawValue();
+    try {
+      await firstValueFrom(this.locationsService.create({
+        name: value.name,
+        description: value.description || 'Sin descripción',
+        status: 'ACTIVE',
+      }));
+      this.notifications.success({ message: 'Ubicación registrada correctamente.' });
+      await this.router.navigate(['/settings/locations']);
+    } catch {
+      this.notifications.error({ message: 'No se pudo registrar la ubicación.' });
+    }
   }
 }

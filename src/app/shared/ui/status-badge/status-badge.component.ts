@@ -4,7 +4,6 @@ export type StatusBadgeTone = 'success' | 'error' | 'neutral' | 'warning' | 'inf
 
 @Component({
   selector: 'app-status-badge',
-  standalone: true,
   templateUrl: './status-badge.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

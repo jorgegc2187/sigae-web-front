@@ -3,7 +3,6 @@ import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-home',
-  standalone: true,
   imports: [DecimalPipe],
   templateUrl: './dashboard-home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

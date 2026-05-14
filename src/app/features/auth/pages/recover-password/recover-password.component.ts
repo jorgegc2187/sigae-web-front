@@ -5,7 +5,7 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { APP_CONFIG } from '../../../../core/config/app.tokens';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
@@ -13,13 +13,12 @@ import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.
 
 @Component({
   selector: 'app-recover-password',
-  standalone: true,
   imports: [ReactiveFormsModule, RouterLink, FormFieldComponent, ActionButtonComponent],
   templateUrl: './recover-password.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecoverPasswordComponent {
-  private fb = inject(FormBuilder);
+  private fb = inject(NonNullableFormBuilder);
   private appConfig = inject(APP_CONFIG);
 
   readonly appName = this.appConfig.appName;

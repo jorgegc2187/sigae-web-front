@@ -1,21 +1,26 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { MOCK_ASSET_LOCATIONS, MOCK_CATEGORY_FILTERS } from '../../../../shared/models/mock-inventory-catalog.model';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
-import { INVENTORY_ASSETS } from '../../data/inventory.mock';
+import { CategoriesService } from '../../../categories/services/categories.service';
+import { LocationsService } from '../../../locations/services/locations.service';
 import { AssetCondition } from '../../models/inventory.model';
+import { AssetsService } from '../../services/assets.service';
 
 @Component({
   selector: 'app-inventory-list',
-  standalone: true,
   imports: [RouterLink, ActionButtonComponent, DataListingComponent, SearchInputComponent, StatusBadgeComponent],
   templateUrl: './inventory-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InventoryListComponent {
+  private readonly assetsService = inject(AssetsService);
+  private readonly categoriesService = inject(CategoriesService);
+  private readonly locationsService = inject(LocationsService);
+
   readonly query = signal('');
   readonly categoryId = signal('all');
   readonly locationId = signal('all');
@@ -23,13 +28,14 @@ export class InventoryListComponent {
   readonly currentPage = signal(1);
   readonly pageSize = 10;
 
-  readonly categories = MOCK_CATEGORY_FILTERS;
-  readonly locations = MOCK_ASSET_LOCATIONS;
+  readonly assets = toSignal(this.assetsService.list(), { initialValue: [] });
+  readonly categories = toSignal(this.categoriesService.list(), { initialValue: [] });
+  readonly locations = toSignal(this.locationsService.list(), { initialValue: [] });
   readonly conditions: AssetCondition[] = ['Bueno', 'Regular', 'Malo', 'Mantenimiento', 'Dado de baja'];
 
   readonly filteredAssets = computed(() => {
     const query = this.query().trim().toLowerCase();
-    return INVENTORY_ASSETS.filter((asset) => {
+    return this.assets().filter((asset) => {
       const matchesQuery = !query || [asset.name, asset.code, asset.serial, asset.locationName, asset.typeName]
         .some((value) => value.toLowerCase().includes(query));
       const matchesCategory = this.categoryId() === 'all' || asset.categoryId === this.categoryId();

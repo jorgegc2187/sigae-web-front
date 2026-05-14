@@ -1,7 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { map } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
-import { InventoryAsset, AssetTraceabilityEntry } from '../models/inventory.model';
+import {
+  ApiAssetCondition,
+  AssetCondition,
+  AssetRequest,
+  AssetResponse,
+  AssetTraceabilityEntry,
+  InventoryAsset,
+} from '../models/inventory.model';
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {
@@ -10,22 +18,77 @@ export class AssetsService {
   private readonly baseUrl = `${this.appConfig.apiUrl}/assets`;
 
   list() {
-    return this.http.get<InventoryAsset[]>(this.baseUrl);
+    return this.http.get<AssetResponse[]>(this.baseUrl).pipe(
+      map((assets) => assets.map((asset) => this.toInventoryAsset(asset))),
+    );
   }
 
   getById(id: string) {
-    return this.http.get<InventoryAsset>(`${this.baseUrl}/${id}`);
+    return this.http.get<AssetResponse>(`${this.baseUrl}/${id}`).pipe(
+      map((asset) => this.toInventoryAsset(asset)),
+    );
   }
 
-  create(payload: Partial<InventoryAsset>) {
-    return this.http.post<InventoryAsset>(this.baseUrl, payload);
+  create(payload: AssetRequest) {
+    return this.http.post<AssetResponse>(this.baseUrl, payload).pipe(
+      map((asset) => this.toInventoryAsset(asset)),
+    );
   }
 
-  update(id: string, payload: Partial<InventoryAsset>) {
-    return this.http.patch<InventoryAsset>(`${this.baseUrl}/${id}`, payload);
+  update(id: string, payload: AssetRequest) {
+    return this.http.patch<AssetResponse>(`${this.baseUrl}/${id}`, payload).pipe(
+      map((asset) => this.toInventoryAsset(asset)),
+    );
   }
 
   traceability(id: string) {
     return this.http.get<AssetTraceabilityEntry[]>(`${this.baseUrl}/${id}/traceability`);
+  }
+
+  toApiCondition(condition: AssetCondition): ApiAssetCondition {
+    const conditions: Record<AssetCondition, ApiAssetCondition> = {
+      Bueno: 'BUENO',
+      Regular: 'REGULAR',
+      Malo: 'MALO',
+      Mantenimiento: 'MANTENIMIENTO',
+      'Dado de baja': 'DADO_DE_BAJA',
+    };
+    return conditions[condition];
+  }
+
+  private toUiCondition(condition: ApiAssetCondition): AssetCondition {
+    const conditions: Record<ApiAssetCondition, AssetCondition> = {
+      BUENO: 'Bueno',
+      REGULAR: 'Regular',
+      MALO: 'Malo',
+      MANTENIMIENTO: 'Mantenimiento',
+      DADO_DE_BAJA: 'Dado de baja',
+    };
+    return conditions[condition];
+  }
+
+  private toInventoryAsset(asset: AssetResponse): InventoryAsset {
+    return {
+      id: asset.id,
+      code: asset.code,
+      name: asset.name,
+      categoryId: asset.categoryId,
+      categoryName: asset.categoryName,
+      typeId: asset.assetTypeId,
+      typeName: asset.assetTypeName,
+      icon: 'inventory_2',
+      locationId: asset.locationId,
+      locationName: asset.locationName,
+      supplierId: asset.supplierId ?? undefined,
+      supplierName: asset.supplierName ?? undefined,
+      condition: this.toUiCondition(asset.condition),
+      serial: asset.serialNumber ?? 'Sin serie',
+      barcode: asset.barcode ?? '',
+      acquisitionDate: asset.acquisitionDate ?? '',
+      observations: asset.notes ?? '',
+      attributes: Object.fromEntries(
+        asset.attributeValues.map((attribute) => [attribute.attributeName, attribute.value]),
+      ),
+    };
   }
 }

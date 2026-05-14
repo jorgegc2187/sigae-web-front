@@ -1,20 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { catchError, map, of, switchMap } from 'rxjs';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { Loan, LoanActivity, LoanAssetStatus, LoanStatus, MOCK_LOANS } from '../../models/loan.model';
+import { Loan, LoanActivity, LoanAssetStatus, LoanStatus } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
+import { LoansService } from '../../services/loans.service';
 
 @Component({
   selector: 'app-loan-detail',
-  standalone: true,
   imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent],
   templateUrl: './loan-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoanDetailComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly loansService = inject(LoansService);
   private readonly shortDateFormatter = new Intl.DateTimeFormat('es-PE', {
     day: '2-digit',
     month: 'short',
@@ -31,13 +32,12 @@ export class LoanDetailComponent {
     timeZone: 'UTC',
   });
 
-  private readonly loanId = toSignal(
-    this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
-    { initialValue: this.route.snapshot.paramMap.get('id') ?? '' },
-  );
-
-  readonly loan = computed<Loan | undefined>(() =>
-    MOCK_LOANS.find((loan) => loan.id === this.loanId()),
+  readonly loan = toSignal(
+    this.route.paramMap.pipe(
+      map((params) => params.get('id') ?? ''),
+      switchMap((id) => (id ? this.loansService.getById(id).pipe(catchError(() => of(undefined))) : of(undefined))),
+    ),
+    { initialValue: undefined },
   );
 
   readonly pageTitle = computed(() => {

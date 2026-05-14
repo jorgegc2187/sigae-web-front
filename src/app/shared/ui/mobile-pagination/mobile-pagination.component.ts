@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 
 @Component({
   selector: 'app-mobile-pagination',
-  standalone: true,
   templateUrl: './mobile-pagination.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

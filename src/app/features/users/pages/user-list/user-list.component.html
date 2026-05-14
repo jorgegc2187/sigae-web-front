@@ -1,5 +1,5 @@
 <app-data-listing
-  [isLoading]="false"
+  [isLoading]="isLoading()"
   [isEmpty]="filteredUsers().length === 0"
   [resultLabel]="resultLabel()"
   [currentPage]="currentPage()"

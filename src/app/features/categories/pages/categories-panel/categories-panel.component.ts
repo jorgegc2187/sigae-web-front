@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,16 +8,17 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
-import { MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
-import { NotificationService } from '../../../../shared/services/notification.service';
-import { inferAssetTypeIcon, inferCategoryIcon } from '../../../../shared/utils/icon-inference.util';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
+import { inferAssetTypeIcon, inferCategoryIcon } from '../../../../shared/utils/icon-inference.util';
 import { AssetType, Attribute, Category } from '../../models/category.model';
+import { CategoriesService } from '../../services/categories.service';
 
 type TypeFormMode = 'create' | 'edit';
 type CategoryFormMode = 'create' | 'edit';
@@ -26,6 +26,7 @@ type CategoryFilterId = 'all' | string;
 
 interface AttributeDraft {
   id: string;
+  persistedId?: string;
   name: string;
   description: string;
   isRequired: boolean;
@@ -64,9 +65,7 @@ interface DeleteTarget {
 
 @Component({
   selector: 'app-categories-panel',
-  standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ActionButtonComponent,
     DesktopPaginationComponent,
@@ -80,19 +79,16 @@ interface DeleteTarget {
 })
 export class CategoriesPanelComponent {
   private readonly notifications = inject(NotificationService);
+  private readonly categoriesService = inject(CategoriesService);
 
-  private readonly categoryDialog =
-    viewChild<ElementRef<HTMLDialogElement>>('categoryDialog');
+  private readonly categoryDialog = viewChild<ElementRef<HTMLDialogElement>>('categoryDialog');
   private readonly typeDialog = viewChild<ElementRef<HTMLDialogElement>>('typeDialog');
-  private readonly attributesDialog =
-    viewChild<ElementRef<HTMLDialogElement>>('attributesDialog');
+  private readonly attributesDialog = viewChild<ElementRef<HTMLDialogElement>>('attributesDialog');
   private readonly deleteDialog = viewChild<ElementRef<HTMLDialogElement>>('deleteDialog');
-
-  private idSequence = 100;
+  private readonly categoriesResource = this.categoriesService.listResource();
   private readonly desktopPageSize = 10;
   private readonly mobilePageSize = 4;
 
-  readonly categories = signal<Category[]>(this.cloneCategories(MOCK_CATEGORIES));
   readonly activeCategoryFilterId = signal<CategoryFilterId>('all');
   readonly typeSearchQuery = signal('');
   readonly desktopCurrentPage = signal(1);
@@ -106,6 +102,7 @@ export class CategoriesPanelComponent {
   readonly attributesModalContext = signal<AttributesModalContext | null>(null);
   readonly deleteTarget = signal<DeleteTarget | null>(null);
 
+  readonly categories = computed(() => this.categoriesResource.value());
   readonly categoriesWithMetrics = computed(() =>
     this.categories().map((category) => ({
       ...category,
@@ -120,21 +117,17 @@ export class CategoriesPanelComponent {
       name: 'Todos',
       icon: 'grid_view',
       typesCount: this.categoriesWithMetrics().reduce((total, category) => total + category.types.length, 0),
-      assetsCount: this.categoriesWithMetrics().reduce(
-        (total, category) => total + category.assetsCount,
-        0,
-      ),
+      assetsCount: this.categoriesWithMetrics().reduce((total, category) => total + category.assetsCount, 0),
+      types: [],
     },
     ...this.categoriesWithMetrics(),
   ]);
 
   readonly selectedCategory = computed(() => {
     const categoryId = this.activeCategoryFilterId();
-    if (categoryId === 'all') {
-      return null;
-    }
-
-    return this.categoriesWithMetrics().find((category) => category.id === categoryId) ?? null;
+    return categoryId === 'all'
+      ? null
+      : this.categoriesWithMetrics().find((category) => category.id === categoryId) ?? null;
   });
 
   readonly isGlobalSearchActive = computed(() => this.typeSearchQuery().trim().length > 0);
@@ -142,7 +135,6 @@ export class CategoriesPanelComponent {
   readonly filteredTypeEntries = computed<TypeListEntry[]>(() => {
     const query = this.typeSearchQuery().trim().toLowerCase();
     const activeFilter = this.activeCategoryFilterId();
-
     const matchingEntries = this.categoriesWithMetrics().flatMap((category) =>
       category.types
         .filter((type) => {
@@ -151,7 +143,6 @@ export class CategoriesPanelComponent {
           const matchesAttributes = type.attributes.some((attribute) =>
             attribute.name.toLowerCase().includes(query),
           );
-
           return matchesTypeName || matchesCategoryName || matchesAttributes;
         })
         .map((type) => ({
@@ -162,11 +153,7 @@ export class CategoriesPanelComponent {
         })),
     );
 
-    if (query) {
-      return matchingEntries;
-    }
-
-    if (activeFilter === 'all') {
+    if (query || activeFilter === 'all') {
       return matchingEntries;
     }
 
@@ -174,83 +161,42 @@ export class CategoriesPanelComponent {
   });
 
   readonly visibleTypeEntries = computed<TypeListEntry[]>(() => this.filteredTypeEntries());
-
-  readonly desktopTotalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredTypeEntries().length / this.desktopPageSize)),
-  );
-
+  readonly desktopTotalPages = computed(() => Math.max(1, Math.ceil(this.filteredTypeEntries().length / this.desktopPageSize)));
   readonly desktopVisibleTypeEntries = computed<TypeListEntry[]>(() => {
     const page = Math.min(this.desktopCurrentPage(), this.desktopTotalPages());
-    const startIndex = (page - 1) * this.desktopPageSize;
-
-    return this.filteredTypeEntries().slice(startIndex, startIndex + this.desktopPageSize);
+    return this.filteredTypeEntries().slice((page - 1) * this.desktopPageSize, page * this.desktopPageSize);
   });
-
-  readonly desktopStartItem = computed(() => {
-    if (this.filteredTypeEntries().length === 0) {
-      return 0;
-    }
-
-    const page = Math.min(this.desktopCurrentPage(), this.desktopTotalPages());
-    return (page - 1) * this.desktopPageSize + 1;
-  });
-
-  readonly desktopEndItem = computed(() => {
-    if (this.filteredTypeEntries().length === 0) {
-      return 0;
-    }
-
-    return Math.min(
-      this.desktopStartItem() + this.desktopVisibleTypeEntries().length - 1,
-      this.filteredTypeEntries().length,
-    );
-  });
-
+  readonly desktopStartItem = computed(() =>
+    this.filteredTypeEntries().length === 0
+      ? 0
+      : (Math.min(this.desktopCurrentPage(), this.desktopTotalPages()) - 1) * this.desktopPageSize + 1,
+  );
+  readonly desktopEndItem = computed(() =>
+    this.filteredTypeEntries().length === 0
+      ? 0
+      : Math.min(this.desktopStartItem() + this.desktopVisibleTypeEntries().length - 1, this.filteredTypeEntries().length),
+  );
   readonly desktopResultLabel = computed(
-    () =>
-      `Mostrando ${this.desktopStartItem()}-${this.desktopEndItem()} de ${this.filteredTypeEntries().length} tipos`,
+    () => `Mostrando ${this.desktopStartItem()}-${this.desktopEndItem()} de ${this.filteredTypeEntries().length} tipos`,
   );
-
-  readonly mobileTotalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredTypeEntries().length / this.mobilePageSize)),
-  );
-
+  readonly mobileTotalPages = computed(() => Math.max(1, Math.ceil(this.filteredTypeEntries().length / this.mobilePageSize)));
   readonly mobileVisibleTypeEntries = computed<TypeListEntry[]>(() => {
     const page = Math.min(this.mobileCurrentPage(), this.mobileTotalPages());
-    const startIndex = (page - 1) * this.mobilePageSize;
-
-    return this.filteredTypeEntries().slice(startIndex, startIndex + this.mobilePageSize);
+    return this.filteredTypeEntries().slice((page - 1) * this.mobilePageSize, page * this.mobilePageSize);
   });
+  readonly mobilePageLabel = computed(() => `${Math.min(this.mobileCurrentPage(), this.mobileTotalPages())} de ${this.mobileTotalPages()}`);
 
   readonly currentAttributesEntry = computed<TypeListEntry | null>(() => {
     const context = this.attributesModalContext();
-    if (!context) {
-      return null;
-    }
-
-    const category = this.categoriesWithMetrics().find((item) => item.id === context.categoryId);
-    const type = category?.types.find((item) => item.id === context.typeId);
-
-    if (!category || !type) {
-      return null;
-    }
-
-    return {
-      categoryId: category.id,
-      categoryName: category.name,
-      categoryIcon: category.icon,
-      type,
-    };
+    const category = context ? this.categoriesWithMetrics().find((item) => item.id === context.categoryId) : null;
+    const type = category?.types.find((item) => item.id === context?.typeId);
+    return category && type
+      ? { categoryId: category.id, categoryName: category.name, categoryIcon: category.icon, type }
+      : null;
   });
 
-  readonly typeFormTitle = computed(() =>
-    this.typeFormMode() === 'edit' ? 'Editar tipo de activo' : 'Nuevo tipo de activo',
-  );
-
-  readonly typeFormSubmitLabel = computed(() =>
-    this.typeFormMode() === 'edit' ? 'Guardar cambios' : 'Crear Tipo',
-  );
-
+  readonly typeFormTitle = computed(() => (this.typeFormMode() === 'edit' ? 'Editar tipo de activo' : 'Nuevo tipo de activo'));
+  readonly typeFormSubmitLabel = computed(() => (this.typeFormMode() === 'edit' ? 'Guardar cambios' : 'Crear Tipo'));
   readonly typeSearchEmptyMessage = computed(() =>
     this.isGlobalSearchActive()
       ? 'No se encontraron tipos que coincidan con la búsqueda.'
@@ -258,29 +204,12 @@ export class CategoriesPanelComponent {
         ? 'No hay tipos de activos configurados todavía.'
         : 'No hay tipos de activos configurados para esta categoría.',
   );
-
-  readonly mobilePageLabel = computed(
-    () => `${Math.min(this.mobileCurrentPage(), this.mobileTotalPages())} de ${this.mobileTotalPages()}`,
-  );
-
-  readonly categoryFormTitle = computed(() =>
-    this.categoryFormMode() === 'edit' ? 'Editar Categoría' : 'Nueva Categoría',
-  );
-
-  readonly categoryFormSubmitLabel = computed(() =>
-    this.categoryFormMode() === 'edit' ? 'Guardar cambios' : 'Crear Categoría',
-  );
-
-  readonly deleteDialogTitle = computed(() =>
-    this.deleteTarget()?.type === 'category' ? 'Eliminar categoría' : 'Eliminar tipo de activo',
-  );
-
+  readonly categoryFormTitle = computed(() => (this.categoryFormMode() === 'edit' ? 'Editar Categoría' : 'Nueva Categoría'));
+  readonly categoryFormSubmitLabel = computed(() => (this.categoryFormMode() === 'edit' ? 'Guardar cambios' : 'Crear Categoría'));
+  readonly deleteDialogTitle = computed(() => (this.deleteTarget()?.type === 'category' ? 'Eliminar categoría' : 'Eliminar tipo de activo'));
   readonly deleteDialogMessage = computed(() => {
     const target = this.deleteTarget();
-    if (!target) {
-      return '';
-    }
-
+    if (!target) return '';
     return target.type === 'category'
       ? `Se eliminará la categoría "${target.label}" con todos sus tipos asociados. Esta acción no se puede deshacer.`
       : `Se eliminará el tipo de activo "${target.label}". Esta acción no se puede deshacer.`;
@@ -288,18 +217,48 @@ export class CategoriesPanelComponent {
 
   setActiveCategoryFilter(categoryId: CategoryFilterId) {
     this.activeCategoryFilterId.set(categoryId);
-    this.desktopCurrentPage.set(1);
-    this.mobileCurrentPage.set(1);
+    this.resetPagination();
   }
 
   onTypeSearch(query: string) {
     this.typeSearchQuery.set(query);
-    this.desktopCurrentPage.set(1);
-    this.mobileCurrentPage.set(1);
+    this.resetPagination();
   }
 
   onMobileSearchInput(event: Event) {
     this.onTypeSearch((event.target as HTMLInputElement).value);
+  }
+
+  categoryFilterItemClass(categoryId: CategoryFilterId): string {
+    const stateClass = this.activeCategoryFilterId() === categoryId ? 'border-primary/15 bg-primary/10 shadow-sm' : 'border-transparent hover:bg-base-200/55';
+    return `group relative flex items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all ${stateClass}`;
+  }
+
+  categoryFilterIconClass(categoryId: CategoryFilterId): string {
+    const stateClass = this.activeCategoryFilterId() === categoryId ? 'bg-primary text-primary-content shadow-sm' : 'bg-base-200 text-base-content/55 group-hover:bg-base-300';
+    return `flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${stateClass}`;
+  }
+
+  categoryFilterLabelClass(categoryId: CategoryFilterId): string {
+    const stateClass = this.activeCategoryFilterId() === categoryId ? 'text-primary' : 'text-base-content group-hover:text-primary';
+    return `block truncate text-sm font-semibold transition-colors ${stateClass}`;
+  }
+
+  categoryFilterChevronClass(categoryId: CategoryFilterId): string {
+    return `material-symbols-outlined transition-colors ${this.activeCategoryFilterId() === categoryId ? 'text-primary' : 'text-base-content/35'}`;
+  }
+
+  mobileCategoryFilterClass(categoryId: CategoryFilterId): string {
+    const stateClass = this.activeCategoryFilterId() === categoryId
+      ? 'border-primary bg-primary text-primary-content shadow-sm'
+      : 'border-base-300 bg-base-100 text-base-content/65 hover:bg-base-200/60';
+    return `flex-none whitespace-nowrap rounded-full border px-4 py-1.5 text-[12px] font-medium transition-colors ${stateClass}`;
+  }
+
+  attributeRequiredBadgeClass(isRequired: boolean): string {
+    return `inline-flex min-w-20 items-center justify-center rounded-full px-3 py-1 text-xs font-semibold ${
+      isRequired ? 'bg-primary/10 text-primary' : 'bg-base-200 text-base-content/60'
+    }`;
   }
 
   onDesktopPageChange(page: number) {
@@ -318,10 +277,7 @@ export class CategoriesPanelComponent {
 
   openEditCategoryModal(category: Category) {
     this.categoryFormMode.set('edit');
-    this.categoryFormDraft.set({
-      id: category.id,
-      name: category.name,
-    });
+    this.categoryFormDraft.set({ id: category.id, name: category.name });
     this.categoryDialog()?.nativeElement.showModal();
   }
 
@@ -329,52 +285,29 @@ export class CategoriesPanelComponent {
     this.categoryDialog()?.nativeElement.close();
   }
 
-  submitCategory() {
+  async submitCategory() {
     const draft = this.categoryFormDraft();
     const name = draft.name.trim();
-    if (!name) {
-      return;
+    if (!name) return;
+
+    try {
+      const payload = { name, icon: inferCategoryIcon(name) };
+      const category = draft.id
+        ? await firstValueFrom(this.categoriesService.updateCategory(draft.id, payload))
+        : await firstValueFrom(this.categoriesService.createCategory(payload));
+
+      this.activeCategoryFilterId.set(category.id);
+      this.categoriesResource.reload();
+      this.notifications.success({ message: `Categoría "${name}" guardada correctamente.` });
+      this.resetPagination();
+      this.closeCategoryModal();
+    } catch {
+      this.notifications.error({ message: 'No se pudo guardar la categoría.' });
     }
-
-    if (this.categoryFormMode() === 'edit' && draft.id) {
-      this.categories.update((categories) =>
-        categories.map((category) =>
-          category.id === draft.id
-            ? {
-                ...category,
-                name,
-                icon: inferCategoryIcon(name),
-              }
-            : category,
-        ),
-      );
-      this.activeCategoryFilterId.set(draft.id);
-      this.notifications.success({ message: `Categoría "${name}" actualizada correctamente.` });
-    } else {
-      const newCategory: Category = {
-        id: this.createId('category'),
-        name,
-        icon: inferCategoryIcon(name),
-        typesCount: 0,
-        assetsCount: 0,
-        types: [],
-      };
-
-      this.categories.update((categories) => [...categories, newCategory]);
-      this.activeCategoryFilterId.set(newCategory.id);
-      this.notifications.success({ message: `Categoría "${name}" creada correctamente.` });
-    }
-
-    this.resetPagination();
-    this.closeCategoryModal();
   }
 
   openCreateTypeModal(categoryId?: string) {
-    const targetCategoryId =
-      categoryId ??
-      (this.activeCategoryFilterId() === 'all' ? this.categoriesWithMetrics()[0]?.id : this.activeCategoryFilterId()) ??
-      '';
-
+    const targetCategoryId = categoryId ?? (this.activeCategoryFilterId() === 'all' ? this.categoriesWithMetrics()[0]?.id : this.activeCategoryFilterId()) ?? '';
     this.typeFormMode.set('create');
     this.typeFormOriginCategoryId.set(targetCategoryId);
     this.typeFormDraft.set(this.createEmptyTypeDraft(targetCategoryId));
@@ -388,8 +321,8 @@ export class CategoriesPanelComponent {
       id: entry.type.id,
       name: entry.type.name,
       categoryId: entry.categoryId,
-      attributes: entry.type.attributes.map((attribute) => ({
-        id: attribute.id,
+      attributes: entry.type.attributes.map((attribute) => this.createAttributeDraft({
+        persistedId: attribute.id,
         name: attribute.name,
         description: attribute.description,
         isRequired: attribute.isRequired,
@@ -403,323 +336,126 @@ export class CategoriesPanelComponent {
   }
 
   updateTypeDraftName(name: string) {
-    this.typeFormDraft.update((draft) => ({
-      ...draft,
-      name,
-    }));
+    this.typeFormDraft.update((draft) => ({ ...draft, name }));
   }
 
   updateCategoryDraftName(name: string) {
-    this.categoryFormDraft.update((draft) => ({
-      ...draft,
-      name,
-    }));
+    this.categoryFormDraft.update((draft) => ({ ...draft, name }));
   }
 
   updateTypeDraftCategory(categoryId: string) {
-    this.typeFormDraft.update((draft) => ({
-      ...draft,
-      categoryId,
-    }));
+    this.typeFormDraft.update((draft) => ({ ...draft, categoryId }));
   }
 
   addDraftAttribute() {
     this.typeFormDraft.update((draft) => ({
       ...draft,
-      attributes: [
-        ...draft.attributes,
-        this.createAttributeDraft({
-          name: '',
-          description: '',
-          isRequired: false,
-        }),
-      ],
+      attributes: [...draft.attributes, this.createAttributeDraft({ name: '', description: '', isRequired: false })],
     }));
   }
 
   updateDraftAttributeName(attributeId: string, name: string) {
     this.typeFormDraft.update((draft) => ({
       ...draft,
-      attributes: draft.attributes.map((attribute) =>
-        attribute.id === attributeId ? { ...attribute, name } : attribute,
-      ),
+      attributes: draft.attributes.map((attribute) => attribute.id === attributeId ? { ...attribute, name } : attribute),
     }));
   }
 
   toggleDraftAttributeRequired(attributeId: string) {
     this.typeFormDraft.update((draft) => ({
       ...draft,
-      attributes: draft.attributes.map((attribute) =>
-        attribute.id === attributeId
-          ? { ...attribute, isRequired: !attribute.isRequired }
-          : attribute,
-      ),
+      attributes: draft.attributes.map((attribute) => attribute.id === attributeId ? { ...attribute, isRequired: !attribute.isRequired } : attribute),
     }));
   }
 
   removeDraftAttribute(attributeId: string) {
     this.typeFormDraft.update((draft) => {
-      const remainingAttributes = draft.attributes.filter(
-        (attribute) => attribute.id !== attributeId,
-      );
-
+      const attributes = draft.attributes.filter((attribute) => attribute.id !== attributeId);
       return {
         ...draft,
-        attributes:
-          remainingAttributes.length > 0
-            ? remainingAttributes
-            : [this.createAttributeDraft({ name: '', description: '', isRequired: false })],
+        attributes: attributes.length ? attributes : [this.createAttributeDraft({ name: '', description: '', isRequired: false })],
       };
     });
   }
 
-  submitTypeForm() {
+  async submitTypeForm() {
     const draft = this.typeFormDraft();
     const typeName = draft.name.trim();
-    const categoryId = draft.categoryId;
-    const isCreateMode = this.typeFormMode() === 'create';
-    const originCategoryId = this.typeFormOriginCategoryId();
-    const previousTypeId = draft.id;
+    if (!typeName || !draft.categoryId) return;
 
-    if (!typeName || !categoryId) {
+    const categoryName = this.categoriesWithMetrics().find((category) => category.id === draft.categoryId)?.name ?? '';
+    const icon = inferAssetTypeIcon({ name: typeName, categoryId: draft.categoryId, categoryName });
+    const attributes = this.normalizeDraftAttributes(draft.attributes);
+    if (attributes.length === 0) {
+      this.notifications.warning({ message: 'Agregue al menos un atributo con nombre.' });
       return;
     }
 
-    const attributes = this.normalizeDraftAttributes(draft.attributes);
-    const categoryName =
-      this.categoriesWithMetrics().find((category) => category.id === categoryId)?.name ?? '';
-    const icon = inferAssetTypeIcon({
-      name: typeName,
-      categoryId,
-      categoryName,
-    });
+    try {
+      if (this.typeFormMode() === 'edit' && draft.id) {
+        await firstValueFrom(this.categoriesService.updateType(this.typeFormOriginCategoryId() ?? draft.categoryId, draft.id, {
+          categoryId: draft.categoryId,
+          name: typeName,
+          icon,
+          attributes,
+        }));
+      } else {
+        await firstValueFrom(this.categoriesService.createType(draft.categoryId, { name: typeName, icon, attributes }));
+      }
 
-    const normalizedType: AssetType = {
-      id: draft.id ?? this.createId('type'),
-      name: typeName,
-      icon,
-      attributes,
-    };
-
-    this.categories.update((categories) => {
-      return categories.map((category) => {
-        const isOriginCategory = category.id === originCategoryId;
-        const isTargetCategory = category.id === categoryId;
-
-        if (isCreateMode) {
-          if (!isTargetCategory) {
-            return category;
-          }
-
-          return this.syncCategoryMetrics({
-            ...category,
-            types: [...category.types, normalizedType],
-          });
-        }
-
-        if (!draft.id) {
-          return category;
-        }
-
-        if (isOriginCategory && isTargetCategory) {
-          return this.syncCategoryMetrics({
-            ...category,
-            types: category.types.map((type) => (type.id === draft.id ? normalizedType : type)),
-          });
-        }
-
-        if (isOriginCategory) {
-          return this.syncCategoryMetrics({
-            ...category,
-            types: category.types.filter((type) => type.id !== draft.id),
-          });
-        }
-
-        if (isTargetCategory) {
-          return this.syncCategoryMetrics({
-            ...category,
-            types: [...category.types, normalizedType],
-          });
-        }
-
-        return category;
-      });
-    });
-
-    if (isCreateMode && this.isGlobalSearchActive()) {
-      this.typeSearchQuery.set('');
+      this.activeCategoryFilterId.set(draft.categoryId);
+      this.categoriesResource.reload();
+      this.notifications.success({ message: `Tipo "${typeName}" guardado correctamente.` });
+      this.resetPagination();
+      this.closeTypeModal();
+    } catch {
+      this.notifications.error({ message: 'No se pudo guardar el tipo de activo.' });
     }
-
-    this.activeCategoryFilterId.set(categoryId);
-    if (isCreateMode || originCategoryId !== categoryId) {
-      this.goToTypeEntry(categoryId, normalizedType.id);
-    } else if (previousTypeId === normalizedType.id) {
-      this.clampDesktopPage();
-      this.clampMobilePage();
-    }
-    this.notifications.success({
-      message: isCreateMode
-        ? `Tipo de activo "${typeName}" creado correctamente.`
-        : `Tipo de activo "${typeName}" actualizado correctamente.`,
-    });
-    this.closeTypeModal();
   }
 
   openAttributesModal(entry: TypeListEntry) {
-    this.attributesModalContext.set({
-      categoryId: entry.categoryId,
-      typeId: entry.type.id,
-    });
+    this.attributesModalContext.set({ categoryId: entry.categoryId, typeId: entry.type.id });
     this.attributesDialog()?.nativeElement.showModal();
   }
 
-  closeAttributesModal() {
-    this.attributesDialog()?.nativeElement.close();
-  }
-
   openDeleteCategoryDialog(category: Category) {
-    this.deleteTarget.set({
-      type: 'category',
-      id: category.id,
-      label: category.name,
-    });
+    this.deleteTarget.set({ type: 'category', id: category.id, label: category.name });
     this.deleteDialog()?.nativeElement.showModal();
   }
 
   openDeleteTypeDialog(entry: TypeListEntry) {
-    this.deleteTarget.set({
-      type: 'assetType',
-      id: entry.type.id,
-      categoryId: entry.categoryId,
-      label: entry.type.name,
-    });
+    this.deleteTarget.set({ type: 'assetType', id: entry.type.id, categoryId: entry.categoryId, label: entry.type.name });
     this.deleteDialog()?.nativeElement.showModal();
   }
 
-  closeDeleteDialog() {
-    this.deleteDialog()?.nativeElement.close();
-  }
-
-  confirmDeleteTarget() {
+  async confirmDeleteTarget() {
     const target = this.deleteTarget();
-    if (!target) {
-      return;
-    }
+    if (!target) return;
 
-    if (target.type === 'category') {
-      this.categories.update((categories) =>
-        categories.filter((category) => category.id !== target.id),
-      );
-
-      if (this.activeCategoryFilterId() === target.id) {
+    try {
+      if (target.type === 'category') {
+        await firstValueFrom(this.categoriesService.deleteCategory(target.id));
         this.activeCategoryFilterId.set('all');
+      } else if (target.categoryId) {
+        await firstValueFrom(this.categoriesService.deleteType(target.categoryId, target.id));
       }
 
-      const attributesContext = this.attributesModalContext();
-      if (attributesContext?.categoryId === target.id) {
-        this.closeAttributesModal();
-      }
-      this.notifications.success({ message: `Categoría "${target.label}" eliminada correctamente.` });
-    } else if (target.categoryId) {
-      const attributesContext = this.attributesModalContext();
-      if (
-        attributesContext?.categoryId === target.categoryId &&
-        attributesContext.typeId === target.id
-      ) {
-        this.closeAttributesModal();
-      }
-
-      this.categories.update((categories) =>
-        categories.map((category) =>
-          category.id === target.categoryId
-            ? this.syncCategoryMetrics({
-                ...category,
-                types: category.types.filter((type) => type.id !== target.id),
-              })
-            : category,
-          ),
-      );
-      this.notifications.success({
-        message: `Tipo de activo "${target.label}" eliminado correctamente.`,
-      });
-    }
-
-    this.clampDesktopPage();
-    this.clampMobilePage();
-    this.closeDeleteDialog();
-  }
-
-  addAttributeFromDetails() {
-    const entry = this.currentAttributesEntry();
-    if (!entry) {
-      return;
-    }
-
-    const nextIndex = entry.type.attributes.length + 1;
-    this.updateType(entry.categoryId, entry.type.id, (type) => ({
-      ...type,
-      attributes: [
-        ...type.attributes,
-        {
-          id: this.createId('attr'),
-          name: `Nuevo atributo ${nextIndex}`,
-          description: 'Descripción pendiente',
-          isRequired: false,
-        },
-      ],
-    }));
-    this.notifications.success({ message: 'Atributo agregado correctamente.' });
-  }
-
-  onToggleAttributeRequired(categoryId: string, typeId: string, attributeId: string) {
-    this.updateType(categoryId, typeId, (type) => ({
-      ...type,
-      attributes: type.attributes.map((attribute) =>
-        attribute.id === attributeId
-          ? { ...attribute, isRequired: !attribute.isRequired }
-          : attribute,
-      ),
-    }));
-    this.notifications.success({ message: 'Atributo actualizado correctamente.' });
-  }
-
-  onDeleteAttribute(categoryId: string, typeId: string, attributeId: string) {
-    this.updateType(categoryId, typeId, (type) => ({
-      ...type,
-      attributes: type.attributes.filter((attribute) => attribute.id !== attributeId),
-    }));
-    this.notifications.success({ message: 'Atributo eliminado correctamente.' });
-  }
-
-  getCategoryToneClasses(categoryId: string): string {
-    switch (categoryId) {
-      case '1':
-        return 'bg-primary/10 text-primary';
-      case '2':
-        return 'bg-base-200 text-base-content/60';
-      case '3':
-        return 'bg-base-200 text-base-content/60';
-      case '4':
-        return 'bg-base-200 text-base-content/60';
-      default:
-        return 'bg-base-200 text-base-content/60';
+      this.categoriesResource.reload();
+      this.notifications.success({ message: `"${target.label}" eliminado correctamente.` });
+      this.resetPagination();
+      this.deleteDialog()?.nativeElement.close();
+    } catch {
+      this.notifications.error({ message: 'No se pudo eliminar el registro.' });
     }
   }
 
   onCategoryDialogClose() {
-    this.categoryFormMode.set('create');
     this.categoryFormDraft.set(this.createEmptyCategoryDraft());
   }
 
   onTypeDialogClose() {
-    const fallbackCategoryId =
-      (this.activeCategoryFilterId() === 'all'
-        ? this.categoriesWithMetrics()[0]?.id
-        : this.activeCategoryFilterId()) ??
-      '';
-    this.typeFormMode.set('create');
+    this.typeFormDraft.set(this.createEmptyTypeDraft());
     this.typeFormOriginCategoryId.set(null);
-    this.typeFormDraft.set(this.createEmptyTypeDraft(fallbackCategoryId));
   }
 
   onAttributesDialogClose() {
@@ -730,53 +466,13 @@ export class CategoriesPanelComponent {
     this.deleteTarget.set(null);
   }
 
-  private normalizeDraftAttributes(attributes: AttributeDraft[]): Attribute[] {
-    return attributes
-      .map((attribute) => ({
-        ...attribute,
-        name: attribute.name.trim(),
-        description: attribute.description.trim(),
-      }))
-      .filter((attribute) => attribute.name.length > 0)
-      .map((attribute) => ({
-        id: attribute.id || this.createId('attr'),
-        name: attribute.name,
-        description: attribute.description || attribute.name,
-        isRequired: attribute.isRequired,
-      }));
-  }
-
-  private updateType(
-    categoryId: string,
-    typeId: string,
-    updater: (type: AssetType) => AssetType,
-  ) {
-    this.categories.update((categories) =>
-      categories.map((category) => {
-        if (category.id !== categoryId) {
-          return category;
-        }
-
-        return this.syncCategoryMetrics({
-          ...category,
-          types: category.types.map((type) => (type.id === typeId ? updater(type) : type)),
-        });
-      }),
-    );
-  }
-
-  private syncCategoryMetrics(category: Category): Category {
-    return {
-      ...category,
-      typesCount: category.types.length,
-    };
+  private resetPagination() {
+    this.desktopCurrentPage.set(1);
+    this.mobileCurrentPage.set(1);
   }
 
   private createEmptyCategoryDraft(): CategoryFormDraft {
-    return {
-      id: null,
-      name: '',
-    };
+    return { id: null, name: '' };
   }
 
   private createEmptyTypeDraft(categoryId = ''): TypeFormDraft {
@@ -784,64 +480,33 @@ export class CategoriesPanelComponent {
       id: null,
       name: '',
       categoryId,
-      attributes: [
-        this.createAttributeDraft({
-          name: '',
-          description: '',
-          isRequired: false,
-        }),
-      ],
+      attributes: [this.createAttributeDraft({ name: '', description: '', isRequired: false })],
     };
   }
 
-  private createAttributeDraft(partial: Partial<AttributeDraft>): AttributeDraft {
+  private createAttributeDraft(params: {
+    persistedId?: string;
+    name: string;
+    description: string;
+    isRequired: boolean;
+  }): AttributeDraft {
     return {
-      id: partial.id ?? this.createId('draft-attr'),
-      name: partial.name ?? '',
-      description: partial.description ?? '',
-      isRequired: partial.isRequired ?? false,
+      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
+      persistedId: params.persistedId,
+      name: params.name,
+      description: params.description,
+      isRequired: params.isRequired,
     };
   }
 
-  private createId(prefix: string): string {
-    this.idSequence += 1;
-    return `${prefix}-${this.idSequence}`;
-  }
-
-  private resetPagination() {
-    this.desktopCurrentPage.set(1);
-    this.mobileCurrentPage.set(1);
-  }
-
-  private goToTypeEntry(categoryId: string, typeId: string) {
-    const categoryEntries = this.filteredTypeEntries().filter((entry) => entry.categoryId === categoryId);
-    const entryIndex = categoryEntries.findIndex((entry) => entry.type.id === typeId);
-
-    if (entryIndex < 0) {
-      this.clampDesktopPage();
-      this.clampMobilePage();
-      return;
-    }
-
-    this.desktopCurrentPage.set(Math.floor(entryIndex / this.desktopPageSize) + 1);
-    this.mobileCurrentPage.set(Math.floor(entryIndex / this.mobilePageSize) + 1);
-  }
-
-  private clampDesktopPage() {
-    this.desktopCurrentPage.set(Math.min(this.desktopCurrentPage(), this.desktopTotalPages()));
-  }
-
-  private clampMobilePage() {
-    this.mobileCurrentPage.set(Math.min(this.mobileCurrentPage(), this.mobileTotalPages()));
-  }
-
-  private cloneCategories(categories: Category[]): Category[] {
-    return categories.map((category) => ({
-      ...category,
-      types: category.types.map((type) => ({
-        ...type,
-        attributes: type.attributes.map((attribute) => ({ ...attribute })),
-      })),
-    }));
+  private normalizeDraftAttributes(attributes: AttributeDraft[]): Attribute[] {
+    return attributes
+      .map((attribute) => ({
+        id: attribute.persistedId ?? attribute.id,
+        name: attribute.name.trim(),
+        description: attribute.description.trim() || 'Sin descripción',
+        isRequired: attribute.isRequired,
+      }))
+      .filter((attribute) => attribute.name.length > 0);
   }
 }

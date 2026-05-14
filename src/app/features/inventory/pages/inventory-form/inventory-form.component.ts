@@ -1,44 +1,52 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MOCK_ASSET_LOCATIONS, MOCK_CATEGORIES } from '../../../../shared/models/mock-inventory-catalog.model';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
-import { INVENTORY_ASSETS, MOCK_SUPPLIERS } from '../../data/inventory.mock';
+import { CategoriesService } from '../../../categories/services/categories.service';
+import { LocationsService } from '../../../locations/services/locations.service';
+import { SuppliersService } from '../../../suppliers/services/suppliers.service';
+import { AssetCondition, InventoryAsset } from '../../models/inventory.model';
+import { AssetsService } from '../../services/assets.service';
 
 @Component({
   selector: 'app-inventory-form',
-  standalone: true,
   imports: [ReactiveFormsModule, RouterLink, ActionButtonComponent, FormFieldComponent],
   templateUrl: './inventory-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InventoryFormComponent {
-  private readonly fb = inject(FormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
+  private readonly assetsService = inject(AssetsService);
+  private readonly categoriesService = inject(CategoriesService);
+  private readonly locationsService = inject(LocationsService);
+  private readonly suppliersService = inject(SuppliersService);
 
   readonly id = input<string | null>(null);
-  readonly existingAsset = computed(() => INVENTORY_ASSETS.find((asset) => asset.id === this.id()) ?? null);
+  readonly existingAsset = signal<InventoryAsset | null>(null);
   readonly isEdit = computed(() => Boolean(this.existingAsset()));
-  readonly categories = MOCK_CATEGORIES;
-  readonly locations = MOCK_ASSET_LOCATIONS;
-  readonly suppliers = MOCK_SUPPLIERS;
-  readonly selectedCategoryId = signal(MOCK_CATEGORIES[0]?.id ?? '');
+  readonly categories = toSignal(this.categoriesService.list(), { initialValue: [] });
+  readonly locations = toSignal(this.locationsService.list(), { initialValue: [] });
+  readonly suppliers = toSignal(this.suppliersService.list(), { initialValue: [] });
+  readonly selectedCategoryId = signal('');
 
   readonly availableTypes = computed(() =>
-    this.categories.find((category) => category.id === this.selectedCategoryId())?.types ?? [],
+    this.categories().find((category) => category.id === this.selectedCategoryId())?.types ?? [],
   );
 
-  readonly form = this.fb.nonNullable.group({
+  readonly form = this.fb.group({
     code: ['', Validators.required],
     name: ['', Validators.required],
-    categoryId: this.fb.nonNullable.control<string>(MOCK_CATEGORIES[0]?.id ?? '', Validators.required),
-    typeId: [MOCK_CATEGORIES[0]?.types[0]?.id ?? '', Validators.required],
-    locationId: this.fb.nonNullable.control<string>(MOCK_ASSET_LOCATIONS[0]?.id ?? '', Validators.required),
+    categoryId: this.fb.control<string>('', Validators.required),
+    typeId: this.fb.control<string>('', Validators.required),
+    locationId: this.fb.control<string>('', Validators.required),
     supplierId: [''],
-    condition: ['Bueno', Validators.required],
+    condition: this.fb.control<AssetCondition>('Bueno', Validators.required),
     serial: ['', Validators.required],
     barcode: [''],
     acquisitionDate: [''],
@@ -46,10 +54,78 @@ export class InventoryFormComponent {
   });
 
   constructor() {
-    queueMicrotask(() => {
-      const asset = this.existingAsset();
-      if (!asset) return;
+    effect(() => {
+      const categories = this.categories();
+      const locations = this.locations();
+      if (!this.form.controls.categoryId.value && categories[0]) {
+        this.selectedCategoryId.set(categories[0].id);
+        this.form.patchValue({
+          categoryId: categories[0].id,
+          typeId: categories[0].types[0]?.id ?? '',
+        });
+      }
+      if (!this.form.controls.locationId.value && locations[0]) {
+        this.form.controls.locationId.setValue(locations[0].id);
+      }
+    });
 
+    queueMicrotask(() => {
+      void this.loadExistingAsset();
+    });
+  }
+
+  updateCategory(event: Event): void {
+    const categoryId = (event.target as HTMLSelectElement).value;
+    this.selectedCategoryId.set(categoryId);
+    this.form.patchValue({
+      categoryId,
+      typeId: this.categories().find((category) => category.id === categoryId)?.types[0]?.id ?? '',
+    });
+  }
+
+  async submit(): Promise<void> {
+    this.form.markAllAsTouched();
+    if (this.form.invalid) return;
+
+    const value = this.form.getRawValue();
+    const payload = {
+      code: value.code,
+      name: value.name,
+      assetTypeId: value.typeId,
+      locationId: value.locationId,
+      supplierId: value.supplierId || null,
+      condition: this.assetsService.toApiCondition(value.condition),
+      serialNumber: value.serial || null,
+      barcode: value.barcode || null,
+      acquisitionDate: value.acquisitionDate || null,
+      notes: value.observations || null,
+      attributeValues: [],
+    };
+
+    try {
+      const id = this.id();
+      if (id) {
+        await firstValueFrom(this.assetsService.update(id, payload));
+      } else {
+        await firstValueFrom(this.assetsService.create(payload));
+      }
+
+      this.notifications.success({
+        message: this.isEdit() ? 'Activo actualizado correctamente.' : 'Activo registrado correctamente.',
+      });
+      await this.router.navigate(['/inventory']);
+    } catch {
+      this.notifications.error({ message: 'No se pudo guardar el activo.' });
+    }
+  }
+
+  private async loadExistingAsset(): Promise<void> {
+    const id = this.id();
+    if (!id) return;
+
+    try {
+      const asset = await firstValueFrom(this.assetsService.getById(id));
+      this.existingAsset.set(asset);
       this.selectedCategoryId.set(asset.categoryId);
       this.form.patchValue({
         code: asset.code,
@@ -64,25 +140,8 @@ export class InventoryFormComponent {
         acquisitionDate: asset.acquisitionDate,
         observations: asset.observations ?? '',
       });
-    });
-  }
-
-  updateCategory(event: Event): void {
-    const categoryId = (event.target as HTMLSelectElement).value;
-    this.selectedCategoryId.set(categoryId);
-    this.form.patchValue({
-      categoryId,
-      typeId: this.categories.find((category) => category.id === categoryId)?.types[0]?.id ?? '',
-    });
-  }
-
-  submit(): void {
-    this.form.markAllAsTouched();
-    if (this.form.invalid) return;
-
-    this.notifications.success({
-      message: this.isEdit() ? 'Activo actualizado correctamente.' : 'Activo registrado correctamente.',
-    });
-    this.router.navigate(['/inventory']);
+    } catch {
+      this.notifications.error({ message: 'No se pudo cargar el activo.' });
+    }
   }
 }

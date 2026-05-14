@@ -9,31 +9,27 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
-  FormBuilder,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { LoanQrScannerComponent } from '../../components/loan-qr-scanner/loan-qr-scanner.component';
 import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
 import { LoanAttachmentDraft, LoanAttachmentSource } from '../../models/loan-attachment-draft.model';
-import {
-  MOCK_ASSET_LOCATIONS,
-  MOCK_CATEGORY_FILTERS,
-  MOCK_INVENTORY_ASSETS,
-  MOCK_LOAN_DESTINATIONS,
-  MockAssetCategoryId,
-  MockAssetCondition,
-  MockAssetLocationId,
-  MockInventoryAsset,
-  isLoanSelectableAssetCondition,
-} from '../../../../shared/models/mock-inventory-catalog.model';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DatePickerComponent } from '../../../../shared/ui/date-picker/date-picker.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { AssetsService } from '../../../inventory/services/assets.service';
+import { AssetCondition, InventoryAsset } from '../../../inventory/models/inventory.model';
+import { LocationsService } from '../../../locations/services/locations.service';
+import { TeachersService } from '../../../teachers/services/teachers.service';
+import { LoansService } from '../../services/loans.service';
 
 interface TeacherOption {
   id: string;
@@ -48,10 +44,14 @@ interface DestinationOption {
   name: string;
 }
 
-type AssetCategoryId = 'all' | MockAssetCategoryId;
-type AssetLocationId = 'all' | MockAssetLocationId;
-type AssetCondition = MockAssetCondition;
-type AssetOption = MockInventoryAsset;
+type AssetCategoryId = 'all' | string;
+type AssetLocationId = 'all' | string;
+type AssetOption = InventoryAsset & {
+  location: string;
+  groupKey: string;
+  groupName: string;
+  groupIcon: string;
+};
 
 interface AssetCategoryOption {
   id: AssetCategoryId;
@@ -64,7 +64,7 @@ interface AssetLocationOption {
   name: string;
   count: number;
 }
-type AssetSearchOption = MockInventoryAsset;
+type AssetSearchOption = AssetOption;
 
 interface AssetSearchGroup {
   key: string;
@@ -105,7 +105,6 @@ function getTodayIsoDate(): string {
 
 @Component({
   selector: 'app-loan-form',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     RouterLink,
@@ -121,9 +120,13 @@ function getTodayIsoDate(): string {
   },
 })
 export class LoanFormComponent implements OnDestroy {
-  private readonly fb = inject(FormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
+  private readonly assetsService = inject(AssetsService);
+  private readonly locationsService = inject(LocationsService);
+  private readonly teachersService = inject(TeachersService);
+  private readonly loansService = inject(LoansService);
   private readonly modalScrollLockClass = 'overflow-hidden';
 
   readonly teacherSearchContainer = viewChild<ElementRef>('teacherSearchContainer');
@@ -133,41 +136,37 @@ export class LoanFormComponent implements OnDestroy {
   readonly signaturePad = viewChild<LoanSignaturePadComponent>('signaturePad');
   readonly documentPickerInput = viewChild<ElementRef<HTMLInputElement>>('documentPickerInput');
 
-  readonly availableTeachers = signal<TeacherOption[]>([
-    {
-      id: 'teacher-1',
-      name: 'Luis Quispe Mendoza',
-      initials: 'LQ',
-      dni: '45879632',
-      specialty: 'Dpto. Ciencias',
-    },
-    {
-      id: 'teacher-2',
-      name: 'Ana Torres Huaman',
-      initials: 'AT',
-      dni: '70124568',
-      specialty: 'Comunicación',
-    },
-    {
-      id: 'teacher-3',
-      name: 'Jorge Ramos Cárdenas',
-      initials: 'JR',
-      dni: '46587912',
-      specialty: 'Matemáticas',
-    },
-  ]);
+  private readonly teacherRows = toSignal(this.teachersService.list(), { initialValue: [] });
+  private readonly locationRows = toSignal(this.locationsService.list(), { initialValue: [] });
+  private readonly assetRows = toSignal(this.assetsService.list(), { initialValue: [] });
 
-  readonly destinations = signal<DestinationOption[]>(MOCK_LOAN_DESTINATIONS.map((destination) => ({ ...destination })));
+  readonly availableTeachers = computed<TeacherOption[]>(() =>
+    this.teacherRows().map((teacher) => ({
+      id: teacher.id,
+      name: teacher.fullName,
+      initials: this.buildInitials(teacher.fullName),
+      dni: teacher.dni,
+      specialty: teacher.specialty ?? 'Docente',
+    })),
+  );
 
-  readonly availableAssets = signal<AssetOption[]>(MOCK_INVENTORY_ASSETS.map((asset) => ({ ...asset })));
+  readonly destinations = computed<DestinationOption[]>(() =>
+    this.locationRows().map((location) => ({ id: location.id, name: location.name })),
+  );
+
+  readonly availableAssets = computed<AssetOption[]>(() =>
+    this.assetRows().map((asset) => ({
+      ...asset,
+      location: asset.locationName,
+      groupKey: asset.typeId,
+      groupName: asset.typeName,
+      groupIcon: asset.icon,
+    })),
+  );
 
   readonly selectedTeacher = signal<TeacherOption | null>(null);
   readonly selectedDestination = signal<DestinationOption | null>(null);
-  readonly selectedAssets = signal<AssetOption[]>(
-    ['asset-1', 'asset-4', 'asset-14']
-      .map((assetId) => this.availableAssets().find((asset) => asset.id === assetId))
-      .filter((asset): asset is AssetOption => !!asset),
-  );
+  readonly selectedAssets = signal<AssetOption[]>([]);
 
   readonly teacherQuery = signal('');
   readonly locationQuery = signal('');
@@ -248,26 +247,34 @@ export class LoanFormComponent implements OnDestroy {
 
   readonly assetCategoryOptions = computed<AssetCategoryOption[]>(() => {
     const assets = this.assetSearchOptions();
+    const categories = new Map<string, string>();
+    for (const asset of assets) {
+      categories.set(asset.categoryId, asset.categoryName);
+    }
 
     return [
       { id: 'all', name: 'Todos', count: assets.length },
-      ...MOCK_CATEGORY_FILTERS.map((category) => ({
-        id: category.id,
-        name: category.name,
-        count: assets.filter((asset) => asset.categoryId === category.id).length,
+      ...Array.from(categories.entries()).map(([id, name]) => ({
+        id,
+        name,
+        count: assets.filter((asset) => asset.categoryId === id).length,
       })),
     ];
   });
 
   readonly assetLocationOptions = computed<AssetLocationOption[]>(() => {
     const assets = this.assetSearchOptions();
+    const locations = new Map<string, string>();
+    for (const asset of assets) {
+      locations.set(asset.locationId, asset.locationName);
+    }
 
     return [
       { id: 'all', name: 'Todos', count: assets.length },
-      ...MOCK_ASSET_LOCATIONS.map((location) => ({
-        id: location.id,
-        name: location.name,
-        count: assets.filter((asset) => asset.locationId === location.id).length,
+      ...Array.from(locations.entries()).map(([id, name]) => ({
+        id,
+        name,
+        count: assets.filter((asset) => asset.locationId === id).length,
       })),
     ];
   });
@@ -384,9 +391,9 @@ export class LoanFormComponent implements OnDestroy {
     this.locationQuery.set(value);
     this.locationDropdownOpen.set(true);
     this.selectedDestination.set(null);
-    this.form.controls['destinationId'].setValue('');
-    this.form.controls['destinationId'].markAsUntouched();
-    this.form.controls['destinationId'].updateValueAndValidity();
+    this.form.controls.destinationId.setValue('');
+    this.form.controls.destinationId.markAsUntouched();
+    this.form.controls.destinationId.updateValueAndValidity();
   }
 
   onLocationFocus() {
@@ -397,18 +404,18 @@ export class LoanFormComponent implements OnDestroy {
     this.selectedDestination.set(destination);
     this.locationQuery.set(destination.name);
     this.locationDropdownOpen.set(false);
-    this.form.controls['destinationId'].setValue(destination.id);
-    this.form.controls['destinationId'].markAsTouched();
-    this.form.controls['destinationId'].updateValueAndValidity();
+    this.form.controls.destinationId.setValue(destination.id);
+    this.form.controls.destinationId.markAsTouched();
+    this.form.controls.destinationId.updateValueAndValidity();
   }
 
   clearDestination() {
     this.selectedDestination.set(null);
     this.locationQuery.set('');
     this.locationDropdownOpen.set(true);
-    this.form.controls['destinationId'].setValue('');
-    this.form.controls['destinationId'].markAsUntouched();
-    this.form.controls['destinationId'].updateValueAndValidity();
+    this.form.controls.destinationId.setValue('');
+    this.form.controls.destinationId.markAsUntouched();
+    this.form.controls.destinationId.updateValueAndValidity();
   }
 
   onAssetSearch(event: Event) {
@@ -838,7 +845,7 @@ export class LoanFormComponent implements OnDestroy {
     this.router.navigate(['/loans']);
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (!this.selectedTeacher()) {
       this.showTeacherError.set(true);
       this.teacherDropdownOpen.set(false);
@@ -855,10 +862,17 @@ export class LoanFormComponent implements OnDestroy {
 
     this.isSubmitting.set(true);
 
-    console.log('Registrar préstamo', this.buildLoanSubmissionPayload());
-    this.notifications.success({ message: 'Préstamo registrado correctamente.' });
-
-    queueMicrotask(() => this.isSubmitting.set(false));
+    try {
+      await firstValueFrom(this.loansService.create(this.buildLoanSubmissionPayload()));
+      this.notifications.success({ message: 'Préstamo registrado correctamente.' });
+      await this.router.navigate(['/loans']);
+    } catch {
+      this.notifications.info({
+        message: 'El backend de préstamos aún está pendiente; no se guardó información local.',
+      });
+    } finally {
+      this.isSubmitting.set(false);
+    }
   }
 
   private createAttachmentDraft(file: File, source: LoanAttachmentSource): LoanAttachmentDraft {
@@ -970,6 +984,15 @@ export class LoanFormComponent implements OnDestroy {
     return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
+  private buildInitials(fullName: string): string {
+    return fullName
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('');
+  }
+
   private getFileExtension(fileName: string): string {
     const segments = fileName.toLowerCase().split('.');
     return segments.at(-1) ?? '';
@@ -984,7 +1007,7 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   private isAssetSearchOptionSelectable(asset: AssetSearchOption): boolean {
-    return isLoanSelectableAssetCondition(asset.condition);
+    return asset.condition === 'Bueno' || asset.condition === 'Regular';
   }
 
   private isAssetVisibleInSearchModal(asset: AssetOption): boolean {

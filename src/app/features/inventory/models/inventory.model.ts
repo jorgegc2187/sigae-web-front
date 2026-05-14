@@ -1,6 +1,5 @@
-import { MockAssetCondition } from '../../../shared/models/mock-inventory-catalog.model';
-
-export type AssetCondition = MockAssetCondition;
+export type AssetCondition = 'Bueno' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
+export type ApiAssetCondition = 'BUENO' | 'REGULAR' | 'MALO' | 'MANTENIMIENTO' | 'DADO_DE_BAJA';
 
 export interface InventoryAsset {
   id: string;
@@ -29,4 +28,47 @@ export interface AssetTraceabilityEntry {
   type: 'Creación' | 'Edición' | 'Estado' | 'Ubicación' | 'Baja';
   description: string;
   user: string;
+}
+
+export interface AssetAttributeValueResponse {
+  attributeDefinitionId: string;
+  attributeName: string;
+  value: string;
+}
+
+export interface AssetResponse {
+  id: string;
+  code: string;
+  name: string;
+  assetTypeId: string;
+  assetTypeName: string;
+  categoryId: string;
+  categoryName: string;
+  locationId: string;
+  locationName: string;
+  supplierId: string | null;
+  supplierName: string | null;
+  condition: ApiAssetCondition;
+  serialNumber: string | null;
+  barcode: string | null;
+  acquisitionDate: string | null;
+  notes: string | null;
+  attributeValues: AssetAttributeValueResponse[];
+}
+
+export interface AssetRequest {
+  code: string;
+  name: string;
+  assetTypeId: string;
+  locationId: string;
+  supplierId: string | null;
+  condition: ApiAssetCondition;
+  serialNumber: string | null;
+  barcode: string | null;
+  acquisitionDate: string | null;
+  notes: string | null;
+  attributeValues: Array<{
+    attributeDefinitionId: string;
+    value: string;
+  }>;
 }

@@ -10,7 +10,6 @@ export type SegmentedFilterTabsVariant = 'desktop' | 'mobile';
 
 @Component({
   selector: 'app-segmented-filter-tabs',
-  standalone: true,
   templateUrl: './segmented-filter-tabs.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

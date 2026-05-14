@@ -1,5 +1,5 @@
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams, HttpResponse, httpResource } from '@angular/common/http';
+import { Injectable, Signal, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
 
@@ -61,6 +61,16 @@ export class ReportsService {
     return this.http.get<AssetReportRow[]>(`${this.baseUrl}/assets`, {
       params: this.buildParams(filters),
     });
+  }
+
+  assetsReportResource(filters: Signal<AssetReportFilters>) {
+    return httpResource<AssetReportRow[]>(
+      () => ({
+        url: `${this.baseUrl}/assets`,
+        params: this.buildParams(filters()),
+      }),
+      { defaultValue: [] },
+    );
   }
 
   listAssetCategories() {

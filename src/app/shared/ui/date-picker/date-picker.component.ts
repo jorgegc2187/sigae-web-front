@@ -28,7 +28,6 @@ let nextDatePickerId = 0;
 
 @Component({
   selector: 'app-date-picker',
-  standalone: true,
   templateUrl: './date-picker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

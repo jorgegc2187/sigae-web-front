@@ -173,8 +173,7 @@
     @for (loan of paginatedLoans(); track loan.id) {
       <tr
         listing-body
-        class="transition-colors"
-        [ngClass]="getLoanRowClass(loan.status)"
+        [class]="getLoanRowClass(loan.status)"
       >
           <td class="px-5 py-4 align-middle">
             <label class="flex justify-center">

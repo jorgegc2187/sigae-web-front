@@ -12,4 +12,5 @@ export interface Location {
   managers: Manager[];
   additionalManagersCount?: number;
   managersText?: string;
+  status?: 'Activo' | 'Inactivo';
 }

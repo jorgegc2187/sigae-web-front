@@ -17,7 +17,6 @@ type ScannerState = 'requesting' | 'scanning' | 'error';
 
 @Component({
   selector: 'app-loan-qr-scanner',
-  standalone: true,
   templateUrl: './loan-qr-scanner.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

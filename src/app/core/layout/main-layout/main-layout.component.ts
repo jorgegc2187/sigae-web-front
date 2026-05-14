@@ -5,7 +5,6 @@ import { HeaderComponent } from '../header/header.component';
 
 @Component({
   selector: 'app-main-layout',
-  standalone: true,
   imports: [RouterOutlet, SidebarComponent, HeaderComponent],
   templateUrl: './main-layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

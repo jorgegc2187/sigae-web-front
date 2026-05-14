@@ -5,7 +5,6 @@ type FormFieldSize = 'md' | 'compact';
 
 @Component({
   selector: 'app-form-field',
-  standalone: true,
   templateUrl: './form-field.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

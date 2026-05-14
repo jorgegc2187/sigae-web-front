@@ -6,25 +6,26 @@ import {
   computed,
 } from '@angular/core';
 import {
-  FormBuilder,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { APP_CONFIG } from '../../../../core/config/app.tokens';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { emailFormatValidator } from '../../../../shared/validators/email-format.validator';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   imports: [ReactiveFormsModule, RouterLink, FormFieldComponent, ActionButtonComponent],
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  private fb = inject(FormBuilder);
+  private fb = inject(NonNullableFormBuilder);
   private router = inject(Router);
   private appConfig = inject(APP_CONFIG);
   private auth = inject(AuthService);
@@ -35,21 +36,24 @@ export class LoginComponent {
   loginError = signal<string | null>(null);
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, emailFormatValidator()]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
+  private readonly formEvents = toSignal(this.form.events, { initialValue: null });
 
   emailError = computed(() => {
-    const c = this.form.get('email');
-    if (!c?.dirty || !c.errors) return null;
+    this.formEvents();
+    const c = this.form.controls.email;
+    if ((!c.dirty && !c.touched) || !c.errors) return null;
     if (c.errors['required']) return 'El correo es requerido.';
-    if (c.errors['email']) return 'Ingrese un correo electrónico válido.';
+    if (c.errors['emailFormat']) return 'Ingrese un correo electrónico válido.';
     return null;
   });
 
   passwordError = computed(() => {
-    const c = this.form.get('password');
-    if (!c?.dirty || !c.errors) return null;
+    this.formEvents();
+    const c = this.form.controls.password;
+    if ((!c.dirty && !c.touched) || !c.errors) return null;
     if (c.errors['required']) return 'La contraseña es requerida.';
     if (c.errors['minlength']) return 'La contraseña debe tener al menos 6 caracteres.';
     return null;
@@ -69,8 +73,8 @@ export class LoginComponent {
     try {
       const credentials = this.form.getRawValue();
       await this.auth.login({
-        email: credentials.email ?? '',
-        password: credentials.password ?? '',
+        email: credentials.email,
+        password: credentials.password,
       });
       this.router.navigate(['/dashboard']);
     } catch {

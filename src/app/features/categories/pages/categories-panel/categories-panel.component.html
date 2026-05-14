@@ -12,12 +12,7 @@
         @for (category of categoryFilters(); track category.id) {
           <li>
             <div
-              class="group relative flex items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all"
-              [ngClass]="{
-                'border-primary/15 bg-primary/10 shadow-sm':
-                  activeCategoryFilterId() === category.id,
-                'border-transparent hover:bg-base-200/55': activeCategoryFilterId() !== category.id,
-              }"
+              [class]="categoryFilterItemClass(category.id)"
             >
               <button
                 type="button"
@@ -29,23 +24,12 @@
                 }
 
                 <div
-                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors"
-                  [ngClass]="{
-                    'bg-primary text-primary-content shadow-sm':
-                      activeCategoryFilterId() === category.id,
-                    'bg-base-200 text-base-content/55 group-hover:bg-base-300':
-                      activeCategoryFilterId() !== category.id,
-                  }"
+                  [class]="categoryFilterIconClass(category.id)"
                 >
                   <span class="material-symbols-outlined">{{ category.icon }}</span>
                 </div>
                 <span
-                  class="block truncate text-sm font-semibold transition-colors"
-                  [ngClass]="{
-                    'text-primary': activeCategoryFilterId() === category.id,
-                    'text-base-content group-hover:text-primary':
-                      activeCategoryFilterId() !== category.id,
-                  }"
+                  [class]="categoryFilterLabelClass(category.id)"
                 >
                   {{ category.name }}
                 </span>
@@ -53,11 +37,7 @@
 
               @if (category.id === 'all') {
                 <span
-                  class="material-symbols-outlined transition-colors"
-                  [ngClass]="{
-                    'text-primary': activeCategoryFilterId() === category.id,
-                    'text-base-content/35': activeCategoryFilterId() !== category.id,
-                  }"
+                  [class]="categoryFilterChevronClass(category.id)"
                 >
                   chevron_right
                 </span>
@@ -245,13 +225,7 @@
     @for (category of categoryFilters(); track category.id) {
       <button
         type="button"
-        class="flex-none whitespace-nowrap rounded-full border px-4 py-1.5 text-[12px] font-medium transition-colors"
-        [ngClass]="{
-          'border-primary bg-primary text-primary-content shadow-sm':
-            activeCategoryFilterId() === category.id,
-          'border-base-300 bg-base-100 text-base-content/65 hover:bg-base-200/60':
-            activeCategoryFilterId() !== category.id,
-        }"
+        [class]="mobileCategoryFilterClass(category.id)"
         (click)="setActiveCategoryFilter(category.id)"
       >
         {{ category.name }}
@@ -636,12 +610,7 @@
                 <td class="px-5 py-3 text-base-content/70">{{ attribute.description }}</td>
                 <td class="px-5 py-3 text-center">
                   <span
-                    class="inline-flex min-w-20 items-center justify-center rounded-full px-3 py-1 text-xs font-semibold"
-                    [ngClass]="
-                      attribute.isRequired
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-base-200 text-base-content/60'
-                    "
+                    [class]="attributeRequiredBadgeClass(attribute.isRequired)"
                   >
                     {{ attribute.isRequired ? 'Sí' : 'No' }}
                   </span>

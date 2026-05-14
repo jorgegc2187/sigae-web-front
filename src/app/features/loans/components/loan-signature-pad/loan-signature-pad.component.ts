@@ -11,7 +11,6 @@ import SignaturePad from 'signature_pad';
 
 @Component({
   selector: 'app-loan-signature-pad',
-  standalone: true,
   templateUrl: './loan-signature-pad.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

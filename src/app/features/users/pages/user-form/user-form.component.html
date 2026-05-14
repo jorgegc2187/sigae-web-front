@@ -163,7 +163,7 @@
             <div class="flex items-center">
               <app-toggle-switch
                 ariaLabel="Enviar invitación por correo"
-                [checked]="sendInvitationControl.value ?? true"
+                [checked]="sendInvitationControl.value"
                 (checkedChange)="onSendInvitationChange($event)"
               />
               <span class="ml-3 text-sm font-medium text-base-content">

@@ -8,17 +8,6 @@ import { AuthResponse, AuthUser, LoginCredentials, UserRole } from './auth.model
 const ACCESS_TOKEN_KEY = 'sigae.accessToken';
 const REFRESH_TOKEN_KEY = 'sigae.refreshToken';
 const USER_KEY = 'sigae.user';
-const MOCK_ACCESS_TOKEN = 'mock-access-token';
-const MOCK_REFRESH_TOKEN = 'mock-refresh-token';
-
-const MOCK_USER: AuthUser = {
-  id: 'mock-admin',
-  fullName: 'Administrador SIGAE',
-  email: 'admin@sigae.edu.pe',
-  role: 'Administrador',
-  status: 'Activo',
-  locationIds: [],
-};
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -34,25 +23,7 @@ export class AuthService {
   readonly currentUser = this.userState.asReadonly();
   readonly isAuthenticated = computed(() => Boolean(this.accessTokenState() && this.userState()));
 
-  constructor() {
-    if (!this.appConfig.enableMockAuth && this.isLegacyMockSession()) {
-      this.clearSession();
-    }
-  }
-
   async login(credentials: LoginCredentials): Promise<void> {
-    if (this.appConfig.enableMockAuth) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      this.persistSession({
-        accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
-        tokenType: 'Bearer',
-        expiresIn: 3600,
-        user: { ...MOCK_USER, email: credentials.email || MOCK_USER.email },
-      });
-      return;
-    }
-
     const response = await firstValueFrom(
       this.http.post<AuthResponse>(`${this.appConfig.apiUrl}/auth/login`, credentials),
     );
@@ -61,7 +32,7 @@ export class AuthService {
 
   async refreshAccessToken(): Promise<string | null> {
     const refreshToken = this.refreshTokenState();
-    if (!refreshToken || this.appConfig.enableMockAuth) {
+    if (!refreshToken) {
       return this.accessTokenState();
     }
 
@@ -79,7 +50,7 @@ export class AuthService {
 
   async logout(): Promise<void> {
     const refreshToken = this.refreshTokenState();
-    if (refreshToken && !this.appConfig.enableMockAuth) {
+    if (refreshToken) {
       try {
         await firstValueFrom(this.http.post(`${this.appConfig.apiUrl}/auth/logout`, { refreshToken }));
       } catch {
@@ -124,9 +95,5 @@ export class AuthService {
       localStorage.removeItem(USER_KEY);
       return null;
     }
-  }
-
-  private isLegacyMockSession(): boolean {
-    return this.accessTokenState() === MOCK_ACCESS_TOKEN || this.refreshTokenState() === MOCK_REFRESH_TOKEN;
   }
 }

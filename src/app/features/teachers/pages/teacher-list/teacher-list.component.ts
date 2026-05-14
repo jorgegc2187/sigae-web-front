@@ -6,7 +6,6 @@ import { Teacher } from '../../models/teacher.model';
 
 @Component({
   selector: 'app-teacher-list',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TeacherCardComponent, SearchInputComponent, ActionButtonComponent],
   templateUrl: './teacher-list.component.html',

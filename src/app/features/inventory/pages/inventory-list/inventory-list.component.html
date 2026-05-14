@@ -25,13 +25,13 @@
     <div class="grid gap-3 md:grid-cols-3">
       <select class="select select-bordered w-full bg-base-100" [value]="categoryId()" (change)="updateCategory($event)">
         <option value="all">Todas las categorías</option>
-        @for (category of categories; track category.id) {
+        @for (category of categories(); track category.id) {
           <option [value]="category.id">{{ category.name }}</option>
         }
       </select>
       <select class="select select-bordered w-full bg-base-100" [value]="locationId()" (change)="updateLocation($event)">
         <option value="all">Todas las ubicaciones</option>
-        @for (location of locations; track location.id) {
+        @for (location of locations(); track location.id) {
           <option [value]="location.id">{{ location.name }}</option>
         }
       </select>

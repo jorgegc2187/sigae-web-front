@@ -1,13 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { MOCK_ASSET_LOCATIONS, MOCK_CATEGORY_FILTERS } from '../../../../shared/models/mock-inventory-catalog.model';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DatePickerComponent, DateRangeValue } from '../../../../shared/ui/date-picker/date-picker.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/status-badge/status-badge.component';
-import { Loan, MOCK_LOANS } from '../../../loans/models/loan.model';
+import { LoanStatus } from '../../../loans/models/loan.model';
 import {
   AssetReportFilters,
   AssetReportRow,
@@ -26,7 +25,7 @@ interface LoanReportRow {
   dueDate: string;
   loanDate: string;
   location: string;
-  status: Loan['status'];
+  status: LoanStatus;
 }
 
 interface PendingReportExport {
@@ -36,7 +35,6 @@ interface PendingReportExport {
 
 @Component({
   selector: 'app-reports-home',
-  standalone: true,
   imports: [RouterLink, ActionButtonComponent, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent],
   templateUrl: './reports-home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,7 +58,6 @@ export class ReportsHomeComponent {
   readonly assetDateRange = signal<DateRangeValue | null>(null);
   readonly assetCurrentPage = signal(1);
   readonly assetPageSize = 8;
-  readonly assetRows = signal<AssetReportRow[]>([]);
 
   readonly loanQuery = signal('');
   readonly loanLocation = signal('all');
@@ -68,13 +65,10 @@ export class ReportsHomeComponent {
   readonly loanCurrentPage = signal(1);
   readonly loanPageSize = 8;
 
-  readonly assetCategories = signal<ReportFilterOption[]>(MOCK_CATEGORY_FILTERS);
-  readonly assetLocations = signal<ReportFilterOption[]>(MOCK_ASSET_LOCATIONS);
+  readonly assetCategories = signal<ReportFilterOption[]>([]);
+  readonly assetLocations = signal<ReportFilterOption[]>([]);
 
-  readonly loanLocations = computed(() =>
-    Array.from(new Set(MOCK_LOANS.map((loan) => loan.destination)))
-      .sort((a, b) => a.localeCompare(b, 'es')),
-  );
+  readonly loanLocations = computed<string[]>(() => []);
 
   readonly assetReportFilters = computed<AssetReportFilters>(() => {
     const dateRange = this.assetDateRange();
@@ -85,6 +79,9 @@ export class ReportsHomeComponent {
       endDate: dateRange?.end,
     };
   });
+
+  readonly assetReportResource = this.reportsService.assetsReportResource(this.assetReportFilters);
+  readonly assetRows = computed<AssetReportRow[]>(() => this.assetReportResource.value());
 
   readonly filteredAssetRows = computed(() => {
     const categoryId = this.assetCategoryId();
@@ -113,18 +110,7 @@ export class ReportsHomeComponent {
     this.buildResultLabel(this.filteredAssetRows().length, this.assetCurrentPage(), this.assetPageSize),
   );
 
-  readonly loanRows = computed<LoanReportRow[]>(() =>
-    MOCK_LOANS.map((loan) => ({
-      id: loan.id,
-      code: loan.code,
-      teacherName: loan.teacher.name,
-      assetsCount: loan.assets.length,
-      dueDate: loan.dueDate,
-      loanDate: loan.loanDate,
-      location: loan.destination,
-      status: loan.status,
-    })),
-  );
+  readonly loanRows = computed<LoanReportRow[]>(() => []);
 
   readonly filteredLoanRows = computed(() => {
     const query = this.loanQuery().trim().toLowerCase();
@@ -182,9 +168,6 @@ export class ReportsHomeComponent {
 
   constructor() {
     void this.loadAssetFilterOptions();
-    effect(() => {
-      void this.loadAssetReport(this.assetReportFilters());
-    });
   }
 
   setActiveTab(tab: ReportsTab): void {
@@ -295,7 +278,7 @@ export class ReportsHomeComponent {
     return 'neutral';
   }
 
-  loanStatusTone(status: Loan['status']): StatusBadgeTone {
+  loanStatusTone(status: LoanStatus): StatusBadgeTone {
     if (status === 'Activo') return 'success';
     if (status === 'Vencido') return 'error';
     return 'neutral';
@@ -324,15 +307,6 @@ export class ReportsHomeComponent {
     const end = Math.min(start + pageSize - 1, total);
 
     return `Mostrando ${start} a ${end} de ${total} resultados`;
-  }
-
-  private async loadAssetReport(filters: AssetReportFilters): Promise<void> {
-    try {
-      const rows = await firstValueFrom(this.reportsService.listAssetsReport(filters));
-      this.assetRows.set(rows);
-    } catch {
-      this.assetRows.set([]);
-    }
   }
 
   private async confirmAssetExport(format: ReportExportFormat): Promise<void> {
@@ -365,8 +339,7 @@ export class ReportsHomeComponent {
       this.assetCategories.set(categories);
       this.assetLocations.set(locations);
     } catch {
-      this.assetCategories.set(MOCK_CATEGORY_FILTERS);
-      this.assetLocations.set(MOCK_ASSET_LOCATIONS);
+      this.notifications.error({ message: 'No se pudieron cargar los filtros de reportes.' });
     }
   }
 

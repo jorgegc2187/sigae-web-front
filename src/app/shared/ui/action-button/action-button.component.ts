@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostBinding, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 type ActionButtonVariant = 'primary' | 'outline' | 'ghost' | 'neutral';
@@ -8,10 +8,12 @@ type ActionButtonIconPosition = 'start' | 'end';
 
 @Component({
   selector: 'app-action-button',
-  standalone: true,
   imports: [RouterLink],
   templateUrl: './action-button.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class]': 'hostClasses()',
+  },
 })
 export class ActionButtonComponent {
   readonly label = input.required<string>();
@@ -71,10 +73,7 @@ export class ActionButtonComponent {
   readonly resolvedAriaLabel = computed(() => this.ariaLabel() ?? this.label());
   readonly displayLabel = computed(() => this.loadingLabel() ?? this.label());
 
-  @HostBinding('class')
-  get hostClasses(): string {
-    return `block ${this.hostClass().trim()}`.trim();
-  }
+  readonly hostClasses = computed(() => `block ${this.hostClass().trim()}`.trim());
 
   onClick(event: MouseEvent) {
     if (this.isDisabled()) {

@@ -24,7 +24,7 @@
 
         <app-form-field label="Categoría">
           <select class="select select-bordered w-full bg-base-100" formControlName="categoryId" (change)="updateCategory($event)">
-            @for (category of categories; track category.id) {
+            @for (category of categories(); track category.id) {
               <option [value]="category.id">{{ category.name }}</option>
             }
           </select>
@@ -40,7 +40,7 @@
 
         <app-form-field label="Ubicación">
           <select class="select select-bordered w-full bg-base-100" formControlName="locationId">
-            @for (location of locations; track location.id) {
+            @for (location of locations(); track location.id) {
               <option [value]="location.id">{{ location.name }}</option>
             }
           </select>
@@ -49,7 +49,7 @@
         <app-form-field label="Proveedor">
           <select class="select select-bordered w-full bg-base-100" formControlName="supplierId">
             <option value="">Sin proveedor</option>
-            @for (supplier of suppliers; track supplier.id) {
+            @for (supplier of suppliers(); track supplier.id) {
               <option [value]="supplier.id">{{ supplier.name }}</option>
             }
           </select>

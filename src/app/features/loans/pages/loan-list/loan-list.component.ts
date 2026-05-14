@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
@@ -10,8 +9,9 @@ import {
   SegmentedFilterTabItem,
   SegmentedFilterTabsComponent,
 } from '../../../../shared/ui/segmented-filter-tabs/segmented-filter-tabs.component';
-import { Loan, LoanStatus, LoanStatusTab, MOCK_LOANS } from '../../models/loan.model';
+import { Loan, LoanStatus, LoanStatusTab } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
+import { LoansService } from '../../services/loans.service';
 
 type AssetsPopoverContext = 'desktop' | 'mobile';
 interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
@@ -20,9 +20,7 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
 
 @Component({
   selector: 'app-loan-list',
-  standalone: true,
   imports: [
-    NgClass,
     DataListingComponent,
     LoanStatusBadgeComponent,
     MobilePaginationComponent,
@@ -36,14 +34,13 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
 export class LoanListComponent {
   readonly pageSize = 5;
   private readonly router = inject(Router);
+  private readonly loansService = inject(LoansService);
   private readonly dateFormatter = new Intl.DateTimeFormat('es-PE', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
     timeZone: 'UTC',
   });
-
-  private readonly loans = signal<Loan[]>(MOCK_LOANS);
 
   readonly queryState = signal<LoanListQueryState>({
     search: '',
@@ -54,6 +51,11 @@ export class LoanListComponent {
     direction: undefined,
     selectedIds: [],
   });
+  private readonly loansResource = this.loansService.listResource(computed(() => ({
+    search: this.queryState().search || undefined,
+    status: this.queryState().status === 'all' ? undefined : this.queryState().status,
+  })));
+  readonly loans = computed(() => this.loansResource.value());
 
   readonly filteredLoans = computed(() => {
     const { search, status } = this.queryState();
@@ -210,14 +212,14 @@ export class LoanListComponent {
 
   getLoanRowClass(status: LoanStatus): string {
     if (status === 'Vencido') {
-      return 'bg-error/5 hover:bg-error/10';
+      return 'transition-colors bg-error/5 hover:bg-error/10';
     }
 
     if (status === 'Devuelto') {
-      return 'opacity-75 hover:bg-base-200/35';
+      return 'transition-colors opacity-75 hover:bg-base-200/35';
     }
 
-    return 'hover:bg-base-200/35';
+    return 'transition-colors hover:bg-base-200/35';
   }
 
   getPrimaryAssetName(loan: Loan): string {

@@ -4,7 +4,6 @@ type SearchInputSize = 'md' | 'lg';
 
 @Component({
   selector: 'app-search-input',
-  standalone: true,
   templateUrl: './search-input.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

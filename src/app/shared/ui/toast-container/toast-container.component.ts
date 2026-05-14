@@ -7,7 +7,6 @@ import {
 
 @Component({
   selector: 'app-toast-container',
-  standalone: true,
   templateUrl: './toast-container.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

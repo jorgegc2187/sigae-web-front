@@ -7,7 +7,6 @@ import { LoanStatus } from '../../models/loan.model';
 
 @Component({
   selector: 'app-loan-status-badge',
-  standalone: true,
   imports: [StatusBadgeComponent],
   templateUrl: './loan-status-badge.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

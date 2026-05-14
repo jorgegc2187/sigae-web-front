@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 
 @Component({
   selector: 'app-toggle-switch',
-  standalone: true,
   templateUrl: './toggle-switch.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
