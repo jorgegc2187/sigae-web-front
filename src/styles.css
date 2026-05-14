@@ -132,22 +132,86 @@
 }
 
 .cally {
+  --color-accent: var(--color-primary);
+  --color-text-on-accent: var(--color-primary-content);
   color: var(--color-base-content);
+  inline-size: 100%;
+}
+
+.cally calendar-month {
+  inline-size: 100%;
+}
+
+.cally::part(months) {
+  display: flex;
+  justify-content: center;
+  inline-size: 100%;
+}
+
+.cally::part(heading) {
+  color: var(--color-base-content);
+  font-size: 0.925rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .cally::part(button) {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  color: var(--color-base-content);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
-.cally--range::part(months) {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
+.cally::part(previous),
+.cally::part(next) {
+  block-size: 2rem;
+  inline-size: 2rem;
+  border: 1px solid color-mix(in oklab, var(--color-base-300) 90%, transparent);
+  background: color-mix(in oklab, var(--color-base-100) 96%, var(--color-primary) 4%);
+  color: color-mix(in oklab, var(--color-base-content) 78%, transparent);
 }
 
-@media (max-width: 767px) {
-  .cally--range::part(months) {
-    gap: 0.75rem;
-  }
+.cally::part(previous):hover,
+.cally::part(next):hover {
+  background: color-mix(in oklab, var(--color-base-200) 88%, var(--color-primary) 12%);
+  color: var(--color-primary);
+}
+
+.cally::part(day) {
+  border-radius: 0.75rem;
+  color: color-mix(in oklab, var(--color-base-content) 94%, transparent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.cally::part(day):hover {
+  background: color-mix(in oklab, var(--color-base-200) 90%, var(--color-primary) 10%);
+}
+
+.cally::part(selected) {
+  background: var(--color-primary);
+  box-shadow: 0 8px 18px color-mix(in oklab, var(--color-primary) 26%, transparent);
+  color: var(--color-primary-content);
+}
+
+.cally::part(range-inner) {
+  background: color-mix(in oklab, var(--color-primary) 12%, white);
+  color: var(--color-primary);
+}
+
+.cally::part(today) {
+  border: 1px solid color-mix(in oklab, var(--color-primary) 38%, transparent);
+}
+
+.cally::part(outside),
+.cally::part(disallowed) {
+  opacity: 0.38;
+}
+
+[data-theme='sigae-dark'] .cally::part(previous),
+[data-theme='sigae-dark'] .cally::part(next) {
+  background: color-mix(in oklab, var(--color-base-200) 92%, var(--color-primary) 8%);
 }

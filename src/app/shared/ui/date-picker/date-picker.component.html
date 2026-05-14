@@ -33,14 +33,14 @@
   #popover
   popover="auto"
   [id]="popoverId"
-  class="dropdown rounded-box border border-base-300 bg-base-100 p-2 shadow-lg [position-anchor:var(--anchor)]"
+  class="dropdown w-[min(20rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-base-300 bg-base-100 p-2 shadow-[0_14px_34px_rgba(15,23,42,0.12)] [position-anchor:var(--anchor)]"
   [style.position-anchor]="anchorName"
 >
   @if (mode() === 'range') {
     <calendar-range
       #calendar
       [class]="calendarClass()"
-      months="2"
+      months="1"
       page-by="months"
       [attr.value]="valueSignal() || null"
       [attr.min]="min() || null"
@@ -66,7 +66,6 @@
         <path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
       </svg>
       <calendar-month></calendar-month>
-      <calendar-month offset="1"></calendar-month>
     </calendar-range>
   } @else {
     <calendar-date
