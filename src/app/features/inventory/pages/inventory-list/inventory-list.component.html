@@ -1,0 +1,91 @@
+<app-data-listing
+  [isEmpty]="filteredAssets().length === 0"
+  [resultLabel]="resultLabel()"
+  [currentPage]="currentPage()"
+  [totalPages]="totalPages()"
+  (pageChange)="goToPage($event)"
+>
+  <div listing-toolbar class="space-y-3">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <app-search-input
+        widthClass="w-full lg:max-w-sm"
+        placeholder="Buscar por código, nombre, serie o ubicación..."
+        [value]="query()"
+        (valueChange)="updateQuery($event)"
+      />
+
+      <app-action-button
+        label="Nuevo activo"
+        icon="add"
+        routerLink="/inventory/new"
+        hostClass="lg:w-auto"
+      />
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-3">
+      <select class="select select-bordered w-full bg-base-100" [value]="categoryId()" (change)="updateCategory($event)">
+        <option value="all">Todas las categorías</option>
+        @for (category of categories; track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+      <select class="select select-bordered w-full bg-base-100" [value]="locationId()" (change)="updateLocation($event)">
+        <option value="all">Todas las ubicaciones</option>
+        @for (location of locations; track location.id) {
+          <option [value]="location.id">{{ location.name }}</option>
+        }
+      </select>
+      <select class="select select-bordered w-full bg-base-100" [value]="condition()" (change)="updateCondition($event)">
+        <option value="all">Todos los estados</option>
+        @for (item of conditions; track item) {
+          <option [value]="item">{{ item }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <ng-container listing-head>
+    <th class="px-5 py-4">Activo</th>
+    <th class="px-5 py-4">Categoría / Tipo</th>
+    <th class="px-5 py-4">Ubicación</th>
+    <th class="px-5 py-4">Estado</th>
+    <th class="px-5 py-4 text-right">Acciones</th>
+  </ng-container>
+
+  <ng-container listing-body>
+    @for (asset of visibleAssets(); track asset.id) {
+      <tr class="hover:bg-base-200/50">
+        <td class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span class="material-symbols-outlined text-[20px]">{{ asset.icon }}</span>
+            </div>
+            <div>
+              <p class="font-semibold text-base-content">{{ asset.name }}</p>
+              <p class="text-xs text-base-content/55">{{ asset.code }} · SN: {{ asset.serial }}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-5 py-4">
+          <p class="font-medium text-base-content">{{ asset.categoryName }}</p>
+          <p class="text-xs text-base-content/55">{{ asset.typeName }}</p>
+        </td>
+        <td class="px-5 py-4 text-base-content/70">{{ asset.locationName }}</td>
+        <td class="px-5 py-4">
+          <app-status-badge [label]="asset.condition" [tone]="conditionTone(asset.condition)" [compact]="true" />
+        </td>
+        <td class="px-5 py-4 text-right">
+          <a class="btn btn-ghost btn-sm text-primary" [routerLink]="['/inventory', asset.id]">Ver detalle</a>
+        </td>
+      </tr>
+    }
+  </ng-container>
+
+  <div listing-empty class="flex flex-col items-center gap-3 text-center">
+    <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl text-base-content/45">inventory_2</span>
+    <div>
+      <p class="font-semibold text-base-content">No se encontraron activos</p>
+      <p class="text-sm text-base-content/55">Ajuste los filtros o registre un nuevo activo.</p>
+    </div>
+  </div>
+</app-data-listing>

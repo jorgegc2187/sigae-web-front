@@ -46,7 +46,7 @@ export class UsersMockStore {
     const map: Record<UserRole, string> = {
       Administrador: 'bg-primary',
       Encargado: 'bg-info',
-      Director: 'bg-neutral',
+      'Solo Lectura': 'bg-neutral',
     };
 
     return map[role];

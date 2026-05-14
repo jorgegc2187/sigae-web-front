@@ -1,0 +1,93 @@
+<app-data-listing
+  [isEmpty]="filteredSuppliers().length === 0"
+  [resultLabel]="resultLabel()"
+>
+  <div listing-toolbar class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <app-search-input
+      widthClass="w-full md:max-w-sm"
+      placeholder="Buscar proveedor, RUC o correo..."
+      [value]="query()"
+      (valueChange)="query.set($event)"
+    />
+    <app-action-button label="Nuevo proveedor" icon="add" (clicked)="openCreateModal()" />
+  </div>
+
+  <ng-container listing-head>
+    <th class="px-5 py-4">Proveedor</th>
+    <th class="px-5 py-4">Contacto</th>
+    <th class="px-5 py-4">Activos</th>
+    <th class="px-5 py-4">Estado</th>
+    <th class="px-5 py-4 text-right">Acciones</th>
+  </ng-container>
+
+  <ng-container listing-body>
+    @for (supplier of filteredSuppliers(); track supplier.id) {
+      <tr class="hover:bg-base-200/50">
+        <td class="px-5 py-4">
+          <p class="font-semibold text-base-content">{{ supplier.name }}</p>
+          <p class="text-xs text-base-content/55">RUC: {{ supplier.ruc || 'No registrado' }}</p>
+        </td>
+        <td class="px-5 py-4">
+          <p class="text-sm text-base-content/70">{{ supplier.email || 'Sin correo' }}</p>
+          <p class="text-xs text-base-content/55">{{ supplier.phone || 'Sin teléfono' }}</p>
+        </td>
+        <td class="px-5 py-4 text-base-content/70">{{ supplier.assetsCount }}</td>
+        <td class="px-5 py-4">
+          <app-status-badge [label]="supplier.status" [tone]="supplier.status === 'Activo' ? 'success' : 'neutral'" [compact]="true" />
+        </td>
+        <td class="px-5 py-4 text-right">
+          <button class="btn btn-ghost btn-sm text-primary" type="button" (click)="openEditModal(supplier)">Editar</button>
+          <button class="btn btn-ghost btn-sm text-error" type="button" [disabled]="supplier.status === 'Inactivo'" (click)="deactivate(supplier)">
+            Desactivar
+          </button>
+        </td>
+      </tr>
+    }
+  </ng-container>
+
+  <div listing-empty class="py-6 text-center">
+    <span class="material-symbols-outlined text-4xl text-base-content/35">storefront</span>
+    <p class="mt-2 font-semibold text-base-content">No hay proveedores</p>
+    <p class="text-sm text-base-content/55">Registre proveedores para asociarlos a activos.</p>
+  </div>
+</app-data-listing>
+
+@if (isModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-base-content/30 p-4">
+    <section class="w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 shadow-xl">
+      <header class="border-b border-base-200 px-6 py-4">
+        <h3 class="text-lg font-bold text-base-content">
+          {{ editingSupplierId() ? 'Editar proveedor' : 'Nuevo proveedor' }}
+        </h3>
+      </header>
+      <div class="space-y-4 px-6 py-5">
+        <label class="form-control">
+          <span class="label-text font-semibold">Nombre</span>
+          <input class="input input-bordered w-full" [value]="draft().name" (input)="updateDraft('name', $event)" />
+        </label>
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="form-control">
+            <span class="label-text font-semibold">RUC</span>
+            <input class="input input-bordered w-full" [value]="draft().ruc" (input)="updateDraft('ruc', $event)" />
+          </label>
+          <label class="form-control">
+            <span class="label-text font-semibold">Teléfono</span>
+            <input class="input input-bordered w-full" [value]="draft().phone" (input)="updateDraft('phone', $event)" />
+          </label>
+        </div>
+        <label class="form-control">
+          <span class="label-text font-semibold">Correo</span>
+          <input class="input input-bordered w-full" [value]="draft().email" (input)="updateDraft('email', $event)" />
+        </label>
+        <label class="form-control">
+          <span class="label-text font-semibold">Dirección</span>
+          <input class="input input-bordered w-full" [value]="draft().address" (input)="updateDraft('address', $event)" />
+        </label>
+      </div>
+      <footer class="flex justify-end gap-3 border-t border-base-200 px-6 py-4">
+        <app-action-button label="Cancelar" variant="neutral" (clicked)="closeModal()" />
+        <app-action-button label="Guardar" icon="save" (clicked)="saveSupplier()" />
+      </footer>
+    </section>
+  </div>
+}

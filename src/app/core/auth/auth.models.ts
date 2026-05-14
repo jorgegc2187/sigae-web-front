@@ -1,0 +1,23 @@
+export type UserRole = 'Administrador' | 'Encargado' | 'Solo Lectura';
+
+export interface AuthUser {
+  id: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  status?: 'Activo' | 'Inactivo';
+  locationIds?: string[];
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: AuthUser;
+}

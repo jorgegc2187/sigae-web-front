@@ -37,7 +37,7 @@ export class UserFormComponent {
 
   readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
 
-  readonly roles: UserRole[] = ['Administrador', 'Encargado', 'Director'];
+  readonly roles: UserRole[] = ['Administrador', 'Encargado', 'Solo Lectura'];
   readonly locations = signal<LocationOption[]>([
     { id: 'location-1', name: 'Aula de Cómputo' },
     { id: 'location-2', name: 'Biblioteca' },

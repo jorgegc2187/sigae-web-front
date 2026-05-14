@@ -1,4 +1,4 @@
-export type UserRole = 'Administrador' | 'Encargado' | 'Director';
+export type UserRole = 'Administrador' | 'Encargado' | 'Solo Lectura';
 export type UserStatus = 'Activo' | 'Inactivo';
 
 export interface User {
@@ -53,8 +53,8 @@ export const MOCK_USERS: User[] = [
     email: 'jorge.ramos@colegio.edu.pe',
     initials: 'JR',
     avatarColor: 'bg-neutral',
-    role: 'Director',
-    locations: null,
+    role: 'Solo Lectura',
+    locations: 'Dirección',
     status: 'Activo',
     lastAccess: 'Hace 1 semana',
   },

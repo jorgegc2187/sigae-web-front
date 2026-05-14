@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/auth.guard';
+import { roleGuard } from './core/auth/role.guard';
 import { MainLayoutComponent } from './core/layout/main-layout/main-layout.component';
 
 export const routes: Routes = [
@@ -15,11 +17,22 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       {
         path: 'dashboard',
         loadChildren: () =>
           import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
+      },
+      {
+        path: 'inventory',
+        loadChildren: () =>
+          import('./features/inventory/inventory.routes').then((m) => m.INVENTORY_ROUTES),
+      },
+      {
+        path: 'reports',
+        loadChildren: () =>
+          import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
       },
       {
         path: 'teachers',
@@ -41,11 +54,15 @@ export const routes: Routes = [
         children: [
           {
             path: 'users',
+            canActivate: [roleGuard],
+            data: { roles: ['Administrador'] },
             loadChildren: () =>
               import('./features/users/users.routes').then((m) => m.USERS_ROUTES),
           },
           {
             path: 'categories',
+            canActivate: [roleGuard],
+            data: { roles: ['Administrador'] },
             loadChildren: () =>
               import('./features/categories/categories.routes').then((m) => m.CATEGORIES_ROUTES),
           },
@@ -53,6 +70,13 @@ export const routes: Routes = [
             path: 'locations',
             loadChildren: () =>
               import('./features/locations/locations.routes').then((m) => m.LOCATIONS_ROUTES),
+          },
+          {
+            path: 'suppliers',
+            canActivate: [roleGuard],
+            data: { roles: ['Administrador'] },
+            loadChildren: () =>
+              import('./features/suppliers/suppliers.routes').then((m) => m.SUPPLIERS_ROUTES),
           },
         ],
       },

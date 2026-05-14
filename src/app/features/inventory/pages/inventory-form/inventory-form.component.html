@@ -1,0 +1,95 @@
+<form class="pb-24" [formGroup]="form" (ngSubmit)="submit()">
+  <div class="mx-auto max-w-5xl space-y-6">
+    <a routerLink="/inventory" class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+      Volver al inventario
+    </a>
+
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+      <div class="mb-6">
+        <h2 class="text-xl font-bold text-base-content">
+          {{ isEdit() ? 'Editar activo' : 'Nuevo activo' }}
+        </h2>
+        <p class="text-sm text-base-content/60">Complete los datos operativos del activo.</p>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <app-form-field label="Código" [error]="form.get('code')?.invalid && form.get('code')?.touched ? 'El código es requerido.' : null">
+          <input class="input input-bordered w-full bg-base-100" formControlName="code" placeholder="CMP-2026-001" />
+        </app-form-field>
+
+        <app-form-field label="Nombre" [error]="form.get('name')?.invalid && form.get('name')?.touched ? 'El nombre es requerido.' : null">
+          <input class="input input-bordered w-full bg-base-100" formControlName="name" placeholder="Laptop Lenovo ThinkPad" />
+        </app-form-field>
+
+        <app-form-field label="Categoría">
+          <select class="select select-bordered w-full bg-base-100" formControlName="categoryId" (change)="updateCategory($event)">
+            @for (category of categories; track category.id) {
+              <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
+        </app-form-field>
+
+        <app-form-field label="Tipo de activo">
+          <select class="select select-bordered w-full bg-base-100" formControlName="typeId">
+            @for (type of availableTypes(); track type.id) {
+              <option [value]="type.id">{{ type.name }}</option>
+            }
+          </select>
+        </app-form-field>
+
+        <app-form-field label="Ubicación">
+          <select class="select select-bordered w-full bg-base-100" formControlName="locationId">
+            @for (location of locations; track location.id) {
+              <option [value]="location.id">{{ location.name }}</option>
+            }
+          </select>
+        </app-form-field>
+
+        <app-form-field label="Proveedor">
+          <select class="select select-bordered w-full bg-base-100" formControlName="supplierId">
+            <option value="">Sin proveedor</option>
+            @for (supplier of suppliers; track supplier.id) {
+              <option [value]="supplier.id">{{ supplier.name }}</option>
+            }
+          </select>
+        </app-form-field>
+
+        <app-form-field label="Estado">
+          <select class="select select-bordered w-full bg-base-100" formControlName="condition">
+            <option>Bueno</option>
+            <option>Regular</option>
+            <option>Malo</option>
+            <option>Mantenimiento</option>
+            <option>Dado de baja</option>
+          </select>
+        </app-form-field>
+
+        <app-form-field label="Serie" [error]="form.get('serial')?.invalid && form.get('serial')?.touched ? 'La serie es requerida.' : null">
+          <input class="input input-bordered w-full bg-base-100" formControlName="serial" placeholder="SN-0001" />
+        </app-form-field>
+
+        <app-form-field label="Barcode">
+          <input class="input input-bordered w-full bg-base-100" formControlName="barcode" placeholder="BC-CMP-2026-001" />
+        </app-form-field>
+
+        <app-form-field label="Fecha de adquisición">
+          <input class="input input-bordered w-full bg-base-100" formControlName="acquisitionDate" type="date" />
+        </app-form-field>
+      </div>
+
+      <div class="mt-4">
+        <app-form-field label="Observaciones">
+          <textarea class="textarea textarea-bordered min-h-28 w-full resize-y bg-base-100" formControlName="observations"></textarea>
+        </app-form-field>
+      </div>
+    </section>
+  </div>
+
+  <footer class="fixed bottom-0 left-0 right-0 z-30 border-t border-base-300 bg-base-100/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:left-[240px] md:px-8">
+    <div class="mx-auto flex max-w-5xl justify-end gap-3">
+      <app-action-button label="Cancelar" variant="neutral" routerLink="/inventory" />
+      <app-action-button label="Guardar activo" icon="save" type="submit" />
+    </div>
+  </footer>
+</form>

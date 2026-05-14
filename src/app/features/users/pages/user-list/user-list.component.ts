@@ -91,7 +91,7 @@ export class UserListComponent {
     const map: Record<UserRole, string> = {
       Administrador: 'badge-primary',
       Encargado: 'badge-secondary',
-      Director: 'badge-neutral',
+      'Solo Lectura': 'badge-neutral',
     };
     return map[role];
   }

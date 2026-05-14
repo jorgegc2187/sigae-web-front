@@ -11,6 +11,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { APP_CONFIG } from '../../../../core/config/app.tokens';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
@@ -26,6 +27,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private appConfig = inject(APP_CONFIG);
+  private auth = inject(AuthService);
 
   readonly appName = this.appConfig.appName;
   isSubmitting = signal(false);
@@ -64,15 +66,17 @@ export class LoginComponent {
     this.isSubmitting.set(true);
     this.loginError.set(null);
 
-    // TODO: Reemplazar con llamada real al AuthService usando appConfig.apiUrl.
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    if (this.appConfig.enableMockAuth) {
+    try {
+      const credentials = this.form.getRawValue();
+      await this.auth.login({
+        email: credentials.email ?? '',
+        password: credentials.password ?? '',
+      });
       this.router.navigate(['/dashboard']);
-    } else {
-      this.loginError.set('La autenticación con API aún no está conectada.');
+    } catch {
+      this.loginError.set('No pudimos iniciar sesión con esas credenciales.');
+    } finally {
+      this.isSubmitting.set(false);
     }
-
-    this.isSubmitting.set(false);
   }
 }
