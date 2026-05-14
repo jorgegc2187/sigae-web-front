@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+import { guestOnlyGuard } from './core/auth/guest-only.guard';
 import { roleGuard } from './core/auth/role.guard';
 import { MainLayoutComponent } from './core/layout/main-layout/main-layout.component';
 
@@ -7,10 +8,11 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'login',
+    redirectTo: 'auth/login',
   },
   {
-    path: '',
+    path: 'auth',
+    canActivate: [guestOnlyGuard],
     loadChildren: () =>
       import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
@@ -85,6 +87,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'login',
+    redirectTo: 'auth/login',
   },
 ];

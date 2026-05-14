@@ -59,7 +59,7 @@ export class AuthService {
     }
 
     this.clearSession();
-    await this.router.navigate(['/login']);
+    await this.router.navigate(['/auth/login']);
   }
 
   hasAnyRole(roles: readonly UserRole[]): boolean {
