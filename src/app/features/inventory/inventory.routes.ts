@@ -8,7 +8,7 @@ export const INVENTORY_ROUTES: Routes = [
     title: 'Inventario - SIGAE',
     data: {
       pageTitle: 'Inventario',
-      pageSubtitle: 'Activos, estados y trazabilidad',
+      pageSubtitle: 'Inventario maestro y unidades individuales',
     },
   },
   {
@@ -19,6 +19,16 @@ export const INVENTORY_ROUTES: Routes = [
     data: {
       pageTitle: 'Inventario',
       pageSubtitle: 'Registrar nuevo activo',
+    },
+  },
+  {
+    path: 'groups/:groupId',
+    loadComponent: () =>
+      import('./pages/inventory-group-detail/inventory-group-detail.component').then((m) => m.InventoryGroupDetailComponent),
+    title: 'Familia de activos - SIGAE',
+    data: {
+      pageTitle: 'Inventario',
+      pageSubtitle: 'Unidades agrupadas por familia de activo',
     },
   },
   {

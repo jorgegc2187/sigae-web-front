@@ -10,11 +10,13 @@ export class DataListingComponent {
   isLoading = input(false);
   isEmpty = input(false);
   resultLabel = input('Mostrando 0 resultados');
+  showResultLabel = input(true);
   currentPage = input(1);
   totalPages = input(1);
   selectionEnabled = input(false);
   allSelected = input(false);
   selectedCount = input(0);
+  centerPagination = input(false);
 
   pageChange = output<number>();
   toggleSelectAll = output<boolean>();
@@ -59,6 +61,14 @@ export class DataListingComponent {
   readonly hasMultiplePages = computed(() => this.totalPages() > 1);
   readonly canGoPrevious = computed(() => this.currentPage() > 1);
   readonly canGoNext = computed(() => this.currentPage() < this.totalPages());
+  readonly footerClass = computed(() =>
+    this.centerPagination()
+      ? 'flex flex-col items-center justify-center gap-3 border-t border-base-200 bg-base-200/30 px-6 py-4'
+      : 'flex flex-col gap-3 border-t border-base-200 bg-base-200/30 px-6 py-4 md:flex-row md:items-center md:justify-between',
+  );
+  readonly paginationClass = computed(() =>
+    this.centerPagination() ? 'join self-center' : 'join self-end md:self-auto',
+  );
 
   onPreviousPage() {
     if (this.canGoPrevious()) {

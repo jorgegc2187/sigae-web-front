@@ -1,4 +1,5 @@
 export type UserRole = 'Administrador' | 'Encargado' | 'Solo Lectura';
+export type SessionStatus = 'unknown' | 'authenticated' | 'anonymous';
 
 export interface AuthUser {
   id: string;

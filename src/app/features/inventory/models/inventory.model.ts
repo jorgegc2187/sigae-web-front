@@ -30,6 +30,23 @@ export interface AssetTraceabilityEntry {
   user: string;
 }
 
+export interface InventoryAssetGroupUnit {
+  id: string;
+  code: string;
+  locationName: string;
+  condition: AssetCondition;
+  lastInspectionDate: string;
+}
+
+export interface InventoryAssetGroup {
+  groupId: string;
+  displayName: string;
+  categoryName: string;
+  totalUnits: number;
+  lastEntryDate: string;
+  units: InventoryAssetGroupUnit[];
+}
+
 export interface AssetAttributeValueResponse {
   attributeDefinitionId: string;
   attributeName: string;

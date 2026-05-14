@@ -1,0 +1,608 @@
+<!doctype html>
+
+<html class="light" lang="es" style="">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SIGAE - Desglose de Activos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'tertiary-fixed-dim': '#ffb59c',
+              'on-surface-variant': '#434655',
+              'on-error-container': '#93000a',
+              'error-container': '#ffdad6',
+              'on-surface': '#191c1e',
+              'inverse-on-surface': '#eff1f3',
+              'surface-variant': '#e0e3e5',
+              'on-tertiary': '#ffffff',
+              'inverse-primary': '#b7c4ff',
+              tertiary: '#7f2500',
+              'surface-dim': '#d8dadc',
+              'primary-fixed': '#dce1ff',
+              'on-secondary-fixed-variant': '#003ea8',
+              'on-error': '#ffffff',
+              secondary: '#0051d5',
+              surface: '#f7f9fb',
+              'surface-container-high': '#e6e8ea',
+              'on-secondary': '#ffffff',
+              'on-tertiary-container': '#ffc9b7',
+              'primary-fixed-dim': '#b7c4ff',
+              'secondary-fixed-dim': '#b4c5ff',
+              'surface-container-low': '#f2f4f6',
+              'on-secondary-fixed': '#00174b',
+              'inverse-surface': '#2d3133',
+              'outline-variant': '#c4c5d7',
+              'on-primary-container': '#cad3ff',
+              'surface-tint': '#2151da',
+              error: '#ba1a1a',
+              'on-tertiary-fixed-variant': '#832700',
+              'on-background': '#191c1e',
+              'secondary-fixed': '#dbe1ff',
+              'secondary-container': '#316bf3',
+              'on-primary-fixed-variant': '#0039b5',
+              'tertiary-fixed': '#ffdbcf',
+              'on-primary-fixed': '#001551',
+              background: '#f7f9fb',
+              'surface-container-lowest': '#ffffff',
+              'surface-container': '#eceef0',
+              'primary-container': '#1d4ed8',
+              'on-tertiary-fixed': '#390c00',
+              'surface-bright': '#f7f9fb',
+              'on-primary': '#ffffff',
+              'tertiary-container': '#a73400',
+              outline: '#747686',
+              'on-secondary-container': '#fefcff',
+              'surface-container-highest': '#e0e3e5',
+              primary: '#0037b0',
+
+              'sigae-primary': '#1D4ED8',
+              'sigae-primary-hover': '#2563EB',
+              'sigae-base-100': '#F8FAFC',
+              'sigae-base-200': '#F1F5F9',
+              'sigae-base-300': '#E2E8F0',
+              'sigae-base-content': '#0F172A',
+              'sigae-text-secondary': '#334155',
+              'sigae-text-muted': '#64748B',
+
+              'status-good-text': '#15803D',
+              'status-good-bg': '#DCFCE7',
+              'status-regular-text': '#B45309',
+              'status-regular-bg': '#FEF3C7',
+              'status-bad-text': '#B91C1C',
+              'status-bad-bg': '#FEE2E2',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+              card: '12px',
+              btn: '8px',
+            },
+            fontFamily: {
+              inter: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+      }
+    </style>
+    <style data-stitch-cursor=""></style>
+    <style data-stitch-scroll-lock=""></style>
+  </head>
+  <body class="bg-sigae-base-100 text-sigae-base-content font-inter">
+    <!-- TopNavBar -->
+    <header
+      class="bg-white dark:bg-slate-900 font-inter text-sm antialiased docked full-width top-0 border-b border-slate-200 dark:border-slate-800 shadow-sm fixed top-0 right-0 left-60 h-16 z-40 flex items-center justify-between px-6"
+    >
+      <div class="flex items-center">
+        <span class="text-xl font-bold text-blue-700 dark:text-blue-400 mr-8">SIGAE</span>
+        <div class="relative hidden md:block w-96">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+            >search</span
+          >
+          <input
+            class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            placeholder="Buscar en el inventario..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div class="flex items-center space-x-6">
+        <button
+          class="text-slate-600 hover:text-blue-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors p-2 rounded-full relative"
+        >
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="flex items-center border-l border-slate-200 pl-6 cursor-pointer">
+          <div class="text-right mr-3 hidden sm:block">
+            <p class="text-sm font-semibold text-slate-700">Admin Principal</p>
+            <p class="text-xs text-slate-500">Administrador</p>
+          </div>
+          <img
+            alt="User Avatar Admin"
+            class="h-9 w-9 rounded-full border border-slate-200 object-cover"
+            data-alt="professional headshot of a man in a blue shirt with a neutral grey background"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfXc7W3TJcpIhds24g5imwBkI8uch99JDoZ7dly19j9vfKCo4o6_pRY5s4PIt0aPOipJl2-CnP3R6iYMyeykCboSo4E7oVIYQ_SzkbCRADkX8N1B_JBeKQBq9Q10u0B5ZfQPLN8_d0bZafPRLdr-4xfTK7p6RLZGGrqNI8N8DKKn9DlTNlii-RI-qLbAxh2SYzqCX4UdZ00xbDzLSXA-NCLJQKHgRdbQzZHXrODvlNsHeRLDffnJ63pji020LrkuUsRX5K2APhc4xm"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- SideNavBar -->
+    <nav
+      class="bg-slate-50 dark:bg-slate-950 font-inter text-sm font-medium docked fixed left-0 top-0 h-screen w-60 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full py-4 z-50"
+    >
+      <div class="px-6 pb-6 mb-2 border-b border-slate-200 flex flex-col">
+        <h1 class="text-2xl font-black text-blue-700 dark:text-blue-400">SIGAE</h1>
+        <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mt-1">
+          Gestión de Activos
+        </p>
+      </div>
+      <div class="flex-1 overflow-y-auto pt-4 px-3 space-y-1">
+        <a
+          class="flex items-center px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-3 text-[18px]">dashboard</span>
+          Dashboard
+        </a>
+        <a
+          class="flex items-center px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-700 transition-all duration-200 ease-in-out rounded-r-md -ml-3 pl-6"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-3 text-[18px]">inventory_2</span>
+          Inventario
+        </a>
+        <a
+          class="flex items-center px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-3 text-[18px]">location_on</span>
+          Ubicaciones
+        </a>
+        <a
+          class="flex items-center px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-3 text-[18px]">handshake</span>
+          Préstamos
+        </a>
+        <a
+          class="flex items-center px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-3 text-[18px]">person_4</span>
+          Docentes
+        </a>
+        <a
+          class="flex items-center px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-3 text-[18px]">analytics</span>
+          Reportes
+        </a>
+        <a
+          class="flex items-center px-3 py-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out rounded-md"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-3 text-[18px]">settings</span>
+          Configuración
+        </a>
+      </div>
+    </nav>
+    <!-- Main Content Area -->
+    <main class="ml-60 pt-16 min-h-screen p-6">
+      <!-- Breadcrumbs & Header -->
+      <div class="mb-6">
+        <nav class="flex text-sm text-sigae-text-muted mb-2">
+          <ol class="flex items-center space-x-2">
+            <li class=""><a class="hover:text-sigae-primary" href="#">Inventario</a></li>
+            <li class=""><span class="mx-1">/</span></li>
+            <li class="text-sigae-text-secondary font-medium">Laptop Lenovo ThinkPad E14</li>
+          </ol>
+        </nav>
+        <div class="flex justify-between items-end">
+          <h1 class="text-[24px] font-bold text-sigae-base-content leading-tight">
+            Laptop Lenovo ThinkPad E14 - Unidades
+          </h1>
+          <button
+            class="bg-sigae-primary hover:bg-sigae-primary-hover text-white h-[36px] px-4 rounded-btn text-sm font-medium transition-colors flex items-center shadow-sm"
+          >
+            <span class="material-symbols-outlined mr-2 text-[18px]">add</span>
+            Agregar unidades iguales
+          </button>
+        </div>
+      </div>
+      <!-- Summary & Controls Row -->
+      <div class="grid grid-cols-12 gap-4 mb-6">
+        <!-- Summary Card -->
+        <!-- Controls Panel -->
+        <div
+          class="bg-white rounded-card border border-sigae-base-300 p-4 shadow-sm flex items-center justify-between col-span-12"
+        >
+          <div class="flex-1 flex gap-4 mr-4">
+            <div class="relative flex-1 max-w-2xl">
+              <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sigae-text-muted text-[18px]"
+                >search</span
+              ><input
+                class="w-full h-[36px] pl-9 pr-4 border border-sigae-base-300 rounded-md text-sm focus:ring-1 focus:ring-sigae-primary focus:border-sigae-primary bg-sigae-base-200/50"
+                placeholder="Buscar por c3digo SIGAE o n9mero de serie..."
+                type="text"
+              />
+            </div>
+            <div class="relative w-64">
+              <select
+                class="w-full h-[36px] pl-3 pr-8 border border-sigae-base-300 rounded-md text-sm focus:ring-1 focus:ring-sigae-primary focus:border-sigae-primary bg-white appearance-none cursor-pointer"
+              >
+                <option value="">Todos los estados</option>
+                <option value="good">Operativo</option>
+                <option value="regular">Regular</option>
+                <option value="bad">Malo</option></select
+              ><span
+                class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-sigae-text-muted pointer-events-none text-[18px]"
+                >arrow_drop_down</span
+              >
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="h-[36px] w-[36px] border border-sigae-base-300 rounded-btn text-sigae-text-secondary hover:bg-sigae-base-200 transition-colors flex items-center justify-center"
+            >
+              <span class="material-symbols-outlined text-[18px]">barcode_scanner</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Data Table Card -->
+      <div class="bg-white rounded-card border border-sigae-base-300 shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr
+              class="bg-sigae-base-200 border-b border-sigae-base-300 text-xs uppercase text-sigae-text-muted font-semibold"
+            >
+              <th class="py-3 px-4 w-[40px] text-center">
+                <input
+                  class="rounded border-sigae-base-300 text-sigae-primary focus:ring-sigae-primary w-4 h-4 cursor-pointer"
+                  type="checkbox"
+                />
+              </th>
+              <th class="py-3 px-4">Código SIGAE</th>
+              <th class="py-3 px-4">Ubicación Específica</th>
+              <th class="py-3 px-4">Estado</th>
+              <th class="py-3 px-4">Última Inspección</th>
+              <th class="py-3 px-4 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-sigae-base-300">
+            <!-- Row 1 -->
+            <tr class="hover:bg-sigae-base-200/50 transition-colors group">
+              <td class="py-3 px-4 text-center">
+                <input
+                  class="rounded border-sigae-base-300 text-sigae-primary focus:ring-sigae-primary w-4 h-4 cursor-pointer"
+                  type="checkbox"
+                />
+              </td>
+              <td class="py-3 px-4 font-bold text-sigae-base-content">ACT-2023-0894</td>
+              <td class="py-3 px-4 text-sigae-text-secondary">Laboratorio 1 - Mesa 1</td>
+              <td class="py-3 px-4">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-status-good-bg text-status-good-text"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-status-good-text mr-1.5"></span>
+                  Operativo
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sigae-text-muted">12/10/2023</td>
+              <td class="py-3 px-4 text-right">
+                <div
+                  class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Ver detalle"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Historial"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 2 -->
+            <tr class="hover:bg-sigae-base-200/50 transition-colors group">
+              <td class="py-3 px-4 text-center">
+                <input
+                  class="rounded border-sigae-base-300 text-sigae-primary focus:ring-sigae-primary w-4 h-4 cursor-pointer"
+                  type="checkbox"
+                />
+              </td>
+              <td class="py-3 px-4 font-bold text-sigae-base-content">ACT-2023-0895</td>
+              <td class="py-3 px-4 text-sigae-text-secondary">Laboratorio 1 - Mesa 2</td>
+              <td class="py-3 px-4">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-status-good-bg text-status-good-text"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-status-good-text mr-1.5"></span>
+                  Operativo
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sigae-text-muted">12/10/2023</td>
+              <td class="py-3 px-4 text-right">
+                <div
+                  class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Ver detalle"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Historial"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 3 -->
+            <tr class="hover:bg-sigae-base-200/50 transition-colors group">
+              <td class="py-3 px-4 text-center">
+                <input
+                  class="rounded border-sigae-base-300 text-sigae-primary focus:ring-sigae-primary w-4 h-4 cursor-pointer"
+                  type="checkbox"
+                />
+              </td>
+              <td class="py-3 px-4 font-bold text-sigae-base-content">ACT-2023-0896</td>
+              <td class="py-3 px-4 text-sigae-text-secondary">Laboratorio 1 - Mesa 3</td>
+              <td class="py-3 px-4">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-status-regular-bg text-status-regular-text"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-status-regular-text mr-1.5"></span>
+                  Regular
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sigae-text-muted">12/10/2023</td>
+              <td class="py-3 px-4 text-right">
+                <div
+                  class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Ver detalle"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Historial"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 4 -->
+            <tr class="hover:bg-sigae-base-200/50 transition-colors group">
+              <td class="py-3 px-4 text-center">
+                <input
+                  class="rounded border-sigae-base-300 text-sigae-primary focus:ring-sigae-primary w-4 h-4 cursor-pointer"
+                  type="checkbox"
+                />
+              </td>
+              <td class="py-3 px-4 font-bold text-sigae-base-content">ACT-2023-0897</td>
+              <td class="py-3 px-4 text-sigae-text-secondary">Biblioteca - Préstamo</td>
+              <td class="py-3 px-4">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#EDE9FE] text-[#6D28D9]"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#6D28D9] mr-1.5"></span>
+                  Mantenimiento
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sigae-text-muted">05/11/2023</td>
+              <td class="py-3 px-4 text-right">
+                <div
+                  class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Ver detalle"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Historial"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 5 -->
+            <tr class="hover:bg-sigae-base-200/50 transition-colors group">
+              <td class="py-3 px-4 text-center">
+                <input
+                  class="rounded border-sigae-base-300 text-sigae-primary focus:ring-sigae-primary w-4 h-4 cursor-pointer"
+                  type="checkbox"
+                />
+              </td>
+              <td class="py-3 px-4 font-bold text-sigae-base-content">ACT-2023-0898</td>
+              <td class="py-3 px-4 text-sigae-text-secondary">Laboratorio 2 - Mesa 1</td>
+              <td class="py-3 px-4">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-status-good-bg text-status-good-text"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-status-good-text mr-1.5"></span>
+                  Operativo
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sigae-text-muted">12/10/2023</td>
+              <td class="py-3 px-4 text-right">
+                <div
+                  class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Ver detalle"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Historial"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Row 6 -->
+            <tr class="hover:bg-sigae-base-200/50 transition-colors group">
+              <td class="py-3 px-4 text-center">
+                <input
+                  class="rounded border-sigae-base-300 text-sigae-primary focus:ring-sigae-primary w-4 h-4 cursor-pointer"
+                  type="checkbox"
+                />
+              </td>
+              <td class="py-3 px-4 font-bold text-sigae-base-content">ACT-2023-0899</td>
+              <td class="py-3 px-4 text-sigae-text-secondary">Almacén Principal</td>
+              <td class="py-3 px-4">
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-status-bad-bg text-status-bad-text"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-status-bad-text mr-1.5"></span>
+                  Malo
+                </span>
+              </td>
+              <td class="py-3 px-4 text-sigae-text-muted">01/11/2023</td>
+              <td class="py-3 px-4 text-right">
+                <div
+                  class="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Ver detalle"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Editar"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    class="p-1 text-sigae-text-muted hover:text-sigae-primary rounded"
+                    title="Historial"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- Pagination -->
+        <div
+          class="px-4 py-3 border-t border-sigae-base-300 bg-white flex items-center justify-between"
+        >
+          <div class="text-sm text-sigae-text-muted">
+            Mostrando <span class="font-medium text-sigae-base-content">1</span> a
+            <span class="font-medium text-sigae-base-content">6</span> de
+            <span class="font-medium text-sigae-base-content">15</span> unidades
+          </div>
+          <div class="flex space-x-1">
+            <button
+              class="px-3 py-1 border border-sigae-base-300 rounded text-sm text-sigae-text-muted bg-sigae-base-200 cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            <button
+              class="px-3 py-1 border border-sigae-primary bg-sigae-primary text-white rounded text-sm"
+            >
+              1
+            </button>
+            <button
+              class="px-3 py-1 border border-sigae-base-300 rounded text-sm text-sigae-text-secondary hover:bg-sigae-base-200 transition-colors"
+            >
+              2
+            </button>
+            <button
+              class="px-3 py-1 border border-sigae-base-300 rounded text-sm text-sigae-text-secondary hover:bg-sigae-base-200 transition-colors"
+            >
+              3
+            </button>
+            <button
+              class="px-3 py-1 border border-sigae-base-300 rounded text-sm text-sigae-text-secondary hover:bg-sigae-base-200 transition-colors"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

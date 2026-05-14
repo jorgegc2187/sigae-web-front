@@ -1,10 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
 import {
   ApiAssetCondition,
   AssetCondition,
+  InventoryAssetGroup,
   AssetRequest,
   AssetResponse,
   AssetTraceabilityEntry,
@@ -16,6 +17,32 @@ export class AssetsService {
   private readonly http = inject(HttpClient);
   private readonly appConfig = inject(APP_CONFIG);
   private readonly baseUrl = `${this.appConfig.apiUrl}/assets`;
+
+  listGroupedResource(search: () => string, categoryId: () => string) {
+    return httpResource<InventoryAssetGroup[]>(() => {
+      const params = new URLSearchParams();
+      const normalizedSearch = search().trim();
+      const normalizedCategoryId = categoryId();
+
+      if (normalizedSearch) {
+        params.set('search', normalizedSearch);
+      }
+
+      if (normalizedCategoryId && normalizedCategoryId !== 'all') {
+        params.set('categoryId', normalizedCategoryId);
+      }
+
+      const query = params.toString();
+      return query ? `${this.baseUrl}/grouped?${query}` : `${this.baseUrl}/grouped`;
+    }, { defaultValue: [] });
+  }
+
+  groupedDetailResource(groupId: () => string | undefined) {
+    return httpResource<InventoryAssetGroup | null>(() => {
+      const normalizedGroupId = groupId()?.trim();
+      return normalizedGroupId ? `${this.baseUrl}/grouped/${normalizedGroupId}` : undefined;
+    }, { defaultValue: null });
+  }
 
   list() {
     return this.http.get<AssetResponse[]>(this.baseUrl).pipe(
