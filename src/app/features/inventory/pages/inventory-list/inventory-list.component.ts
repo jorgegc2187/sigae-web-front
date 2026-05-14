@@ -6,7 +6,6 @@ import { ActionButtonComponent } from '../../../../shared/ui/action-button/actio
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { CategoriesService } from '../../../categories/services/categories.service';
-import { InventoryAssetGroup } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
 
 @Component({
@@ -90,27 +89,5 @@ export class InventoryListComponent {
   areAllVisibleSelected(): boolean {
     const visibleGroupIds = this.visibleGroups().map((group) => group.groupId);
     return visibleGroupIds.length > 0 && visibleGroupIds.every((groupId) => this.selectedGroupIds().includes(groupId));
-  }
-
-  categoryBadgeClass(categoryName: string): string {
-    const normalizedCategory = categoryName.toLowerCase();
-
-    if (normalizedCategory.includes('mobili')) {
-      return 'inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700';
-    }
-
-    if (normalizedCategory.includes('cómput') || normalizedCategory.includes('comput')) {
-      return 'inline-flex items-center rounded-full border border-violet-100 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700';
-    }
-
-    if (normalizedCategory.includes('laborat')) {
-      return 'inline-flex items-center rounded-full border border-amber-100 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700';
-    }
-
-    if (normalizedCategory.includes('av') || normalizedCategory.includes('audio') || normalizedCategory.includes('video')) {
-      return 'inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700';
-    }
-
-    return 'inline-flex items-center rounded-full border border-base-300 bg-base-200 px-2 py-0.5 text-xs font-medium text-base-content/70';
   }
 }
