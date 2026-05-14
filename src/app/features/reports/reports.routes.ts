@@ -8,7 +8,7 @@ export const REPORTS_ROUTES: Routes = [
     title: 'Reportes - SIGAE',
     data: {
       pageTitle: 'Reportes',
-      pageSubtitle: 'Indicadores de inventario y préstamos',
+      pageSubtitle: 'Exportaciones y consultas operativas',
     },
   },
 ];

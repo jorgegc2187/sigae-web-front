@@ -1,59 +1,297 @@
 <div class="space-y-6">
-  <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div>
-        <h2 class="text-xl font-bold text-base-content">Resumen operativo</h2>
-        <p class="text-sm text-base-content/60">Indicadores ligeros mientras se conecta el módulo analítico real.</p>
-      </div>
-      <div class="flex flex-col gap-3 sm:flex-row">
-        <select class="select select-bordered bg-base-100" [value]="period()" (change)="period.set($any($event.target).value)">
-          <option value="week">Esta semana</option>
-          <option value="month">Este mes</option>
-          <option value="year">Este año</option>
-        </select>
-        <app-action-button label="Exportar pronto" icon="download" variant="neutral" [disabled]="true" />
-      </div>
+  <div class="border-b border-base-300">
+    <div class="flex gap-6 overflow-x-auto">
+      <button
+        type="button"
+        class="shrink-0 border-b-2 pb-3 text-sm font-medium transition-colors"
+        [class.border-primary]="activeTab() === 'assets'"
+        [class.text-primary]="activeTab() === 'assets'"
+        [class.font-semibold]="activeTab() === 'assets'"
+        [class.border-transparent]="activeTab() !== 'assets'"
+        [class.text-base-content/65]="activeTab() !== 'assets'"
+        [class.hover:text-primary]="activeTab() !== 'assets'"
+        (click)="setActiveTab('assets')"
+      >
+        Reporte de Activos
+      </button>
+      <button
+        type="button"
+        class="shrink-0 border-b-2 pb-3 text-sm font-medium transition-colors"
+        [class.border-primary]="activeTab() === 'loans'"
+        [class.text-primary]="activeTab() === 'loans'"
+        [class.font-semibold]="activeTab() === 'loans'"
+        [class.border-transparent]="activeTab() !== 'loans'"
+        [class.text-base-content/65]="activeTab() !== 'loans'"
+        [class.hover:text-primary]="activeTab() !== 'loans'"
+        (click)="setActiveTab('loans')"
+      >
+        Reporte de Prestamos
+      </button>
     </div>
-  </section>
+  </div>
 
-  <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-    @for (card of cards(); track card.title) {
-      <article class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <p class="text-sm font-semibold text-base-content/60">{{ card.title }}</p>
-            <p class="mt-2 text-3xl font-bold text-base-content">{{ card.value }}</p>
-          </div>
-          <div class="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <span class="material-symbols-outlined">{{ card.icon }}</span>
-          </div>
-        </div>
-        <p class="mt-4 text-sm text-base-content/55">{{ card.description }}</p>
-      </article>
-    }
-  </section>
+  <div class="flex flex-wrap items-center gap-3">
+    <button
+      type="button"
+      class="inline-flex h-10 items-center gap-2 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-medium text-base-content shadow-sm transition-colors hover:bg-base-200/70"
+      (click)="exportReport('pdf')"
+    >
+      <span class="material-symbols-outlined text-[18px] text-error">picture_as_pdf</span>
+      PDF
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-10 items-center gap-2 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-medium text-base-content shadow-sm transition-colors hover:bg-base-200/70"
+      (click)="exportReport('excel')"
+    >
+      <span class="material-symbols-outlined text-[18px] text-success">table_view</span>
+      Excel
+    </button>
+    <button
+      type="button"
+      class="inline-flex h-10 items-center gap-2 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-medium text-base-content shadow-sm transition-colors hover:bg-base-200/70"
+      (click)="exportReport('word')"
+    >
+      <span class="material-symbols-outlined text-[18px] text-primary">description</span>
+      Word
+    </button>
+  </div>
 
-  <section class="grid gap-6 lg:grid-cols-2">
-    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-      <h3 class="font-bold text-base-content">Reportes preparados</h3>
-      <div class="mt-4 space-y-3">
-        <div class="rounded-xl bg-base-200/60 p-4">
-          <p class="font-semibold text-base-content">Inventario por ubicación</p>
-          <p class="text-sm text-base-content/55">Distribución de activos y condiciones.</p>
+  @if (activeTab() === 'assets') {
+    <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div class="flex flex-wrap items-end gap-4">
+        <div class="min-w-[220px] flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-base-content/70">Categoria</label>
+          <div class="relative">
+            <select
+              class="h-10 w-full appearance-none rounded-md border border-base-300 bg-base-100 px-3 pr-9 text-sm text-base-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
+              [value]="assetCategoryId()"
+              (change)="updateAssetCategory($event)"
+            >
+              <option value="all">Todas las categorias</option>
+              @for (category of assetCategories; track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+              }
+            </select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-base-content/45">
+              expand_more
+            </span>
+          </div>
         </div>
-        <div class="rounded-xl bg-base-200/60 p-4">
-          <p class="font-semibold text-base-content">Préstamos y vencimientos</p>
-          <p class="text-sm text-base-content/55">Resumen de activos prestados y retornos pendientes.</p>
+
+        <div class="min-w-[220px] flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-base-content/70">Ubicacion</label>
+          <div class="relative">
+            <select
+              class="h-10 w-full appearance-none rounded-md border border-base-300 bg-base-100 px-3 pr-9 text-sm text-base-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
+              [value]="assetLocationId()"
+              (change)="updateAssetLocation($event)"
+            >
+              <option value="all">Todas las ubicaciones</option>
+              @for (location of assetLocations; track location.id) {
+                <option [value]="location.id">{{ location.name }}</option>
+              }
+            </select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-base-content/45">
+              expand_more
+            </span>
+          </div>
         </div>
+
+        <div class="min-w-[240px] flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-base-content/70">Rango de Fechas</label>
+          <app-date-picker
+            mode="range"
+            placeholder="Seleccionar rango"
+            [value]="assetDateRange()"
+            (valueChange)="updateAssetDateRange($event)"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
+          (click)="clearAssetFilters()"
+        >
+          <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+          Limpiar Filtros
+        </button>
       </div>
-    </article>
+    </section>
 
-    <article class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-      <h3 class="font-bold text-base-content">Pendiente para producción</h3>
-      <p class="mt-3 text-sm leading-6 text-base-content/60">
-        Exportación PDF/Excel, filtros avanzados y reportes persistidos quedan preparados para una fase posterior,
-        cuando préstamos e inventario ya estén conectados completamente a la API.
-      </p>
-    </article>
-  </section>
+    <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[860px] border-collapse text-left">
+          <thead>
+            <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              <th class="px-4 py-3">Codigo</th>
+              <th class="px-4 py-3">Descripcion</th>
+              <th class="px-4 py-3">Categoria</th>
+              <th class="px-4 py-3">Ubicacion</th>
+              <th class="px-4 py-3">Estado</th>
+              <th class="px-4 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            @for (asset of visibleAssetRows(); track asset.id) {
+              <tr class="group border-b border-base-300 last:border-b-0 hover:bg-base-200/20">
+                <td class="px-4 py-3 font-medium text-base-content">{{ asset.code }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ asset.description }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ asset.category }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ asset.location }}</td>
+                <td class="px-4 py-3">
+                  <app-status-badge [label]="asset.condition" [tone]="assetConditionTone(asset.condition)" />
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <a
+                    class="inline-flex rounded-lg p-1 text-base-content/35 transition-all hover:text-primary md:opacity-0 md:group-hover:opacity-100"
+                    [routerLink]="['/inventory', asset.id]"
+                    aria-label="Ver activo"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center gap-3 text-base-content/55">
+                    <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl">inventory_2</span>
+                    <p class="text-sm font-medium">No hay activos que coincidan con los filtros aplicados.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-desktop-pagination
+        [currentPage]="assetCurrentPage()"
+        [totalPages]="assetTotalPages()"
+        [resultLabel]="assetResultLabel()"
+        (pageChange)="goToAssetPage($event)"
+      />
+    </section>
+  } @else {
+    <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div class="flex flex-wrap items-end gap-4">
+        <div class="min-w-[220px] flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-base-content/70">Docente/Usuario</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-base-content/45">
+              search
+            </span>
+            <input
+              class="h-10 w-full rounded-md border border-base-300 bg-base-100 pl-9 pr-3 text-sm text-base-content placeholder-shown:opacity-50 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
+              type="text"
+              placeholder="Buscar usuario..."
+              [value]="loanQuery()"
+              (input)="updateLoanQuery($event)"
+            />
+          </div>
+        </div>
+
+        <div class="min-w-[220px] flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-base-content/70">Ubicacion</label>
+          <div class="relative">
+            <select
+              class="h-10 w-full appearance-none rounded-md border border-base-300 bg-base-100 px-3 pr-9 text-sm text-base-content outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
+              [value]="loanLocation()"
+              (change)="updateLoanLocation($event)"
+            >
+              <option value="all">Todas las ubicaciones</option>
+              @for (location of loanLocations(); track location) {
+                <option [value]="location">{{ location }}</option>
+              }
+            </select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-base-content/45">
+              expand_more
+            </span>
+          </div>
+        </div>
+
+        <div class="min-w-[240px] flex-1">
+          <label class="mb-1.5 block text-sm font-medium text-base-content/70">Rango de Fechas</label>
+          <app-date-picker
+            mode="range"
+            placeholder="Seleccionar rango"
+            [value]="loanDateRange()"
+            (valueChange)="updateLoanDateRange($event)"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
+          (click)="clearLoanFilters()"
+        >
+          <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+          Limpiar Filtros
+        </button>
+      </div>
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[860px] border-collapse text-left">
+          <thead>
+            <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              <th class="px-4 py-3">ID Prestamo</th>
+              <th class="px-4 py-3">Docente</th>
+              <th class="px-4 py-3">Cant. Activos</th>
+              <th class="px-4 py-3">Fecha Limite</th>
+              <th class="px-4 py-3">Estado</th>
+              <th class="px-4 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            @for (loan of visibleLoanRows(); track loan.id) {
+              <tr class="group border-b border-base-300 last:border-b-0 hover:bg-base-200/20">
+                <td class="px-4 py-3 font-medium text-base-content">{{ loan.code }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ loan.teacherName }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ loan.assetsCount }}</td>
+                <td
+                  class="px-4 py-3"
+                  [class.font-medium]="loan.status === 'Vencido'"
+                  [class.text-error]="loan.status === 'Vencido'"
+                  [class.text-base-content/70]="loan.status !== 'Vencido'"
+                >
+                  {{ formatDisplayDate(loan.dueDate) }}
+                </td>
+                <td class="px-4 py-3">
+                  <app-status-badge [label]="loan.status" [tone]="loanStatusTone(loan.status)" />
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <a
+                    class="inline-flex rounded-lg p-1 text-base-content/35 transition-all hover:text-primary md:opacity-0 md:group-hover:opacity-100"
+                    [routerLink]="['/loans', loan.id]"
+                    aria-label="Ver prestamo"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center gap-3 text-base-content/55">
+                    <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl">bar_chart</span>
+                    <p class="text-sm font-medium">No hay prestamos que coincidan con los filtros aplicados.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-desktop-pagination
+        [currentPage]="loanCurrentPage()"
+        [totalPages]="loanTotalPages()"
+        [resultLabel]="loanResultLabel()"
+        (pageChange)="goToLoanPage($event)"
+      />
+    </section>
+  }
 </div>

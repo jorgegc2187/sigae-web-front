@@ -33,35 +33,69 @@
   #popover
   popover="auto"
   [id]="popoverId"
-  class="dropdown rounded-box border border-base-300 bg-base-100 shadow-lg [position-anchor:var(--anchor)]"
+  class="dropdown rounded-box border border-base-300 bg-base-100 p-2 shadow-lg [position-anchor:var(--anchor)]"
   [style.position-anchor]="anchorName"
 >
-  <calendar-date
-    #calendar
-    class="cally rounded-box border border-base-300 bg-base-100"
-    [attr.value]="valueSignal() || null"
-    [attr.min]="min() || null"
-    [attr.max]="max() || null"
-    (change)="onCalendarChange($event)"
-  >
-    <svg
-      aria-label="Anterior"
-      class="fill-current size-4"
-      slot="previous"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
+  @if (mode() === 'range') {
+    <calendar-range
+      #calendar
+      [class]="calendarClass()"
+      months="2"
+      page-by="months"
+      [attr.value]="valueSignal() || null"
+      [attr.min]="min() || null"
+      [attr.max]="max() || null"
+      (change)="onCalendarChange($event)"
     >
-      <path d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-    </svg>
-    <svg
-      aria-label="Siguiente"
-      class="fill-current size-4"
-      slot="next"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
+      <svg
+        aria-label="Anterior"
+        class="fill-current size-4"
+        slot="previous"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+      </svg>
+      <svg
+        aria-label="Siguiente"
+        class="fill-current size-4"
+        slot="next"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+      </svg>
+      <calendar-month></calendar-month>
+      <calendar-month offset="1"></calendar-month>
+    </calendar-range>
+  } @else {
+    <calendar-date
+      #calendar
+      [class]="calendarClass()"
+      [attr.value]="valueSignal() || null"
+      [attr.min]="min() || null"
+      [attr.max]="max() || null"
+      (change)="onCalendarChange($event)"
     >
-      <path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-    </svg>
-    <calendar-month></calendar-month>
-  </calendar-date>
+      <svg
+        aria-label="Anterior"
+        class="fill-current size-4"
+        slot="previous"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+      </svg>
+      <svg
+        aria-label="Siguiente"
+        class="fill-current size-4"
+        slot="next"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+      </svg>
+      <calendar-month></calendar-month>
+    </calendar-date>
+  }
 </div>

@@ -130,3 +130,24 @@
     'GRAD' 0,
     'opsz' 24;
 }
+
+.cally {
+  color: var(--color-base-content);
+}
+
+.cally::part(button) {
+  border-radius: 0.5rem;
+}
+
+.cally--range::part(months) {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .cally--range::part(months) {
+    gap: 0.75rem;
+  }
+}
