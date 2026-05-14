@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MOCK_ASSET_LOCATIONS, MOCK_CATEGORY_FILTERS } from '../../../../shared/models/mock-inventory-catalog.model';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DatePickerComponent, DateRangeValue } from '../../../../shared/ui/date-picker/date-picker.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/status-badge/status-badge.component';
@@ -10,6 +11,7 @@ import { InventoryAsset } from '../../../inventory/models/inventory.model';
 import { Loan, MOCK_LOANS } from '../../../loans/models/loan.model';
 
 type ReportsTab = 'assets' | 'loans';
+type ReportExportFormat = 'pdf' | 'excel' | 'word';
 
 interface AssetReportRow {
   id: string;
@@ -34,17 +36,30 @@ interface LoanReportRow {
   status: Loan['status'];
 }
 
+interface PendingReportExport {
+  format: ReportExportFormat;
+  tab: ReportsTab;
+}
+
 @Component({
   selector: 'app-reports-home',
   standalone: true,
-  imports: [RouterLink, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent],
+  imports: [RouterLink, ActionButtonComponent, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent],
   templateUrl: './reports-home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsHomeComponent {
   private readonly notifications = inject(NotificationService);
+  private readonly exportLabels = {
+    pdf: 'PDF',
+    excel: 'Excel',
+    word: 'Word',
+  } as const;
+
+  readonly exportDialogRef = viewChild<ElementRef<HTMLDialogElement>>('exportDialog');
 
   readonly activeTab = signal<ReportsTab>('assets');
+  readonly pendingExport = signal<PendingReportExport | null>(null);
 
   readonly assetCategoryId = signal('all');
   readonly assetLocationId = signal('all');
@@ -146,8 +161,36 @@ export class ReportsHomeComponent {
   readonly loanResultLabel = computed(() =>
     this.buildResultLabel(this.filteredLoanRows().length, this.loanCurrentPage(), this.loanPageSize),
   );
+  readonly exportDialogTitle = computed(() => {
+    const pending = this.pendingExport();
+    if (!pending) {
+      return 'Confirmar descarga';
+    }
+
+    return `Descargar reporte en ${this.exportLabels[pending.format]}`;
+  });
+  readonly exportDialogMessage = computed(() => {
+    const pending = this.pendingExport();
+    if (!pending) {
+      return '';
+    }
+
+    const reportName = pending.tab === 'assets' ? 'Reporte de Activos' : 'Reporte de Préstamos';
+    return `Se preparará la descarga del ${reportName} en formato ${this.exportLabels[pending.format]}. Puedes continuar o cancelar esta acción.`;
+  });
+  readonly exportDialogIcon = computed(() => {
+    const pending = this.pendingExport();
+    if (!pending) {
+      return 'download';
+    }
+
+    if (pending.format === 'pdf') return 'picture_as_pdf';
+    if (pending.format === 'excel') return 'table_view';
+    return 'description';
+  });
 
   setActiveTab(tab: ReportsTab): void {
+    this.closeExportDialog();
     this.activeTab.set(tab);
     if (tab === 'assets') {
       this.assetCurrentPage.set(1);
@@ -208,17 +251,38 @@ export class ReportsHomeComponent {
     this.loanCurrentPage.set(page);
   }
 
-  exportReport(format: 'pdf' | 'excel' | 'word'): void {
-    const labels = {
-      pdf: 'PDF',
-      excel: 'Excel',
-      word: 'Word',
-    } as const;
-
-    const reportName = this.activeTab() === 'assets' ? 'reporte de activos' : 'reporte de prestamos';
-    this.notifications.info({
-      message: `La exportacion en ${labels[format]} para ${reportName} quedo preparada para una fase posterior.`,
+  exportReport(format: ReportExportFormat): void {
+    this.pendingExport.set({
+      format,
+      tab: this.activeTab(),
     });
+    this.exportDialogRef()?.nativeElement.showModal();
+  }
+
+  closeExportDialog(): void {
+    if (this.exportDialogRef()?.nativeElement.open) {
+      this.exportDialogRef()?.nativeElement.close();
+    }
+
+    this.pendingExport.set(null);
+  }
+
+  confirmExport(): void {
+    const pending = this.pendingExport();
+    if (!pending) {
+      return;
+    }
+
+    const reportName = pending.tab === 'assets' ? 'reporte de activos' : 'reporte de préstamos';
+    const formatLabel = this.exportLabels[pending.format];
+    this.closeExportDialog();
+    this.notifications.info({
+      message: `La exportación en ${formatLabel} para ${reportName} quedó preparada para una fase posterior.`,
+    });
+  }
+
+  onExportDialogClose(): void {
+    this.pendingExport.set(null);
   }
 
   assetConditionTone(condition: InventoryAsset['condition']): StatusBadgeTone {

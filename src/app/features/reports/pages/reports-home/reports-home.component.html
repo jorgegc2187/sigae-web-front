@@ -326,3 +326,56 @@
     </section>
   }
 </div>
+
+<dialog #exportDialog class="modal" (close)="onExportDialogClose()">
+  <div
+    class="modal-box mx-3 flex max-h-[calc(100dvh-1.5rem)] w-auto max-w-md flex-col rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl sm:mx-0 sm:w-full sm:rounded-xl"
+  >
+    <div class="flex items-center justify-between border-b border-base-300 bg-base-100 px-4 py-4 sm:px-5">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <span class="material-symbols-outlined text-[20px]">{{ exportDialogIcon() }}</span>
+        </div>
+        <h2 class="text-lg font-bold text-base-content">{{ exportDialogTitle() }}</h2>
+      </div>
+      <form method="dialog">
+        <button
+          type="submit"
+          class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+          aria-label="Cerrar confirmación de descarga"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="overflow-y-auto px-4 py-5 text-sm text-base-content/70 sm:px-6">
+      <p>{{ exportDialogMessage() }}</p>
+    </div>
+
+    <div
+      class="flex flex-col-reverse gap-3 border-t border-base-300 bg-base-200/40 px-4 py-4 sm:flex-row sm:justify-end"
+    >
+      <form method="dialog">
+        <app-action-button
+          label="Cancelar"
+          variant="ghost"
+          [fullWidth]="true"
+          className="sm:w-auto"
+          type="submit"
+        />
+      </form>
+      <app-action-button
+        label="Descargar"
+        icon="download"
+        [fullWidth]="true"
+        className="sm:w-auto"
+        (clicked)="confirmExport()"
+      />
+    </div>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>Cerrar</button>
+  </form>
+</dialog>
