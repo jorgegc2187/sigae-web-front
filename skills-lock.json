@@ -13,6 +13,12 @@
       "skillPath": "skills/angular-di/SKILL.md",
       "computedHash": "b7e4fa9c9cc06eba5b2057cc0da024a015fa0af301c3654f34a5c3ec9160d7c6"
     },
+    "angular-directives": {
+      "source": "analogjs/angular-skills",
+      "sourceType": "github",
+      "skillPath": "skills/angular-directives/SKILL.md",
+      "computedHash": "a96e63582eb4350cd6bfe0fbdad2585d999f3ed567c05fd2f99544769977a2e3"
+    },
     "angular-forms": {
       "source": "analogjs/angular-skills",
       "sourceType": "github",

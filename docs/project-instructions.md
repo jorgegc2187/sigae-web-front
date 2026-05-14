@@ -508,6 +508,9 @@ features/
 ## 11. Convenciones y Decisiones Técnicas
 
 - Seguir todas las reglas del archivo `angular-20-best-practices.md`.
+- Antes de implementar frontend, usar fielmente las skills locales en `.agents/skills` según el tipo de cambio: componentes, signals, formularios, HTTP, routing, DI o directivas.
+- En Angular 20+, los componentes/directivas/pipes nuevos son standalone por defecto; no declarar `standalone: true` en código nuevo.
+- Los formularios nuevos usan Reactive Forms tipados con signals para estado UI derivado. No usar Signal Forms hasta que el proyecto migre explícitamente a una versión estable para producción.
 - El nombre del sistema siempre desde `environment.appName` vía token `APP_CONFIG`.
 - Los permisos de UI (mostrar/ocultar elementos, rutas) se derivan del rol del usuario en el JWT.
 - Las tablas con grandes volúmenes de datos usan paginación del lado del servidor.

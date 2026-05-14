@@ -6,7 +6,7 @@
 
 ## 1. Principios
 
-- `standalone: true` en todo componente, directiva y pipe. Sin NgModules en código nuevo.
+- Componentes, directivas y pipes son standalone por defecto en Angular 20+. En código nuevo no declarar `standalone: true`.
 - Signals para estado local/compartido. RxJS solo para streams complejos.
 - Organizar por dominio de negocio (feature-based), no por tipo técnico.
 - Reutilización por defecto: todo elemento visual que se repita (tarjetas, listas, badges, formularios parciales) se extrae como componente. Los estilos compartidos van en `shared/`.
@@ -407,12 +407,12 @@ export const appConfig: ApplicationConfig = {
 
 ## 9. Formularios
 
-Usar Reactive Forms + Signals. Signal Forms es experimental en v20.
+Usar Reactive Forms tipados + Signals. Signal Forms queda fuera del estándar del proyecto mientras siga siendo experimental para nuestro stack Angular 20.
 
 ```typescript
-@Component({ standalone: true, imports: [ReactiveFormsModule] })
+@Component({ imports: [ReactiveFormsModule] })
 export class LoginFormComponent {
-  private fb = inject(FormBuilder);
+  private fb = inject(NonNullableFormBuilder);
   isSubmitting = signal(false);
 
   form = this.fb.group({
@@ -545,9 +545,19 @@ export const serverRoutes: ServerRoute[] = [
 
 ## 13. Reglas para el Agente
 
+Antes de implementar o refactorizar frontend, revisar la skill local que corresponda en `.agents/skills`:
+
+- `angular-component` para componentes, inputs/outputs, host bindings y accesibilidad.
+- `angular-signals` para estado local, derivado y efectos.
+- `angular-forms` usando su referencia estable de Reactive Forms, no Signal Forms experimental.
+- `angular-http` para `httpResource()`, `HttpClient`, descargas e interceptores.
+- `angular-routing` para rutas lazy, guards y params como inputs.
+- `angular-di` para `inject()`, tokens y providers.
+- `angular-directives` para comportamiento DOM reusable.
+
 ### ✅ SIEMPRE
 
-1. `standalone: true` + `ChangeDetectionStrategy.OnPush`.
+1. Omitir `standalone: true` en código nuevo + usar `ChangeDetectionStrategy.OnPush`.
 2. `input()` / `output()` / `model()` — no `@Input()` / `@Output()`.
 3. `inject()` — no constructor injection.
 4. `@if` / `@for (track id)` / `@switch` — no `*ngIf` / `*ngFor`.
