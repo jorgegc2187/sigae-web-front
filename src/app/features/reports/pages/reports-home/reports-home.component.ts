@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { APP_CONFIG } from '../../../../core/config/app.tokens';
 import { MOCK_ASSET_LOCATIONS, MOCK_CATEGORY_FILTERS } from '../../../../shared/models/mock-inventory-catalog.model';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
@@ -9,21 +11,14 @@ import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/sta
 import { INVENTORY_ASSETS } from '../../../inventory/data/inventory.mock';
 import { InventoryAsset } from '../../../inventory/models/inventory.model';
 import { Loan, MOCK_LOANS } from '../../../loans/models/loan.model';
+import {
+  AssetReportFilters,
+  AssetReportRow,
+  ReportExportFormat,
+  ReportsService,
+} from '../../services/reports.service';
 
 type ReportsTab = 'assets' | 'loans';
-type ReportExportFormat = 'pdf' | 'excel' | 'word';
-
-interface AssetReportRow {
-  id: string;
-  code: string;
-  description: string;
-  category: string;
-  categoryId: string;
-  location: string;
-  locationId: string;
-  condition: InventoryAsset['condition'];
-  acquisitionDate: string;
-}
 
 interface LoanReportRow {
   id: string;
@@ -50,6 +45,8 @@ interface PendingReportExport {
 })
 export class ReportsHomeComponent {
   private readonly notifications = inject(NotificationService);
+  private readonly reportsService = inject(ReportsService);
+  private readonly appConfig = inject(APP_CONFIG);
   private readonly exportLabels = {
     pdf: 'PDF',
     excel: 'Excel',
@@ -66,6 +63,7 @@ export class ReportsHomeComponent {
   readonly assetDateRange = signal<DateRangeValue | null>(null);
   readonly assetCurrentPage = signal(1);
   readonly assetPageSize = 8;
+  readonly assetRows = signal<AssetReportRow[]>(this.buildMockAssetRows());
 
   readonly loanQuery = signal('');
   readonly loanLocation = signal('all');
@@ -81,19 +79,15 @@ export class ReportsHomeComponent {
       .sort((a, b) => a.localeCompare(b, 'es')),
   );
 
-  readonly assetRows = computed<AssetReportRow[]>(() =>
-    INVENTORY_ASSETS.map((asset) => ({
-      id: asset.id,
-      code: asset.code,
-      description: asset.name,
-      category: asset.categoryName,
-      categoryId: asset.categoryId,
-      location: asset.locationName,
-      locationId: asset.locationId,
-      condition: asset.condition,
-      acquisitionDate: asset.acquisitionDate,
-    })),
-  );
+  readonly assetReportFilters = computed<AssetReportFilters>(() => {
+    const dateRange = this.assetDateRange();
+    return {
+      categoryId: this.assetCategoryId() === 'all' ? undefined : this.assetCategoryId(),
+      locationId: this.assetLocationId() === 'all' ? undefined : this.assetLocationId(),
+      startDate: dateRange?.start,
+      endDate: dateRange?.end,
+    };
+  });
 
   readonly filteredAssetRows = computed(() => {
     const categoryId = this.assetCategoryId();
@@ -189,6 +183,12 @@ export class ReportsHomeComponent {
     return 'description';
   });
 
+  constructor() {
+    effect(() => {
+      void this.loadAssetReport(this.assetReportFilters());
+    });
+  }
+
   setActiveTab(tab: ReportsTab): void {
     this.closeExportDialog();
     this.activeTab.set(tab);
@@ -267,17 +267,21 @@ export class ReportsHomeComponent {
     this.pendingExport.set(null);
   }
 
-  confirmExport(): void {
+  async confirmExport(): Promise<void> {
     const pending = this.pendingExport();
     if (!pending) {
       return;
     }
 
-    const reportName = pending.tab === 'assets' ? 'reporte de activos' : 'reporte de préstamos';
+    if (pending.tab === 'assets') {
+      await this.confirmAssetExport(pending.format);
+      return;
+    }
+
     const formatLabel = this.exportLabels[pending.format];
     this.closeExportDialog();
     this.notifications.info({
-      message: `La exportación en ${formatLabel} para ${reportName} quedó preparada para una fase posterior.`,
+      message: `La exportación en ${formatLabel} para reporte de préstamos quedó preparada para una fase posterior.`,
     });
   }
 
@@ -285,7 +289,7 @@ export class ReportsHomeComponent {
     this.pendingExport.set(null);
   }
 
-  assetConditionTone(condition: InventoryAsset['condition']): StatusBadgeTone {
+  assetConditionTone(condition: string): StatusBadgeTone {
     if (condition === 'Bueno') return 'success';
     if (condition === 'Regular') return 'warning';
     if (condition === 'Mantenimiento') return 'info';
@@ -324,9 +328,82 @@ export class ReportsHomeComponent {
     return `Mostrando ${start} a ${end} de ${total} resultados`;
   }
 
-  private matchesDateRange(dateValue: string, range: DateRangeValue | null): boolean {
+  private async loadAssetReport(filters: AssetReportFilters): Promise<void> {
+    if (this.appConfig.enableMockAuth) {
+      this.assetRows.set(this.buildMockAssetRows());
+      return;
+    }
+
+    try {
+      const rows = await firstValueFrom(this.reportsService.listAssetsReport(filters));
+      this.assetRows.set(rows);
+    } catch {
+      this.assetRows.set(this.buildMockAssetRows());
+    }
+  }
+
+  private async confirmAssetExport(format: ReportExportFormat): Promise<void> {
+    if (this.appConfig.enableMockAuth) {
+      this.closeExportDialog();
+      this.notifications.info({
+        message: `La exportación en ${this.exportLabels[format]} para reporte de activos quedó preparada para una fase posterior.`,
+      });
+      return;
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.reportsService.downloadAssetsReport(this.assetReportFilters(), format),
+      );
+      const content = response.body;
+      if (!content) {
+        throw new Error('Empty report response');
+      }
+
+      const filename = this.reportsService.getFilename(response, this.buildFallbackFilename(format));
+      this.downloadBlob(content, filename);
+      this.closeExportDialog();
+      this.notifications.success({ message: 'Reporte de activos descargado correctamente.' });
+    } catch {
+      this.closeExportDialog();
+    }
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private buildFallbackFilename(format: ReportExportFormat): string {
+    const extension = format === 'excel' ? 'xlsx' : format === 'word' ? 'docx' : 'pdf';
+    return `reporte-activos-${new Date().toISOString().slice(0, 10)}.${extension}`;
+  }
+
+  private buildMockAssetRows(): AssetReportRow[] {
+    return INVENTORY_ASSETS.map((asset) => ({
+      id: asset.id,
+      code: asset.code,
+      description: asset.name,
+      category: asset.categoryName,
+      categoryId: asset.categoryId,
+      location: asset.locationName,
+      locationId: asset.locationId,
+      condition: asset.condition,
+      acquisitionDate: asset.acquisitionDate,
+    }));
+  }
+
+  private matchesDateRange(dateValue: string | null, range: DateRangeValue | null): boolean {
     if (!range) {
       return true;
+    }
+
+    if (!dateValue) {
+      return false;
     }
 
     const current = this.normalizeDate(new Date(dateValue));
@@ -355,20 +432,6 @@ export class ReportsHomeComponent {
     }
 
     return value.start && value.end ? value : null;
-  }
-
-  private parseLooseDate(rawValue: string): Date | null {
-    const value = rawValue.trim();
-    if (!value) {
-      return null;
-    }
-
-    const isoDate = new Date(value);
-    if (Number.isNaN(isoDate.getTime())) {
-      return null;
-    }
-
-    return isoDate;
   }
 
   private normalizeDate(date: Date): number | null {
