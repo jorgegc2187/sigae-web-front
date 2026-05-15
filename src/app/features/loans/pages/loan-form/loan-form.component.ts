@@ -2,14 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   OnDestroy,
   computed,
   effect,
-  inject,
   signal,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AbstractControl,
   NonNullableFormBuilder,
@@ -18,17 +19,17 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { LoanQrScannerComponent } from '../../components/loan-qr-scanner/loan-qr-scanner.component';
+import { catchError, firstValueFrom, map, of, startWith } from 'rxjs';
 import { LoanSignaturePadComponent } from '../../components/loan-signature-pad/loan-signature-pad.component';
 import { LoanAttachmentDraft, LoanAttachmentSource } from '../../models/loan-attachment-draft.model';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { AssetQrScannerModalComponent } from '../../../../shared/ui/asset-qr-scanner-modal/asset-qr-scanner-modal.component';
 import { DatePickerComponent } from '../../../../shared/ui/date-picker/date-picker.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { AssetsService } from '../../../inventory/services/assets.service';
 import { AssetCondition, InventoryAsset } from '../../../inventory/models/inventory.model';
 import { LocationsService } from '../../../locations/services/locations.service';
-import { TeachersService } from '../../../teachers/services/teachers.service';
+import { TeacherDto, TeachersService } from '../../../teachers/services/teachers.service';
 import { LoansService } from '../../services/loans.service';
 
 interface TeacherOption {
@@ -74,6 +75,11 @@ interface AssetSearchGroup {
   assets: AssetSearchOption[];
 }
 
+type LoadState<T> =
+  | { kind: 'loading'; items: T[] }
+  | { kind: 'ready'; items: T[] }
+  | { kind: 'error'; items: T[]; message: string };
+
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_DOCUMENT_EXTENSIONS = new Set(['pdf', 'doc', 'docx']);
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif']);
@@ -109,7 +115,7 @@ function getTodayIsoDate(): string {
     ReactiveFormsModule,
     RouterLink,
     LoanSignaturePadComponent,
-    LoanQrScannerComponent,
+    AssetQrScannerModalComponent,
     DatePickerComponent,
     ActionButtonComponent,
   ],
@@ -136,12 +142,51 @@ export class LoanFormComponent implements OnDestroy {
   readonly signaturePad = viewChild<LoanSignaturePadComponent>('signaturePad');
   readonly documentPickerInput = viewChild<ElementRef<HTMLInputElement>>('documentPickerInput');
 
-  private readonly teacherRows = toSignal(this.teachersService.list(), { initialValue: [] });
+  private readonly teacherState = toSignal(
+    this.teachersService.list().pipe(
+      map((teachers) => ({ kind: 'ready', items: teachers }) as LoadState<TeacherDto>),
+      startWith({ kind: 'loading', items: [] } as LoadState<TeacherDto>),
+      catchError(() =>
+        of({
+          kind: 'error',
+          items: [],
+          message: 'No se pudieron cargar los docentes disponibles.',
+        } as LoadState<TeacherDto>),
+      ),
+    ),
+    { initialValue: { kind: 'loading', items: [] } as LoadState<TeacherDto> },
+  );
   private readonly locationRows = toSignal(this.locationsService.list(), { initialValue: [] });
-  private readonly assetRows = toSignal(this.assetsService.list(), { initialValue: [] });
+  private readonly assetState = toSignal(
+    this.assetsService.list().pipe(
+      map((assets) => ({ kind: 'ready', items: assets }) as LoadState<InventoryAsset>),
+      startWith({ kind: 'loading', items: [] } as LoadState<InventoryAsset>),
+      catchError(() =>
+        of({
+          kind: 'error',
+          items: [],
+          message: 'No se pudieron cargar los activos disponibles para préstamo.',
+        } as LoadState<InventoryAsset>),
+      ),
+    ),
+    { initialValue: { kind: 'loading', items: [] } as LoadState<InventoryAsset> },
+  );
+
+  readonly teachersLoading = computed(() => this.teacherState().kind === 'loading');
+  readonly teachersLoadFailed = computed(() => this.teacherState().kind === 'error');
+  readonly teacherLoadMessage = computed(() => {
+    const state = this.teacherState();
+    return state.kind === 'error' ? state.message : '';
+  });
+  readonly assetsLoading = computed(() => this.assetState().kind === 'loading');
+  readonly assetsLoadFailed = computed(() => this.assetState().kind === 'error');
+  readonly assetLoadMessage = computed(() => {
+    const state = this.assetState();
+    return state.kind === 'error' ? state.message : '';
+  });
 
   readonly availableTeachers = computed<TeacherOption[]>(() =>
-    this.teacherRows().map((teacher) => ({
+    this.teacherState().items.map((teacher) => ({
       id: teacher.id,
       name: teacher.fullName,
       initials: this.buildInitials(teacher.fullName),
@@ -155,7 +200,7 @@ export class LoanFormComponent implements OnDestroy {
   );
 
   readonly availableAssets = computed<AssetOption[]>(() =>
-    this.assetRows().map((asset) => ({
+    this.assetState().items.map((asset) => ({
       ...asset,
       location: asset.locationName,
       groupKey: asset.typeId,
@@ -241,6 +286,14 @@ export class LoanFormComponent implements OnDestroy {
     });
   });
 
+  readonly teachersEmpty = computed(
+    () => !this.teachersLoading() && !this.teachersLoadFailed() && this.availableTeachers().length === 0,
+  );
+
+  readonly filteredTeachersEmpty = computed(
+    () => !this.teachersLoading() && !this.teachersLoadFailed() && this.filteredTeachers().length === 0,
+  );
+
   readonly assetSearchOptions = computed<AssetSearchOption[]>(() =>
     this.availableAssets().filter((asset) => this.isAssetVisibleInSearchModal(asset)),
   );
@@ -316,6 +369,10 @@ export class LoanFormComponent implements OnDestroy {
 
     return Array.from(groups.values()).filter((group) => group.availableCount > 0);
   });
+
+  readonly assetSearchOptionsEmpty = computed(
+    () => !this.assetsLoading() && !this.assetsLoadFailed() && this.assetSearchOptions().length === 0,
+  );
 
   readonly modalSelectedAssetsCount = computed(() => this.modalSelectedAssetIds().size);
 
@@ -445,7 +502,7 @@ export class LoanFormComponent implements OnDestroy {
       this.assetDropdownOpen.set(true);
       return;
     }
-    this.resolveAssetCode(query, { openDropdownOnFailure: true });
+    void this.lookupAndAddAsset(query, { openDropdownOnFailure: true });
   }
 
   onAssetInputKeydown(event: KeyboardEvent) {
@@ -701,7 +758,7 @@ export class LoanFormComponent implements OnDestroy {
 
   onQrCodeDetected(rawCode: string) {
     this.closeQrScanner();
-    this.resolveAssetCode(rawCode, { openDropdownOnFailure: false });
+    void this.lookupAndAddAsset(rawCode, { openDropdownOnFailure: false });
   }
 
   openDocumentPicker() {
@@ -863,12 +920,18 @@ export class LoanFormComponent implements OnDestroy {
     this.isSubmitting.set(true);
 
     try {
-      await firstValueFrom(this.loansService.create(this.buildLoanSubmissionPayload()));
+      const createdLoan = await firstValueFrom(
+        this.loansService.create(
+          this.buildLoanSubmissionPayload(),
+          this.signatureDataUrlToBlob(this.signatureDataUrl()),
+          this.attachments().map((attachment) => attachment.file),
+        ),
+      );
       this.notifications.success({ message: 'Préstamo registrado correctamente.' });
-      await this.router.navigate(['/loans']);
+      await this.router.navigate(['/loans', createdLoan.id]);
     } catch {
       this.notifications.info({
-        message: 'El backend de préstamos aún está pendiente; no se guardó información local.',
+        message: 'El módulo de préstamos aún no está disponible en la API; no se guardó información local.',
       });
     } finally {
       this.isSubmitting.set(false);
@@ -1007,29 +1070,48 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   private isAssetSearchOptionSelectable(asset: AssetSearchOption): boolean {
-    return asset.condition === 'Bueno' || asset.condition === 'Regular';
+    return asset.availableForLoan && (asset.condition === 'Bueno' || asset.condition === 'Regular');
   }
 
   private isAssetVisibleInSearchModal(asset: AssetOption): boolean {
-    return asset.condition === 'Bueno' || asset.condition === 'Regular';
+    return asset.availableForLoan && (asset.condition === 'Bueno' || asset.condition === 'Regular');
   }
 
   private isAssetSearchOptionCurrentlyAvailable(asset: AssetSearchOption): boolean {
     return this.isAssetSearchOptionSelectable(asset) && !this.isModalAssetAlreadyAdded(asset.id);
   }
 
-  private resolveAssetCode(
+  private async lookupAndAddAsset(
     rawValue: string,
     options: { openDropdownOnFailure: boolean },
-  ): boolean {
+  ): Promise<boolean> {
     const normalizedQuery = rawValue.toLowerCase().trim();
 
     if (!normalizedQuery) {
       return false;
     }
 
+    try {
+      const asset = await firstValueFrom(this.assetsService.lookupByScanValue(rawValue));
+      return this.tryAddResolvedAsset(asset, options);
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        this.assetLookupError.set('No se encontró un activo disponible con ese código o QR.');
+      } else {
+        this.assetLookupError.set('No se pudo resolver el activo escaneado. Intente nuevamente.');
+      }
+
+      this.assetDropdownOpen.set(options.openDropdownOnFailure);
+      return false;
+    }
+  }
+
+  private tryAddResolvedAsset(
+    asset: InventoryAsset,
+    options: { openDropdownOnFailure: boolean },
+  ): boolean {
     const duplicateAsset = this.selectedAssets().find(
-      (asset) => asset.code.toLowerCase() === normalizedQuery,
+      (selectedAsset) => selectedAsset.code.toLowerCase() === asset.code.toLowerCase(),
     );
 
     if (duplicateAsset) {
@@ -1038,48 +1120,54 @@ export class LoanFormComponent implements OnDestroy {
       return false;
     }
 
-    const asset = this.availableAssets().find(
-      (item) =>
-        item.code.toLowerCase() === normalizedQuery ||
-        item.name.toLowerCase() === normalizedQuery,
-    );
-
-    if (!asset) {
-      this.assetLookupError.set('No se encontró un activo disponible con ese código o nombre.');
+    const assetOption = this.availableAssets().find((item) => item.id === asset.id);
+    if (!assetOption) {
+      this.assetLookupError.set('El activo escaneado no está disponible en el inventario cargado.');
       this.assetDropdownOpen.set(options.openDropdownOnFailure);
       return false;
     }
 
-    if (!this.isAssetSearchOptionSelectable(asset)) {
-      this.assetLookupError.set(
-        `El activo no está disponible para préstamo por su estado actual: ${asset.condition}.`,
-      );
+    if (!this.isAssetSearchOptionSelectable(assetOption)) {
+      const message = assetOption.activeLoanId
+        ? 'El activo ya pertenece a un préstamo activo.'
+        : `El activo no está disponible para préstamo por su estado actual: ${assetOption.condition}.`;
+      this.assetLookupError.set(message);
       this.assetDropdownOpen.set(options.openDropdownOnFailure);
       return false;
     }
 
-    this.addAsset(asset);
+    this.addAsset(assetOption);
     return true;
   }
 
   private buildLoanSubmissionPayload() {
     return {
-      loanData: {
-        teacher: this.selectedTeacher(),
-        destination: this.selectedDestination(),
-        assets: this.selectedAssets(),
-        form: this.form.getRawValue(),
-        signatureDataUrl: this.signatureDataUrl(),
-      },
-      attachmentsMetadata: this.attachments().map((attachment) => ({
-        id: attachment.id,
-        name: attachment.name,
-        size: attachment.size,
-        mimeType: attachment.mimeType,
-        source: attachment.source,
-        status: attachment.status,
-      })),
-      attachmentFiles: this.attachments().map((attachment) => attachment.file),
+      teacherId: this.selectedTeacher()?.id ?? '',
+      destinationLocationId: this.form.controls.destinationId.value,
+      loanDate: this.form.controls.startDate.value,
+      dueDate: this.form.controls.dueDate.value,
+      notes: this.form.controls.notes.value || null,
+      assetIds: this.selectedAssets().map((asset) => asset.id),
+      attachmentSources: this.attachments().map((attachment) => attachment.source),
     };
+  }
+
+  private signatureDataUrlToBlob(dataUrl: string | null): Blob | null {
+    if (!dataUrl) {
+      return null;
+    }
+
+    const [metadata, content] = dataUrl.split(',');
+    if (!metadata || !content) {
+      return null;
+    }
+
+    const mimeType = metadata.match(/data:(.*?);base64/)?.[1] ?? 'image/png';
+    const binary = atob(content);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index++) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+    return new Blob([bytes], { type: mimeType });
   }
 }

@@ -3,14 +3,22 @@ import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
 import {
-  ApiAssetCondition,
   AssetCondition,
+  AssetRequestCondition,
   InventoryAssetGroup,
   AssetRequest,
   AssetResponse,
   AssetTraceabilityEntry,
   InventoryAsset,
 } from '../models/inventory.model';
+
+interface AssetTraceabilityResponse {
+  id: string;
+  eventType: 'CREATED' | 'UPDATED' | 'CONDITION_CHANGED' | 'LOCATION_CHANGED' | 'DECOMMISSIONED' | 'LOANED' | 'RETURNED';
+  description: string;
+  userName: string;
+  occurredAt: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {
@@ -56,6 +64,14 @@ export class AssetsService {
     );
   }
 
+  lookupByScanValue(value: string) {
+    return this.http.get<AssetResponse>(`${this.baseUrl}/lookup`, {
+      params: { value: value.trim() },
+    }).pipe(
+      map((asset) => this.toInventoryAsset(asset)),
+    );
+  }
+
   create(payload: AssetRequest) {
     return this.http.post<AssetResponse>(this.baseUrl, payload).pipe(
       map((asset) => this.toInventoryAsset(asset)),
@@ -69,11 +85,19 @@ export class AssetsService {
   }
 
   traceability(id: string) {
-    return this.http.get<AssetTraceabilityEntry[]>(`${this.baseUrl}/${id}/traceability`);
+    return this.http.get<AssetTraceabilityResponse[]>(`${this.baseUrl}/${id}/traceability`).pipe(
+      map((entries) => entries.map((entry) => ({
+        id: entry.id,
+        date: entry.occurredAt,
+        type: this.toTraceabilityType(entry.eventType),
+        description: entry.description,
+        user: entry.userName,
+      }))),
+    );
   }
 
-  toApiCondition(condition: AssetCondition): ApiAssetCondition {
-    const conditions: Record<AssetCondition, ApiAssetCondition> = {
+  toApiCondition(condition: AssetCondition): AssetRequestCondition {
+    const conditions: Record<AssetCondition, AssetRequestCondition> = {
       Bueno: 'BUENO',
       Regular: 'REGULAR',
       Malo: 'MALO',
@@ -83,18 +107,12 @@ export class AssetsService {
     return conditions[condition];
   }
 
-  private toUiCondition(condition: ApiAssetCondition): AssetCondition {
-    const conditions: Record<ApiAssetCondition, AssetCondition> = {
-      BUENO: 'Bueno',
-      REGULAR: 'Regular',
-      MALO: 'Malo',
-      MANTENIMIENTO: 'Mantenimiento',
-      DADO_DE_BAJA: 'Dado de baja',
-    };
-    return conditions[condition];
-  }
-
   private toInventoryAsset(asset: AssetResponse): InventoryAsset {
+    const condition = asset.condition;
+    const activeLoanId = asset.activeLoanId ?? undefined;
+    const availableForLoan =
+      asset.availableForLoan ?? ((condition === 'Bueno' || condition === 'Regular') && !activeLoanId);
+
     return {
       id: asset.id,
       code: asset.code,
@@ -108,7 +126,7 @@ export class AssetsService {
       locationName: asset.locationName,
       supplierId: asset.supplierId ?? undefined,
       supplierName: asset.supplierName ?? undefined,
-      condition: this.toUiCondition(asset.condition),
+      condition,
       serial: asset.serialNumber ?? 'Sin serie',
       barcode: asset.barcode ?? '',
       acquisitionDate: asset.acquisitionDate ?? '',
@@ -116,6 +134,21 @@ export class AssetsService {
       attributes: Object.fromEntries(
         asset.attributeValues.map((attribute) => [attribute.attributeName, attribute.value]),
       ),
+      availableForLoan,
+      activeLoanId,
     };
+  }
+
+  private toTraceabilityType(eventType: AssetTraceabilityResponse['eventType']): AssetTraceabilityEntry['type'] {
+    const types: Record<AssetTraceabilityResponse['eventType'], AssetTraceabilityEntry['type']> = {
+      CREATED: 'Creación',
+      UPDATED: 'Edición',
+      CONDITION_CHANGED: 'Estado',
+      LOCATION_CHANGED: 'Ubicación',
+      DECOMMISSIONED: 'Baja',
+      LOANED: 'Préstamo',
+      RETURNED: 'Devolución',
+    };
+    return types[eventType];
   }
 }

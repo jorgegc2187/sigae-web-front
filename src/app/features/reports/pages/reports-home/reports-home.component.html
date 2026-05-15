@@ -204,8 +204,8 @@
                 (change)="updateLoanLocation($event)"
               >
                 <option value="all">Todas las ubicaciones</option>
-                @for (location of loanLocations(); track location) {
-                  <option [value]="location">{{ location }}</option>
+                @for (location of loanLocations(); track location.id) {
+                  <option [value]="location.id">{{ location.name }}</option>
                 }
               </select>
               <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[18px] text-base-content/45">

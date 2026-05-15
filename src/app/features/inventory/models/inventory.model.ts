@@ -1,5 +1,5 @@
 export type AssetCondition = 'Bueno' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
-export type ApiAssetCondition = 'BUENO' | 'REGULAR' | 'MALO' | 'MANTENIMIENTO' | 'DADO_DE_BAJA';
+export type AssetRequestCondition = 'BUENO' | 'REGULAR' | 'MALO' | 'MANTENIMIENTO' | 'DADO_DE_BAJA';
 
 export interface InventoryAsset {
   id: string;
@@ -20,12 +20,14 @@ export interface InventoryAsset {
   acquisitionDate: string;
   observations?: string;
   attributes: Record<string, string>;
+  availableForLoan: boolean;
+  activeLoanId?: string;
 }
 
 export interface AssetTraceabilityEntry {
   id: string;
   date: string;
-  type: 'Creación' | 'Edición' | 'Estado' | 'Ubicación' | 'Baja';
+  type: 'Creación' | 'Edición' | 'Estado' | 'Ubicación' | 'Baja' | 'Préstamo' | 'Devolución';
   description: string;
   user: string;
 }
@@ -67,12 +69,14 @@ export interface AssetResponse {
   locationName: string;
   supplierId: string | null;
   supplierName: string | null;
-  condition: ApiAssetCondition;
+  condition: AssetCondition;
   serialNumber: string | null;
   barcode: string | null;
   acquisitionDate: string | null;
   notes: string | null;
   attributeValues: AssetAttributeValueResponse[];
+  availableForLoan?: boolean | null;
+  activeLoanId?: string | null;
 }
 
 export interface AssetRequest {
@@ -81,7 +85,7 @@ export interface AssetRequest {
   assetTypeId: string;
   locationId: string;
   supplierId: string | null;
-  condition: ApiAssetCondition;
+  condition: AssetRequestCondition;
   serialNumber: string | null;
   barcode: string | null;
   acquisitionDate: string | null;

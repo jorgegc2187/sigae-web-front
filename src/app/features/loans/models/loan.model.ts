@@ -25,7 +25,16 @@ export interface LoanActivity {
   timestamp: string;
 }
 
-export interface Loan {
+export interface LoanAttachmentSummary {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  source: string;
+  downloadUrl: string;
+}
+
+export interface LoanSummary {
   id: string;
   code: string;
   teacher: LoanTeacher;
@@ -33,8 +42,25 @@ export interface Loan {
   destination: string;
   loanDate: string;
   dueDate: string;
-  completedDate?: string;
   status: LoanStatus;
+}
+
+export interface LoanDetail extends LoanSummary {
+  completedDate: string | null;
   notes?: string;
+  signatureDataUrl: string | null;
+  attachments: LoanAttachmentSummary[];
   activities: LoanActivity[];
 }
+
+export interface CreateLoanPayload {
+  teacherId: string;
+  destinationLocationId: string;
+  loanDate: string;
+  dueDate: string;
+  notes: string | null;
+  assetIds: string[];
+  attachmentSources: string[];
+}
+
+export type Loan = LoanDetail;

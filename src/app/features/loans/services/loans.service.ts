@@ -1,7 +1,8 @@
-import { HttpClient, HttpParams, httpResource } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams, httpResource } from '@angular/common/http';
 import { Injectable, Signal, inject } from '@angular/core';
+import { catchError, map, of, throwError } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
-import { Loan } from '../models/loan.model';
+import { CreateLoanPayload, LoanDetail, LoanSummary } from '../models/loan.model';
 
 export interface LoanListFilters {
   search?: string;
@@ -15,7 +16,7 @@ export class LoansService {
   private readonly baseUrl = `${this.appConfig.apiUrl}/loans`;
 
   listResource(filters: Signal<LoanListFilters>) {
-    return httpResource<Loan[]>(
+    return httpResource<LoanSummary[]>(
       () => ({
         url: this.baseUrl,
         params: this.buildParams(filters()),
@@ -25,11 +26,50 @@ export class LoansService {
   }
 
   getById(id: string) {
-    return this.http.get<Loan>(`${this.baseUrl}/${id}`);
+    return this.http.get<LoanDetail>(`${this.baseUrl}/${id}`);
   }
 
-  create(payload: unknown) {
-    return this.http.post<Loan>(this.baseUrl, payload);
+  create(payload: CreateLoanPayload, signature: Blob | null, attachments: File[]) {
+    const formData = new FormData();
+    formData.append('payload', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+    if (signature) {
+      formData.append('signature', signature, 'firma-prestamo.png');
+    }
+    attachments.forEach((file) => formData.append('attachments', file, file.name));
+    return this.http.post<LoanDetail>(this.baseUrl, formData);
+  }
+
+  returnLoan(id: string) {
+    return this.http.post<LoanDetail>(`${this.baseUrl}/${id}/return`, {});
+  }
+
+  downloadAttachment(downloadUrl: string) {
+    const url = downloadUrl.startsWith('http') ? downloadUrl : `${this.appConfig.apiUrl.replace(/\/api$/, '')}${downloadUrl}`;
+    return this.http.get(url, {
+      observe: 'response',
+      responseType: 'blob',
+    });
+  }
+
+  probeModuleAvailability() {
+    return this.http.get<LoanSummary[]>(this.baseUrl).pipe(
+      map(() => true),
+      catchError((error: unknown) => {
+        if (this.isCollectionEndpointMissing(error)) {
+          return of(false);
+        }
+
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  isCollectionEndpointMissing(error: unknown): boolean {
+    return this.isLoansEndpointError(error) && this.isCollectionUrl(error.url);
+  }
+
+  isLoansEndpointError(error: unknown): error is HttpErrorResponse {
+    return error instanceof HttpErrorResponse && error.status === 404 && this.isLoansUrl(error.url);
   }
 
   private buildParams(filters: LoanListFilters): HttpParams {
@@ -41,5 +81,13 @@ export class LoansService {
       params = params.set('status', filters.status);
     }
     return params;
+  }
+
+  private isCollectionUrl(url: string | null): boolean {
+    return typeof url === 'string' && /\/loans(?:\?.*)?$/.test(url);
+  }
+
+  private isLoansUrl(url: string | null): boolean {
+    return typeof url === 'string' && /\/loans(?:\/[^/?]+)?(?:\?.*)?$/.test(url);
   }
 }

@@ -1,5 +1,15 @@
 <div class="space-y-8">
-  @if (loan(); as loanDetail) {
+  @if (isLoading()) {
+    <section class="card card-border bg-base-100 shadow-sm">
+      <div class="card-body items-center px-6 py-14 text-center">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <h1 class="mt-4 text-xl font-bold text-base-content">Cargando préstamo</h1>
+        <p class="mt-2 max-w-md text-sm leading-6 text-base-content/60">
+          Estamos consultando la información del préstamo seleccionado.
+        </p>
+      </div>
+    </section>
+  } @else if (loan(); as loanDetail) {
     <div class="breadcrumbs p-0 text-sm text-base-content/60">
       <ul>
         <li><a routerLink="/loans" class="transition-colors hover:text-primary">Préstamos</a></li>
@@ -17,13 +27,13 @@
 
       <div class="flex flex-wrap items-center gap-3">
         <app-action-button
-          label="Editar"
-          variant="neutral"
-          className="shadow-sm"
-        />
-        <app-action-button
           [label]="actionLabel()"
+          [icon]="loanDetail.status === 'Devuelto' ? 'check_circle' : 'assignment_return'"
+          [variant]="loanDetail.status === 'Devuelto' ? 'neutral' : 'primary'"
+          [disabled]="loanDetail.status === 'Devuelto' || isReturning()"
+          [loading]="isReturning()"
           className="shadow-sm"
+          (clicked)="onReturnLoan()"
         />
       </div>
     </div>
@@ -98,7 +108,7 @@
               <div class="space-y-2">
                 <p class="text-sm text-base-content/55">Observaciones</p>
                 <div class="rounded-xl border border-base-300 bg-base-100 px-4 py-4">
-                  @if (loanDetail.notes?.trim()) {
+              @if (loanDetail.notes?.trim()) {
                     <p class="text-base leading-8 text-base-content/80">{{ loanDetail.notes }}</p>
                   } @else {
                     <p class="text-base text-base-content/55">Sin observaciones registradas.</p>
@@ -106,6 +116,19 @@
                 </div>
               </div>
             </div>
+
+            @if (loanDetail.signatureDataUrl) {
+              <div class="space-y-2">
+                <p class="text-sm text-base-content/55">Firma Digital</p>
+                <div class="overflow-hidden rounded-xl border border-base-300 bg-base-100 p-3">
+                  <img
+                    [src]="loanDetail.signatureDataUrl"
+                    alt="Firma registrada del préstamo"
+                    class="h-20 w-full object-contain"
+                  />
+                </div>
+              </div>
+            }
           </div>
         </section>
       </div>
@@ -148,6 +171,45 @@
           </div>
         </section>
 
+        <section class="card card-border bg-base-100 shadow-sm">
+          <div class="card-body p-0">
+            <div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
+              <h2 class="flex items-center gap-2 text-base font-semibold text-base-content">
+                <span class="material-symbols-outlined text-[20px] text-primary">attach_file</span>
+                Adjuntos
+              </h2>
+              <span class="badge badge-soft badge-neutral">{{ loanDetail.attachments.length }}</span>
+            </div>
+
+            @if (loanDetail.attachments.length > 0) {
+              <ul class="divide-y divide-base-200">
+                @for (attachment of loanDetail.attachments; track attachment.id) {
+                  <li class="flex items-center justify-between gap-4 px-5 py-4">
+                    <div class="min-w-0">
+                      <p class="truncate text-sm font-semibold text-base-content">{{ attachment.fileName }}</p>
+                      <p class="text-xs text-base-content/55">
+                        {{ attachment.mimeType }} • {{ attachment.sizeBytes }} bytes
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm text-primary"
+                      (click)="downloadAttachment(attachment.downloadUrl, attachment.fileName)"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">download</span>
+                      Descargar
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <div class="px-5 py-8 text-sm text-base-content/55">
+                No hay adjuntos registrados para este préstamo.
+              </div>
+            }
+          </div>
+        </section>
+
         <section class="card card-border shadow-sm" [class]="statusPanelClass()">
           <div class="card-body p-5">
             <div class="mb-4 flex items-center justify-between gap-3 border-b border-base-200 pb-3">
@@ -180,6 +242,42 @@
         </section>
       </div>
     </div>
+  } @else if (modulePending()) {
+    <section class="card card-border bg-base-100 shadow-sm">
+      <div class="card-body items-center px-6 py-14 text-center">
+        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
+          <span class="material-symbols-outlined text-[32px]">hourglass_top</span>
+        </div>
+        <h1 class="text-xl font-bold text-base-content">Módulo de préstamos pendiente</h1>
+        <p class="mt-2 max-w-md text-sm leading-6 text-base-content/60">
+          El backend de préstamos aún no está disponible en la API, por lo que este detalle todavía no puede consultarse.
+        </p>
+        <app-action-button
+          label="Volver a préstamos"
+          icon="arrow_back"
+          className="mt-6 shadow-sm"
+          routerLink="/loans"
+        />
+      </div>
+    </section>
+  } @else if (unexpectedError()) {
+    <section class="card card-border bg-base-100 shadow-sm">
+      <div class="card-body items-center px-6 py-14 text-center">
+        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
+          <span class="material-symbols-outlined text-[32px]">cloud_off</span>
+        </div>
+        <h1 class="text-xl font-bold text-base-content">No se pudo cargar el préstamo</h1>
+        <p class="mt-2 max-w-md text-sm leading-6 text-base-content/60">
+          Ocurrió un problema al consultar la API. Intenta nuevamente desde la lista de préstamos.
+        </p>
+        <app-action-button
+          label="Volver a préstamos"
+          icon="arrow_back"
+          className="mt-6 shadow-sm"
+          routerLink="/loans"
+        />
+      </div>
+    </section>
   } @else {
     <section class="card card-border bg-base-100 shadow-sm">
       <div class="card-body items-center px-6 py-14 text-center">

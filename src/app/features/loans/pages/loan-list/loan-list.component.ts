@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
@@ -9,7 +10,7 @@ import {
   SegmentedFilterTabItem,
   SegmentedFilterTabsComponent,
 } from '../../../../shared/ui/segmented-filter-tabs/segmented-filter-tabs.component';
-import { Loan, LoanStatus, LoanStatusTab } from '../../models/loan.model';
+import { LoanStatus, LoanStatusTab, LoanSummary } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
 import { LoansService } from '../../services/loans.service';
 
@@ -35,6 +36,7 @@ export class LoanListComponent {
   readonly pageSize = 5;
   private readonly router = inject(Router);
   private readonly loansService = inject(LoansService);
+  private readonly notifications = inject(NotificationService);
   private readonly dateFormatter = new Intl.DateTimeFormat('es-PE', {
     day: '2-digit',
     month: 'short',
@@ -55,7 +57,31 @@ export class LoanListComponent {
     search: this.queryState().search || undefined,
     status: this.queryState().status === 'all' ? undefined : this.queryState().status,
   })));
-  readonly loans = computed(() => this.loansResource.value());
+  readonly loans = computed(() => (this.loansResource.hasValue() ? this.loansResource.value() : []));
+  readonly isLoading = computed(() => {
+    const status = this.loansResource.status();
+    return status === 'loading' || status === 'reloading';
+  });
+  readonly modulePending = computed(() =>
+    this.loansService.isCollectionEndpointMissing(this.loansResource.error()),
+  );
+  readonly unexpectedError = computed(
+    () => !!this.loansResource.error() && !this.modulePending(),
+  );
+  readonly stateTitle = computed(() => {
+    if (this.modulePending()) {
+      return 'Módulo de préstamos pendiente';
+    }
+
+    return 'No se pudo cargar la vista de préstamos';
+  });
+  readonly stateMessage = computed(() => {
+    if (this.modulePending()) {
+      return 'El módulo de préstamos aún no está disponible en la API. La vista seguirá visible mientras se implementa el backend.';
+    }
+
+    return 'Ocurrió un problema al consultar la API de préstamos. Intenta recargar esta pantalla nuevamente.';
+  });
 
   readonly filteredLoans = computed(() => {
     const { search, status } = this.queryState();
@@ -222,24 +248,24 @@ export class LoanListComponent {
     return 'transition-colors hover:bg-base-200/35';
   }
 
-  getPrimaryAssetName(loan: Loan): string {
+  getPrimaryAssetName(loan: LoanSummary): string {
     return loan.assets[0]?.name ?? 'Sin activos registrados';
   }
 
-  getExtraAssets(loan: Loan) {
+  getExtraAssets(loan: LoanSummary) {
     return loan.assets.slice(1);
   }
 
-  getAssetsCountLabel(loan: Loan): string {
+  getAssetsCountLabel(loan: LoanSummary): string {
     const count = loan.assets.length;
     return `${count} activo${count === 1 ? '' : 's'}`;
   }
 
-  getAssetsCountAriaLabel(loan: Loan): string {
+  getAssetsCountAriaLabel(loan: LoanSummary): string {
     return `Ver ${this.getAssetsCountLabel(loan).toLowerCase()} del préstamo`;
   }
 
-  getExtraAssetsLabel(loan: Loan): string {
+  getExtraAssetsLabel(loan: LoanSummary): string {
     const count = this.getExtraAssets(loan).length;
     return `Ver ${count} activo${count === 1 ? '' : 's'} adicional${count === 1 ? '' : 'es'}`;
   }
@@ -270,5 +296,14 @@ export class LoanListComponent {
 
   onViewLoan(loanId: string) {
     this.router.navigate(['/loans', loanId]);
+  }
+
+  reloadLoans() {
+    this.loansResource.reload();
+    if (this.modulePending()) {
+      this.notifications.info({
+        message: 'El backend de préstamos aún no está disponible en la API.',
+      });
+    }
   }
 }

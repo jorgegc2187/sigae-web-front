@@ -16,15 +16,15 @@ import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
 type ScannerState = 'requesting' | 'scanning' | 'error';
 
 @Component({
-  selector: 'app-loan-qr-scanner',
-  templateUrl: './loan-qr-scanner.component.html',
+  selector: 'app-qr-code-scanner',
+  templateUrl: './qr-code-scanner.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoanQrScannerComponent implements AfterViewInit, OnDestroy {
+export class QrCodeScannerComponent implements AfterViewInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly qrDetected = output<string>();
+  readonly scanDetected = output<string>();
   readonly videoElement = viewChild.required<ElementRef<HTMLVideoElement>>('videoElement');
 
   readonly scannerState = signal<ScannerState>('requesting');
@@ -76,7 +76,7 @@ export class LoanQrScannerComponent implements AfterViewInit, OnDestroy {
           this.scannerControls = null;
 
           this.ngZone.run(() => {
-            this.qrDetected.emit(result.getText().trim());
+            this.scanDetected.emit(result.getText().trim());
           });
         },
       );

@@ -1,11 +1,21 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { Loan, LoanActivity, LoanAssetStatus, LoanStatus } from '../../models/loan.model';
+import { LoanActivity, LoanAssetStatus, LoanDetail, LoanStatus } from '../../models/loan.model';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
 import { LoansService } from '../../services/loans.service';
+
+type LoanDetailState =
+  | { kind: 'loading' }
+  | { kind: 'ready'; loan: LoanDetail }
+  | { kind: 'module-unavailable' }
+  | { kind: 'not-found' }
+  | { kind: 'error' };
+
+const INITIAL_LOAN_DETAIL_STATE: LoanDetailState = { kind: 'loading' };
 
 @Component({
   selector: 'app-loan-detail',
@@ -16,6 +26,7 @@ import { LoansService } from '../../services/loans.service';
 export class LoanDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly loansService = inject(LoansService);
+  private readonly notifications = inject(NotificationService);
   private readonly shortDateFormatter = new Intl.DateTimeFormat('es-PE', {
     day: '2-digit',
     month: 'short',
@@ -32,13 +43,38 @@ export class LoanDetailComponent {
     timeZone: 'UTC',
   });
 
-  readonly loan = toSignal(
+  readonly detailState = toSignal(
     this.route.paramMap.pipe(
       map((params) => params.get('id') ?? ''),
-      switchMap((id) => (id ? this.loansService.getById(id).pipe(catchError(() => of(undefined))) : of(undefined))),
+      switchMap((id) =>
+        id
+          ? this.loansService.getById(id).pipe(
+              map((loan) => ({ kind: 'ready', loan }) as LoanDetailState),
+              catchError((error: unknown) => this.resolveDetailError(error)),
+            )
+          : of({ kind: 'not-found' } as LoanDetailState),
+      ),
     ),
-    { initialValue: undefined },
+    { initialValue: INITIAL_LOAN_DETAIL_STATE },
   );
+  private readonly returnedLoan = signal<LoanDetail | null>(null);
+  readonly loan = computed(() => {
+    const updatedLoan = this.returnedLoan();
+    if (updatedLoan) {
+      return updatedLoan;
+    }
+
+    const state = this.detailState();
+    if (state.kind !== 'ready') {
+      return undefined;
+    }
+
+    return state.loan;
+  });
+  readonly isLoading = computed(() => this.detailState().kind === 'loading');
+  readonly modulePending = computed(() => this.detailState().kind === 'module-unavailable');
+  readonly unexpectedError = computed(() => this.detailState().kind === 'error');
+  readonly isReturning = signal(false);
 
   readonly pageTitle = computed(() => {
     const loan = this.loan();
@@ -71,8 +107,8 @@ export class LoanDetailComponent {
   });
 
   readonly statusPanelClass = computed(() => {
-    const loan = this.loan();
-    if (!loan) {
+    const currentLoan = this.loan();
+    if (!currentLoan) {
       return 'border-base-300 bg-base-100';
     }
 
@@ -82,7 +118,7 @@ export class LoanDetailComponent {
       Devuelto: 'border-base-300 bg-base-100',
     };
 
-    return map[loan.status];
+    return map[currentLoan.status];
   });
 
   readonly statusMessage = computed(() => {
@@ -108,7 +144,7 @@ export class LoanDetailComponent {
       return 'Volver';
     }
 
-    return loan.status === 'Devuelto' ? 'Ver Préstamo Finalizado' : 'Finalizar Préstamo';
+    return loan.status === 'Devuelto' ? 'Préstamo Finalizado' : 'Finalizar Préstamo';
   });
 
   formatCardDate(dateIso: string): string {
@@ -150,5 +186,61 @@ export class LoanDetailComponent {
 
   trackActivity(_: number, activity: LoanActivity): string {
     return activity.id;
+  }
+
+  async onReturnLoan(): Promise<void> {
+    const loan = this.loan();
+    if (!loan || loan.status === 'Devuelto' || this.isReturning()) {
+      return;
+    }
+
+    const confirmed = window.confirm(`¿Confirmar devolución del préstamo ${loan.code}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.isReturning.set(true);
+    try {
+      const updatedLoan = await firstValueFrom(this.loansService.returnLoan(loan.id));
+      this.returnedLoan.set(updatedLoan);
+      this.notifications.success({ message: 'Préstamo finalizado correctamente.' });
+    } catch {
+      this.notifications.error({ message: 'No se pudo finalizar el préstamo.' });
+    } finally {
+      this.isReturning.set(false);
+    }
+  }
+
+  async downloadAttachment(downloadUrl: string, filename: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.loansService.downloadAttachment(downloadUrl));
+      const blob = response.body;
+      if (!blob) {
+        throw new Error('Empty attachment response');
+      }
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.notifications.error({ message: 'No se pudo descargar el adjunto.' });
+    }
+  }
+
+  private resolveDetailError(error: unknown) {
+    if (!this.loansService.isLoansEndpointError(error)) {
+      return of({ kind: 'error' } as LoanDetailState);
+    }
+
+    return this.loansService.probeModuleAvailability().pipe(
+      map((isAvailable) =>
+        isAvailable
+          ? ({ kind: 'not-found' } as LoanDetailState)
+          : ({ kind: 'module-unavailable' } as LoanDetailState),
+      ),
+      catchError(() => of({ kind: 'error' } as LoanDetailState)),
+    );
   }
 }

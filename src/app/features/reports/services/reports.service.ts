@@ -12,6 +12,13 @@ export interface AssetReportFilters {
   endDate?: string;
 }
 
+export interface LoanReportFilters {
+  search?: string;
+  locationId?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface AssetReportRow {
   id: string;
   code: string;
@@ -22,6 +29,17 @@ export interface AssetReportRow {
   locationId: string;
   condition: string;
   acquisitionDate: string | null;
+}
+
+export interface LoanReportRow {
+  id: string;
+  code: string;
+  teacherName: string;
+  assetsCount: number;
+  loanDate: string;
+  dueDate: string;
+  location: string;
+  status: string;
 }
 
 export interface ReportsSummary {
@@ -73,6 +91,16 @@ export class ReportsService {
     );
   }
 
+  loansReportResource(filters: Signal<LoanReportFilters>) {
+    return httpResource<LoanReportRow[]>(
+      () => ({
+        url: `${this.baseUrl}/loans`,
+        params: this.buildLoanParams(filters()),
+      }),
+      { defaultValue: [] },
+    );
+  }
+
   listAssetCategories() {
     return this.http
       .get<CategoryResponse[]>(`${this.catalogBaseUrl}/categories`)
@@ -93,6 +121,14 @@ export class ReportsService {
     });
   }
 
+  downloadLoansReport(filters: LoanReportFilters, format: ReportExportFormat) {
+    return this.http.get(`${this.baseUrl}/loans/export`, {
+      params: this.buildLoanParams(filters).set('format', format),
+      observe: 'response',
+      responseType: 'blob',
+    });
+  }
+
   getFilename(response: HttpResponse<Blob>, fallback: string): string {
     const disposition = response.headers.get('content-disposition');
     const filename = disposition?.match(/filename="?([^"]+)"?/)?.[1];
@@ -104,6 +140,28 @@ export class ReportsService {
 
     if (filters.categoryId) {
       params = params.set('categoryId', filters.categoryId);
+    }
+
+    if (filters.locationId) {
+      params = params.set('locationId', filters.locationId);
+    }
+
+    if (filters.startDate) {
+      params = params.set('startDate', filters.startDate);
+    }
+
+    if (filters.endDate) {
+      params = params.set('endDate', filters.endDate);
+    }
+
+    return params;
+  }
+
+  private buildLoanParams(filters: LoanReportFilters): HttpParams {
+    let params = new HttpParams();
+
+    if (filters.search) {
+      params = params.set('search', filters.search);
     }
 
     if (filters.locationId) {

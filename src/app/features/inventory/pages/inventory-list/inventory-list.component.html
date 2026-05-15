@@ -43,6 +43,13 @@
 
       <div class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
         <app-action-button
+          label="Escanear QR"
+          icon="qr_code_scanner"
+          variant="outline"
+          hostClass="w-full xl:w-auto"
+          (clicked)="openQrScanner()"
+        />
+        <app-action-button
           label="Registrar activo"
           icon="add"
           routerLink="/inventory/new"
@@ -133,4 +140,11 @@
       (pageChange)="goToPage($event)"
     />
   </section>
+
+  @if (isQrScannerOpen()) {
+    <app-asset-qr-scanner-modal
+      (closeRequested)="closeQrScanner()"
+      (scanDetected)="onQrCodeDetected($event)"
+    />
+  }
 </div>

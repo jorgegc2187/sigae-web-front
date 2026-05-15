@@ -6,27 +6,17 @@ import { ActionButtonComponent } from '../../../../shared/ui/action-button/actio
 import { DatePickerComponent, DateRangeValue } from '../../../../shared/ui/date-picker/date-picker.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/status-badge/status-badge.component';
-import { LoanStatus } from '../../../loans/models/loan.model';
 import {
   AssetReportFilters,
   AssetReportRow,
+  LoanReportFilters,
+  LoanReportRow,
   ReportExportFormat,
   ReportFilterOption,
   ReportsService,
 } from '../../services/reports.service';
 
 type ReportsTab = 'assets' | 'loans';
-
-interface LoanReportRow {
-  id: string;
-  code: string;
-  teacherName: string;
-  assetsCount: number;
-  dueDate: string;
-  loanDate: string;
-  location: string;
-  status: LoanStatus;
-}
 
 interface PendingReportExport {
   format: ReportExportFormat;
@@ -68,7 +58,7 @@ export class ReportsHomeComponent {
   readonly assetCategories = signal<ReportFilterOption[]>([]);
   readonly assetLocations = signal<ReportFilterOption[]>([]);
 
-  readonly loanLocations = computed<string[]>(() => []);
+  readonly loanLocations = computed<ReportFilterOption[]>(() => this.assetLocations());
 
   readonly assetReportFilters = computed<AssetReportFilters>(() => {
     const dateRange = this.assetDateRange();
@@ -110,19 +100,28 @@ export class ReportsHomeComponent {
     this.buildResultLabel(this.filteredAssetRows().length, this.assetCurrentPage(), this.assetPageSize),
   );
 
-  readonly loanRows = computed<LoanReportRow[]>(() => []);
+  readonly loanReportFilters = computed<LoanReportFilters>(() => {
+    const dateRange = this.loanDateRange();
+    return {
+      search: this.loanQuery().trim() || undefined,
+      locationId: this.loanLocation() === 'all' ? undefined : this.loanLocation(),
+      startDate: dateRange?.start,
+      endDate: dateRange?.end,
+    };
+  });
+
+  readonly loanReportResource = this.reportsService.loansReportResource(this.loanReportFilters);
+  readonly loanRows = computed<LoanReportRow[]>(() => this.loanReportResource.value());
 
   readonly filteredLoanRows = computed(() => {
     const query = this.loanQuery().trim().toLowerCase();
-    const location = this.loanLocation();
     const dateRange = this.loanDateRange();
 
     return this.loanRows().filter((row) => {
       const matchesQuery = !query || row.teacherName.toLowerCase().includes(query) || row.code.toLowerCase().includes(query);
-      const matchesLocation = location === 'all' || row.location === location;
       const matchesDate = this.matchesDateRange(row.loanDate, dateRange);
 
-      return matchesQuery && matchesLocation && matchesDate;
+      return matchesQuery && matchesDate;
     });
   });
 
@@ -259,11 +258,7 @@ export class ReportsHomeComponent {
       return;
     }
 
-    const formatLabel = this.exportLabels[pending.format];
-    this.closeExportDialog();
-    this.notifications.info({
-      message: `La exportación en ${formatLabel} para reporte de préstamos quedó preparada para una fase posterior.`,
-    });
+    await this.confirmLoanExport(pending.format);
   }
 
   onExportDialogClose(): void {
@@ -278,7 +273,7 @@ export class ReportsHomeComponent {
     return 'neutral';
   }
 
-  loanStatusTone(status: LoanStatus): StatusBadgeTone {
+  loanStatusTone(status: string): StatusBadgeTone {
     if (status === 'Activo') return 'success';
     if (status === 'Vencido') return 'error';
     return 'neutral';
@@ -329,6 +324,26 @@ export class ReportsHomeComponent {
     }
   }
 
+  private async confirmLoanExport(format: ReportExportFormat): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.reportsService.downloadLoansReport(this.loanReportFilters(), format),
+      );
+      const content = response.body;
+      if (!content) {
+        throw new Error('Empty report response');
+      }
+
+      const filename = this.reportsService.getFilename(response, this.buildFallbackFilename(format, 'prestamos'));
+      this.downloadBlob(content, filename);
+      this.closeExportDialog();
+      this.notifications.success({ message: 'Reporte de préstamos descargado correctamente.' });
+    } catch {
+      this.closeExportDialog();
+      this.notifications.error({ message: 'No se pudo descargar el reporte de préstamos.' });
+    }
+  }
+
   private async loadAssetFilterOptions(): Promise<void> {
     try {
       const [categories, locations] = await Promise.all([
@@ -352,9 +367,9 @@ export class ReportsHomeComponent {
     URL.revokeObjectURL(url);
   }
 
-  private buildFallbackFilename(format: ReportExportFormat): string {
+  private buildFallbackFilename(format: ReportExportFormat, report: 'activos' | 'prestamos' = 'activos'): string {
     const extension = format === 'excel' ? 'xlsx' : format === 'word' ? 'docx' : 'pdf';
-    return `reporte-activos-${new Date().toISOString().slice(0, 10)}.${extension}`;
+    return `reporte-${report}-${new Date().toISOString().slice(0, 10)}.${extension}`;
   }
 
   private matchesDateRange(dateValue: string | null, range: DateRangeValue | null): boolean {

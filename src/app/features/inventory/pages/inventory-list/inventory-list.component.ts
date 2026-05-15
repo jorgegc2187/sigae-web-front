@@ -1,8 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { AssetQrScannerModalComponent } from '../../../../shared/ui/asset-qr-scanner-modal/asset-qr-scanner-modal.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { CategoriesService } from '../../../categories/services/categories.service';
@@ -13,6 +17,7 @@ import { AssetsService } from '../../services/assets.service';
   imports: [
     DatePipe,
     RouterLink,
+    AssetQrScannerModalComponent,
     ActionButtonComponent,
     DesktopPaginationComponent,
     SearchInputComponent,
@@ -23,11 +28,14 @@ import { AssetsService } from '../../services/assets.service';
 export class InventoryListComponent {
   private readonly assetsService = inject(AssetsService);
   private readonly categoriesService = inject(CategoriesService);
+  private readonly notifications = inject(NotificationService);
+  private readonly router = inject(Router);
 
   readonly query = signal('');
   readonly categoryId = signal('all');
   readonly currentPage = signal(1);
   readonly selectedGroupIds = signal<string[]>([]);
+  readonly isQrScannerOpen = signal(false);
   readonly pageSize = 10;
 
   readonly groupedAssetsResource = this.assetsService.listGroupedResource(this.query, this.categoryId);
@@ -89,5 +97,29 @@ export class InventoryListComponent {
   areAllVisibleSelected(): boolean {
     const visibleGroupIds = this.visibleGroups().map((group) => group.groupId);
     return visibleGroupIds.length > 0 && visibleGroupIds.every((groupId) => this.selectedGroupIds().includes(groupId));
+  }
+
+  openQrScanner(): void {
+    this.isQrScannerOpen.set(true);
+  }
+
+  closeQrScanner(): void {
+    this.isQrScannerOpen.set(false);
+  }
+
+  async onQrCodeDetected(rawCode: string): Promise<void> {
+    this.closeQrScanner();
+
+    try {
+      const asset = await firstValueFrom(this.assetsService.lookupByScanValue(rawCode));
+      await this.router.navigate(['/inventory', asset.id]);
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        this.notifications.error({ message: 'No se encontró un activo asociado al código QR escaneado.' });
+        return;
+      }
+
+      this.notifications.error({ message: 'No se pudo resolver el activo escaneado. Intente nuevamente.' });
+    }
   }
 }
