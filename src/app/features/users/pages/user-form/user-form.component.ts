@@ -6,6 +6,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
+import { emailFormatValidator } from '../../../../shared/validators/email-format.validator';
 import { UserRole } from '../../models/user.model';
 import { UsersService } from '../../services/users.service';
 import { LocationsService } from '../../../locations/services/locations.service';
@@ -51,7 +52,7 @@ export class UserFormComponent {
   readonly form = this.fb.group({
     firstName: ['', [Validators.required]],
     lastName: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, emailFormatValidator()]],
     role: this.fb.control<UserRole | ''>('', [Validators.required]),
     sendInvitation: [true],
     password: [''],
@@ -143,25 +144,34 @@ export class UserFormComponent {
     const fullName = `${value.firstName.trim()} ${value.lastName.trim()}`.trim();
 
     try {
-      const user = await firstValueFrom(
-        this.usersService.create({
-          fullName,
-          email: value.email,
-          password: value.sendInvitation ? this.createTemporaryPassword() : value.password,
-          role: this.usersService.toApiRole(value.role as UserRole),
-          status: 'ACTIVE',
-        }),
-      );
+      const payload = {
+        fullName,
+        email: value.email,
+        role: this.usersService.toApiRole(value.role as UserRole),
+        status: 'ACTIVE' as const,
+        sendInvitation: value.sendInvitation,
+        ...(value.sendInvitation ? {} : { password: value.password }),
+      };
 
-      this.notifications.success({ message: `Usuario "${user.fullName}" creado correctamente.` });
+      const user = await firstValueFrom(this.usersService.create(payload));
+
+      this.notifications.success({
+        message: value.sendInvitation
+          ? `Usuario "${user.fullName}" creado correctamente. Se envió una invitación por correo para configurar su contraseña.`
+          : `Usuario "${user.fullName}" creado correctamente.`,
+      });
       await this.router.navigate(['/settings/users']);
-    } catch {
-      this.notifications.error({ message: 'No se pudo crear el usuario.' });
-    }
-  }
+    } catch (error: unknown) {
+      const status = (error as { status?: unknown })?.status;
+      const backendMessage =
+        typeof (error as { error?: { message?: unknown } })?.error?.message === 'string'
+          ? ((error as { error: { message: string } }).error.message)
+          : status === 503
+            ? 'No se pudo enviar el correo de invitación. Verifique la configuración SMTP e intente nuevamente.'
+            : 'No se pudo crear el usuario.';
 
-  private createTemporaryPassword(): string {
-    return `SIGAE-${globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)}`;
+      this.notifications.error({ message: backendMessage });
+    }
   }
 
   private syncPasswordValidators(sendInvitation: boolean): void {

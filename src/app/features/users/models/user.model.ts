@@ -27,9 +27,10 @@ export interface UserResponse {
 export interface CreateUserRequest {
   fullName: string;
   email: string;
-  password: string;
+  password?: string;
   role: ApiUserRole;
   status: ApiUserStatus;
+  sendInvitation: boolean;
 }
 
 export interface UpdateUserRequest {
