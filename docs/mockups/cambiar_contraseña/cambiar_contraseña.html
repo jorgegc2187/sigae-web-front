@@ -1,0 +1,256 @@
+<!doctype html>
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SIGAE - Actualización de Credenciales</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1D4ED8',
+              'primary-hover': '#2563EB',
+              'primary-content': '#FFFFFF',
+              secondary: '#2563EB',
+              'base-100': '#F8FAFC',
+              'base-200': '#F1F5F9',
+              'base-300': '#E2E8F0',
+              'base-content': '#0F172A',
+              'text-secondary': '#334155',
+              'text-muted': '#64748B',
+              success: '#15803D',
+              warning: '#B45309',
+              error: '#B91C1C',
+              info: '#1D4ED8',
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              headline: ['Inter'],
+              display: ['Inter'],
+              body: ['Inter'],
+              label: ['Inter'],
+            },
+            borderRadius: {
+              DEFAULT: '0.25rem',
+              md: '0.375rem',
+              lg: '0.5rem',
+              xl: '0.75rem',
+              '2xl': '1rem',
+              full: '9999px',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+    </style>
+    <style data-stitch-cursor="">
+      * {
+        cursor: crosshair !important;
+      }
+      [contenteditable='true']:focus,
+      .cursor-text:focus {
+        cursor: text !important;
+      }
+    </style>
+    <style data-stitch-scroll-lock="">
+      html,
+      body {
+        overflow: hidden !important;
+      }
+    </style>
+  </head>
+  <body class="bg-base-100 text-base-content font-sans antialiased h-screen overflow-hidden flex">
+    <!-- Split Layout Container -->
+    <div class="flex w-full h-full">
+      <!-- Left Panel (30%) - Institutional Branding -->
+      <div
+        class="hidden lg:flex w-[30%] bg-gradient-to-b from-primary to-[#0f349e] flex-col justify-between p-12 text-primary-content relative overflow-hidden"
+      >
+        <!-- Decorative Background Elements -->
+        <div
+          class="absolute top-[-10%] right-[-20%] w-[150%] h-[150%] bg-white/5 rounded-full blur-3xl mix-blend-overlay pointer-events-none"
+        ></div>
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-8">
+            <span
+              class="material-symbols-outlined text-4xl"
+              data-weight="fill"
+              style="font-variation-settings: 'FILL' 1"
+              >account_balance</span
+            >
+            <span class="text-2xl font-bold tracking-tight">SIGAE</span>
+          </div>
+        </div>
+        <div class="relative z-10 text-sm text-blue-200 mt-auto"></div>
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <img
+            alt="Insignia Institucional"
+            class="w-48 h-auto opacity-90"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmIj11_tF_BFzaZZiUNk18z60_v_CDzWYOcpoII_X-noZuadr1PELPXQxrDwchKZtY9ZqcoIBI17SKU7pc6awqXXyF4L4CDkRb5XYmW1bMIzMplrk2wMZ17P1P4bMJew9s2i1URMTsQrOLoCRJTL8WpelXN-4bVprR8f3JyvgtCbe1jbCP4EZDnCcdw7P_SjBF6ta-Esl3h2DLrWZlnxuVX5wB5R-EhgzeasuSaMwSif94VS58x7W_re4A2pGYYX2xReXyrNbHCWB9"
+          />
+        </div>
+      </div>
+      <!-- Right Panel (70%) - Form Area -->
+      <div
+        class="w-full lg:w-[70%] bg-white flex flex-col justify-center items-center p-6 sm:p-12 md:p-24 overflow-y-auto"
+      >
+        <div class="w-full max-w-lg">
+          <!-- Mobile Header (Hidden on Desktop) -->
+          <div class="lg:hidden flex items-center gap-3 mb-8 text-primary">
+            <span
+              class="material-symbols-outlined text-3xl"
+              data-weight="fill"
+              style="font-variation-settings: 'FILL' 1"
+              >account_balance</span
+            >
+            <span class="text-xl font-bold tracking-tight">SIGAE</span>
+          </div>
+          <div class="mb-10">
+            <h2 class="text-[24px] font-[700] text-base-content mb-2">Cambiar Contraseña</h2>
+            <p class="text-[14px] text-text-secondary">
+              Por favor, ingrese su contraseña actual y defina una nueva siguiendo los requisitos de
+              seguridad.
+            </p>
+          </div>
+          <form class="space-y-6">
+            <!-- Current Password -->
+            <!-- New Password -->
+            <div class="space-y-2">
+              <label class="block text-[12px] font-[500] text-text-secondary" for="new-password"
+                >Nueva Contraseña <span class="text-error">*</span></label
+              >
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted"
+                >
+                  <span class="material-symbols-outlined text-[18px]">key</span>
+                </div>
+                <input
+                  class="block w-full pl-10 pr-10 py-2 h-[36px] border border-base-300 rounded-[6px] text-[14px] focus:ring-0 focus:border-primary focus:outline-none transition-colors"
+                  id="new-password"
+                  placeholder="Defina una nueva contraseña"
+                  required=""
+                  type="password"
+                />
+                <button
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-text-secondary transition-colors focus:outline-none"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                </button>
+              </div>
+            </div>
+            <!-- Password Requirements Checklist -->
+            <div class="bg-base-200/50 rounded-lg p-4 mt-2">
+              <p class="text-[12px] font-[600] text-text-secondary mb-3">
+                Requisitos de seguridad:
+              </p>
+              <ul class="space-y-2">
+                <li class="flex items-center text-[12px] text-success">
+                  <span
+                    class="material-symbols-outlined text-[16px] mr-2"
+                    data-weight="fill"
+                    style="font-variation-settings: 'FILL' 1"
+                    >check_circle</span
+                  >
+                  Al menos 8 caracteres
+                </li>
+                <li class="flex items-center text-[12px] text-text-muted">
+                  <span class="material-symbols-outlined text-[16px] mr-2"
+                    >radio_button_unchecked</span
+                  >
+                  Al menos una letra mayúscula
+                </li>
+                <li class="flex items-center text-[12px] text-text-muted">
+                  <span class="material-symbols-outlined text-[16px] mr-2"
+                    >radio_button_unchecked</span
+                  >
+                  Al menos un número
+                </li>
+                <li class="flex items-center text-[12px] text-text-muted">
+                  <span class="material-symbols-outlined text-[16px] mr-2"
+                    >radio_button_unchecked</span
+                  >
+                  Al menos un carácter especial (!@#$%^&amp;*)
+                </li>
+              </ul>
+            </div>
+            <!-- Confirm Password -->
+            <div class="space-y-2 pt-2">
+              <label class="block text-[12px] font-[500] text-text-secondary" for="confirm-password"
+                >Confirmar Nueva Contraseña <span class="text-error">*</span></label
+              >
+              <div class="relative">
+                <div
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted"
+                >
+                  <span class="material-symbols-outlined text-[18px]">lock_reset</span>
+                </div>
+                <input
+                  class="block w-full pl-10 pr-10 py-2 h-[36px] border border-base-300 rounded-[6px] text-[14px] focus:ring-0 focus:border-primary focus:outline-none transition-colors"
+                  id="confirm-password"
+                  placeholder="Vuelva a ingresar la nueva contraseña"
+                  required=""
+                  type="password"
+                />
+                <button
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-text-secondary transition-colors focus:outline-none"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                </button>
+              </div>
+            </div>
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-6">
+              <button
+                class="px-4 py-2 h-[36px] text-[14px] font-[500] text-text-secondary bg-transparent hover:bg-base-200 border border-transparent rounded-[8px] transition-colors focus:outline-none focus:ring-2 focus:ring-base-300"
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button
+                class="px-6 py-2 h-[36px] text-[14px] font-[500] text-white bg-primary hover:bg-primary-hover rounded-[8px] transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-2 shadow-sm"
+                type="submit"
+              >
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                Actualizar Contraseña
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- Optional Help Section at Bottom -->
+        <div class="mt-12 w-full max-w-lg text-center border-t border-base-200 pt-6">
+          <p class="text-[12px] text-text-muted">
+            ¿Necesita ayuda? Contacte al
+            <a class="text-primary hover:underline font-[500]" href="#">Soporte Técnico de SIGAE</a
+            >.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

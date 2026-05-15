@@ -3,7 +3,15 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { APP_CONFIG } from '../config/app.tokens';
-import { AuthResponse, AuthUser, LoginCredentials, SessionStatus, UserRole } from './auth.models';
+import {
+  AuthResponse,
+  AuthUser,
+  ForgotPasswordPayload,
+  LoginCredentials,
+  ResetPasswordPayload,
+  SessionStatus,
+  UserRole,
+} from './auth.models';
 
 const ACCESS_TOKEN_KEY = 'sigae.accessToken';
 const REFRESH_TOKEN_KEY = 'sigae.refreshToken';
@@ -57,6 +65,19 @@ export class AuthService {
     );
     this.persistSession(response);
     this.sessionStatusState.set('authenticated');
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    const payload: ForgotPasswordPayload = { email };
+    await firstValueFrom(
+      this.http.post(`${this.appConfig.apiUrl}/auth/forgot-password`, payload),
+    );
+  }
+
+  async resetPassword(payload: ResetPasswordPayload): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(`${this.appConfig.apiUrl}/auth/reset-password`, payload),
+    );
   }
 
   async refreshAccessToken(): Promise<string | null> {

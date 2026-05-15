@@ -1,15 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
-  computed,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { APP_CONFIG } from '../../../../core/config/app.tokens';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { emailFormatValidator } from '../../../../shared/validators/email-format.validator';
 
 @Component({
   selector: 'app-recover-password',
@@ -20,6 +23,7 @@ import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.
 export class RecoverPasswordComponent {
   private fb = inject(NonNullableFormBuilder);
   private appConfig = inject(APP_CONFIG);
+  private auth = inject(AuthService);
 
   readonly appName = this.appConfig.appName;
   isSubmitting = signal(false);
@@ -27,14 +31,16 @@ export class RecoverPasswordComponent {
   errorMessage = signal<string | null>(null);
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, emailFormatValidator()]],
   });
+  private readonly formEvents = toSignal(this.form.events, { initialValue: null });
 
   emailError = computed(() => {
-    const c = this.form.get('email');
-    if (!c?.dirty || !c.errors) return null;
+    this.formEvents();
+    const c = this.form.controls.email;
+    if ((!c.dirty && !c.touched) || !c.errors) return null;
     if (c.errors['required']) return 'El correo es requerido.';
-    if (c.errors['email']) return 'Ingrese un correo electrónico válido.';
+    if (c.errors['emailFormat']) return 'Ingrese un correo electrónico válido.';
     return null;
   });
 
@@ -46,14 +52,19 @@ export class RecoverPasswordComponent {
     this.successMessage.set(null);
     this.errorMessage.set(null);
 
-    // TODO: Reemplazar con llamada real al AuthService
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Simulación: siempre muestra éxito (comportamiento de seguridad)
-    this.successMessage.set(
-      'Si el correo está registrado, recibirás un enlace de recuperación en los próximos minutos.'
-    );
-    this.form.reset();
-    this.isSubmitting.set(false);
+    try {
+      const credentials = this.form.getRawValue();
+      await this.auth.requestPasswordReset(credentials.email);
+      this.successMessage.set(
+        'Si el correo está registrado, recibirás un enlace de recuperación en los próximos minutos.'
+      );
+      this.form.reset();
+    } catch {
+      this.errorMessage.set(
+        'No pudimos procesar tu solicitud en este momento. Intenta nuevamente en unos minutos.'
+      );
+    } finally {
+      this.isSubmitting.set(false);
+    }
   }
 }
