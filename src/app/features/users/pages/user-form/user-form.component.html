@@ -26,7 +26,7 @@
             label="Nombre"
             fieldId="userFirstName"
             [required]="true"
-            [error]="firstNameControl.invalid && firstNameControl.touched ? 'El nombre es obligatorio.' : null"
+            [error]="firstNameError()"
           >
             <input
               id="userFirstName"
@@ -41,7 +41,7 @@
             label="Apellido"
             fieldId="userLastName"
             [required]="true"
-            [error]="lastNameControl.invalid && lastNameControl.touched ? 'El apellido es obligatorio.' : null"
+            [error]="lastNameError()"
           >
             <input
               id="userLastName"
@@ -56,13 +56,7 @@
             label="Correo electrónico"
             fieldId="userEmail"
             [required]="true"
-            [error]="
-              emailControl.invalid && emailControl.touched
-                ? emailControl.hasError('required')
-                  ? 'El correo es obligatorio.'
-                  : 'Ingrese un correo electrónico válido.'
-                : null
-            "
+            [error]="emailError()"
             class="md:col-span-2"
           >
             <input
@@ -86,7 +80,7 @@
             label="Rol"
             fieldId="userRole"
             [required]="true"
-            [error]="roleControl.invalid && roleControl.touched ? 'Seleccione un rol.' : null"
+            [error]="roleError()"
           >
             <select
               id="userRole"
@@ -184,23 +178,50 @@
               label="Contraseña temporal"
               fieldId="userPassword"
               [required]="true"
-              [error]="
-                passwordControl.invalid && passwordControl.touched
-                  ? passwordControl.hasError('required')
-                    ? 'La contraseña temporal es obligatoria.'
-                    : 'La contraseña debe tener al menos 8 caracteres.'
-                  : null
-              "
+              [error]="passwordError()"
             >
               <input
                 id="userPassword"
                 type="password"
                 formControlName="password"
                 class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
-                placeholder="Mínimo 8 caracteres"
+                placeholder="Debe cumplir con la política de seguridad"
                 autocomplete="new-password"
               />
             </app-form-field>
+
+            <div class="rounded-2xl bg-base-200/55 p-4">
+              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-base-content/55">
+                Requisitos de seguridad
+              </p>
+
+              <ul class="space-y-2 text-sm">
+                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasMinLength" [class.text-base-content/55]="!passwordRequirements().hasMinLength">
+                  <span class="material-symbols-outlined text-[18px]">
+                    {{ passwordRequirements().hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}
+                  </span>
+                  Al menos 8 caracteres
+                </li>
+                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasUppercase" [class.text-base-content/55]="!passwordRequirements().hasUppercase">
+                  <span class="material-symbols-outlined text-[18px]">
+                    {{ passwordRequirements().hasUppercase ? 'check_circle' : 'radio_button_unchecked' }}
+                  </span>
+                  Al menos una letra mayúscula
+                </li>
+                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasNumber" [class.text-base-content/55]="!passwordRequirements().hasNumber">
+                  <span class="material-symbols-outlined text-[18px]">
+                    {{ passwordRequirements().hasNumber ? 'check_circle' : 'radio_button_unchecked' }}
+                  </span>
+                  Al menos un número
+                </li>
+                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasSpecial" [class.text-base-content/55]="!passwordRequirements().hasSpecial">
+                  <span class="material-symbols-outlined text-[18px]">
+                    {{ passwordRequirements().hasSpecial ? 'check_circle' : 'radio_button_unchecked' }}
+                  </span>
+                  Al menos un carácter especial
+                </li>
+              </ul>
+            </div>
           }
         </div>
       </form>

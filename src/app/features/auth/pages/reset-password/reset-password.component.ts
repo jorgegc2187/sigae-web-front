@@ -5,6 +5,11 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { APP_CONFIG } from '../../../../core/config/app.tokens';
+import {
+  getControlErrorMessage,
+  getGroupErrorMessage,
+  shouldShowControlError,
+} from '../../../../shared/forms/validation-message.util';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { matchingFieldsValidator } from '../../../../shared/validators/matching-fields.validator';
@@ -45,10 +50,11 @@ export class ResetPasswordComponent {
     },
   );
   private readonly formEvents = toSignal(this.form.events, { initialValue: null });
+  private readonly newPasswordValue = toSignal(this.form.controls.newPassword.valueChanges, {
+    initialValue: this.form.controls.newPassword.value,
+  });
 
-  readonly passwordRequirements = computed(() =>
-    evaluatePasswordPolicy(this.form.controls.newPassword.value),
-  );
+  readonly passwordRequirements = computed(() => evaluatePasswordPolicy(this.newPasswordValue()));
 
   readonly viewState = computed<'form' | 'invalid' | 'success'>(() => {
     if (!this.token().trim()) {
@@ -76,37 +82,30 @@ export class ResetPasswordComponent {
   readonly newPasswordError = computed(() => {
     this.formEvents();
     const control = this.form.controls.newPassword;
-    if ((!control.dirty && !control.touched) || !control.errors) {
+    if (!shouldShowControlError(control)) {
       return null;
     }
 
-    if (control.errors['required']) {
-      return 'La nueva contraseña es requerida.';
-    }
-
-    if (control.errors['passwordPolicy']) {
-      return 'La contraseña debe cumplir con los requisitos de seguridad.';
-    }
-
-    return null;
+    return getControlErrorMessage(control, {
+      messages: {
+        required: 'La nueva contraseña es requerida.',
+        passwordPolicy: 'La contraseña debe cumplir con los requisitos de seguridad.',
+      },
+    });
   });
 
   readonly confirmPasswordError = computed(() => {
     this.formEvents();
     const control = this.form.controls.confirmPassword;
-    if ((!control.dirty && !control.touched) || (!control.errors && !this.form.errors)) {
-      return null;
+    if (shouldShowControlError(control)) {
+      return getControlErrorMessage(control, {
+        messages: {
+          required: 'Debe confirmar la nueva contraseña.',
+        },
+      });
     }
 
-    if (control.errors?.['required']) {
-      return 'Debe confirmar la nueva contraseña.';
-    }
-
-    if (this.form.errors?.['fieldsMismatch']) {
-      return 'Las contraseñas no coinciden.';
-    }
-
-    return null;
+    return getGroupErrorMessage(this.form, 'fieldsMismatch', 'Las contraseñas no coinciden.');
   });
 
   toggleNewPasswordVisibility(): void {

@@ -1,12 +1,21 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import {
+  getControlErrorMessage,
+  shouldShowControlError,
+} from '../../../../shared/forms/validation-message.util';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
 import { emailFormatValidator } from '../../../../shared/validators/email-format.validator';
+import {
+  evaluatePasswordPolicy,
+  passwordPolicyValidator,
+} from '../../../../shared/validators/password-policy.validator';
 import { UserRole } from '../../models/user.model';
 import { UsersService } from '../../services/users.service';
 import { LocationsService } from '../../../locations/services/locations.service';
@@ -57,6 +66,10 @@ export class UserFormComponent {
     sendInvitation: [true],
     password: [''],
   });
+  private readonly formEvents = toSignal(this.form.events, { initialValue: null });
+  private readonly passwordValue = toSignal(this.form.controls.password.valueChanges, {
+    initialValue: this.form.controls.password.value,
+  });
 
   readonly filteredLocations = computed(() => {
     const query = this.locationQuery().trim().toLowerCase();
@@ -67,6 +80,74 @@ export class UserFormComponent {
         !selectedIds.has(location.id) &&
         (!query || location.name.toLowerCase().includes(query)),
     );
+  });
+  readonly passwordRequirements = computed(() => evaluatePasswordPolicy(this.passwordValue()));
+  readonly firstNameError = computed(() => {
+    this.formEvents();
+    const control = this.form.controls.firstName;
+    if (!shouldShowControlError(control)) {
+      return null;
+    }
+
+    return getControlErrorMessage(control, {
+      messages: {
+        required: 'El nombre es obligatorio.',
+      },
+    });
+  });
+  readonly lastNameError = computed(() => {
+    this.formEvents();
+    const control = this.form.controls.lastName;
+    if (!shouldShowControlError(control)) {
+      return null;
+    }
+
+    return getControlErrorMessage(control, {
+      messages: {
+        required: 'El apellido es obligatorio.',
+      },
+    });
+  });
+  readonly emailError = computed(() => {
+    this.formEvents();
+    const control = this.form.controls.email;
+    if (!shouldShowControlError(control)) {
+      return null;
+    }
+
+    return getControlErrorMessage(control, {
+      messages: {
+        required: 'El correo es obligatorio.',
+        emailFormat: 'Ingrese un correo electrónico válido.',
+      },
+    });
+  });
+  readonly roleError = computed(() => {
+    this.formEvents();
+    const control = this.form.controls.role;
+    if (!shouldShowControlError(control)) {
+      return null;
+    }
+
+    return getControlErrorMessage(control, {
+      messages: {
+        required: 'Seleccione un rol.',
+      },
+    });
+  });
+  readonly passwordError = computed(() => {
+    this.formEvents();
+    const control = this.form.controls.password;
+    if (!shouldShowPasswordError(this.shouldShowPassword, control)) {
+      return null;
+    }
+
+    return getControlErrorMessage(control, {
+      messages: {
+        required: 'La contraseña temporal es obligatoria.',
+        passwordPolicy: 'La contraseña debe cumplir con los requisitos de seguridad.',
+      },
+    });
   });
 
   get firstNameControl() {
@@ -179,9 +260,13 @@ export class UserFormComponent {
       this.passwordControl.clearValidators();
       this.passwordControl.reset('');
     } else {
-      this.passwordControl.setValidators([Validators.required, Validators.minLength(8)]);
+      this.passwordControl.setValidators([Validators.required, passwordPolicyValidator()]);
     }
 
     this.passwordControl.updateValueAndValidity();
   }
+}
+
+function shouldShowPasswordError(shouldShowPassword: boolean, control: { errors: unknown; touched: boolean; dirty: boolean }): boolean {
+  return shouldShowPassword && !!control.errors && (control.touched || control.dirty);
 }
