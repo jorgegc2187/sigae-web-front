@@ -22,6 +22,8 @@ export interface UserResponse {
   role: ApiUserRole;
   status: ApiUserStatus;
   lastAccessAt: string | null;
+  locationIds: string[];
+  locationNames: string[];
 }
 
 export interface CreateUserRequest {
@@ -30,6 +32,7 @@ export interface CreateUserRequest {
   password?: string;
   role: ApiUserRole;
   status: ApiUserStatus;
+  locationIds?: string[];
   sendInvitation: boolean;
 }
 
@@ -37,6 +40,7 @@ export interface UpdateUserRequest {
   fullName: string;
   email: string;
   role: ApiUserRole;
+  locationIds?: string[];
 }
 
 export interface UpdateUserStatusRequest {

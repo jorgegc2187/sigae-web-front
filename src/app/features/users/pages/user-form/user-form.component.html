@@ -32,7 +32,6 @@
               id="userFirstName"
               type="text"
               formControlName="firstName"
-              [disabled]="isSubmitting()"
               class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="Ej. Juan"
             />
@@ -48,7 +47,6 @@
               id="userLastName"
               type="text"
               formControlName="lastName"
-              [disabled]="isSubmitting()"
               class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="Ej. Pérez"
             />
@@ -65,7 +63,6 @@
               id="userEmail"
               type="email"
               formControlName="email"
-              [disabled]="isSubmitting()"
               class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="ejemplo@institucion.edu.pe"
               autocomplete="email"
@@ -88,7 +85,6 @@
             <select
               id="userRole"
               formControlName="role"
-              [disabled]="isSubmitting()"
               class="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 pr-8 text-sm text-base-content focus:outline-none"
             >
               <option value="" disabled>Selecciona un rol</option>
@@ -101,57 +97,75 @@
             </span>
           </app-form-field>
 
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">Ubicaciones asignadas</legend>
-
-            <div
-              #locationSearchContainer
-              class="relative flex min-h-11 w-full cursor-text flex-wrap items-center gap-2 rounded-lg border border-base-300 bg-base-100 p-1.5 shadow-sm transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary"
-            >
-              @for (location of selectedLocations(); track location.id) {
-                <span class="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200 px-2 py-1 text-xs font-medium text-base-content">
-                  {{ location.name }}
-                  <button
-                    type="button"
-                    [disabled]="isSubmitting()"
-                    class="inline-flex h-4 w-4 items-center justify-center rounded-full text-base-content/55 transition-colors hover:bg-base-content/15 hover:text-base-content"
-                    [attr.aria-label]="'Quitar ' + location.name"
-                    (click)="removeLocation(location.id)"
-                  >
-                    <span class="material-symbols-outlined text-[13px] leading-none">close</span>
-                  </button>
-                </span>
-              }
-
-              <input
-                type="text"
-                [disabled]="isSubmitting()"
-                class="h-7 min-w-[140px] flex-1 border-0 bg-transparent px-1 py-0 text-sm outline-none placeholder-shown:opacity-50"
-                placeholder="Añadir ubicación..."
-                [value]="locationQuery()"
-                (input)="onLocationInput($event)"
-                (focus)="onLocationFocus()"
-              />
-
-              @if (isLocationDropdownOpen() && filteredLocations().length > 0) {
-                <ul class="absolute left-0 top-full z-30 mt-1 max-h-52 w-72 overflow-y-auto rounded-lg border border-base-300 bg-base-100 p-1 shadow-lg">
-                  @for (location of filteredLocations(); track location.id) {
-                    <li>
-                      <button
-                        type="button"
-                        [disabled]="isSubmitting()"
-                        class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-base-200"
-                        (click)="addLocation(location)"
-                      >
-                        <span class="material-symbols-outlined text-[17px] text-base-content/45">location_on</span>
-                        {{ location.name }}
-                      </button>
-                    </li>
-                  }
-                </ul>
-              }
+          @if (usesGlobalLocationAccess()) {
+            <div class="rounded-2xl border border-primary/15 bg-primary/5 p-4">
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary">public</span>
+                <div class="space-y-1">
+                  <p class="text-sm font-semibold text-base-content">Acceso global a ubicaciones</p>
+                  <p class="text-sm leading-relaxed text-base-content/65">
+                    Este rol tiene acceso a todas las ubicaciones del sistema. No requiere asignación manual.
+                  </p>
+                </div>
+              </div>
             </div>
-          </fieldset>
+          } @else {
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">Ubicaciones asignadas</legend>
+
+              <div
+                #locationSearchContainer
+                class="relative flex min-h-11 w-full cursor-text flex-wrap items-center gap-2 rounded-lg border border-base-300 bg-base-100 p-1.5 shadow-sm transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary"
+              >
+                @for (location of selectedLocations(); track location.id) {
+                  <span class="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200 px-2 py-1 text-xs font-medium text-base-content">
+                    {{ location.name }}
+                    <button
+                      type="button"
+                      [disabled]="isSubmitting()"
+                      class="inline-flex h-4 w-4 items-center justify-center rounded-full text-base-content/55 transition-colors hover:bg-base-content/15 hover:text-base-content"
+                      [attr.aria-label]="'Quitar ' + location.name"
+                      (click)="removeLocation(location.id)"
+                    >
+                      <span class="material-symbols-outlined text-[13px] leading-none">close</span>
+                    </button>
+                  </span>
+                }
+
+                <input
+                  type="text"
+                  [disabled]="isSubmitting()"
+                  class="h-7 min-w-[140px] flex-1 border-0 bg-transparent px-1 py-0 text-sm outline-none placeholder-shown:opacity-50"
+                  placeholder="Añadir ubicación..."
+                  [value]="locationQuery()"
+                  (input)="onLocationInput($event)"
+                  (focus)="onLocationFocus()"
+                />
+
+                @if (isLocationDropdownOpen() && filteredLocations().length > 0) {
+                  <ul class="absolute left-0 top-full z-30 mt-1 max-h-52 w-72 overflow-y-auto rounded-lg border border-base-300 bg-base-100 p-1 shadow-lg">
+                    @for (location of filteredLocations(); track location.id) {
+                      <li>
+                        <button
+                          type="button"
+                          [disabled]="isSubmitting()"
+                          class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-base-200"
+                          (click)="addLocation(location)"
+                        >
+                          <span class="material-symbols-outlined text-[17px] text-base-content/45">location_on</span>
+                          {{ location.name }}
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              @if (locationAssignmentError()) {
+                <p class="mt-2 text-sm text-error">{{ locationAssignmentError() }}</p>
+              }
+            </fieldset>
+          }
         </div>
 
         <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
@@ -192,7 +206,6 @@
                 id="userPassword"
                 type="password"
                 formControlName="password"
-                [disabled]="isSubmitting()"
                 class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
                 placeholder="Debe cumplir con la política de seguridad"
                 autocomplete="new-password"

@@ -44,7 +44,8 @@ export class UsersService {
       initials: this.buildInitials(response.fullName),
       avatarColor: this.avatarColor(response.role),
       role: this.toUiRole(response.role),
-      locations: response.role === 'ADMINISTRADOR' ? null : 'Pendiente de asignación',
+      locations:
+        response.role === 'ADMINISTRADOR' ? null : this.summarizeLocations(response.locationNames),
       status: this.toUiStatus(response.status),
       lastAccess: this.formatLastAccess(response.lastAccessAt),
     };
@@ -101,5 +102,17 @@ export class UsersService {
       month: 'short',
       year: 'numeric',
     }).format(new Date(value));
+  }
+
+  private summarizeLocations(locationNames: string[]): string {
+    if (locationNames.length === 0) {
+      return 'Sin ubicaciones asignadas';
+    }
+
+    if (locationNames.length === 1) {
+      return locationNames[0];
+    }
+
+    return `${locationNames[0]}, +${locationNames.length - 1} más`;
   }
 }

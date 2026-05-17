@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -66,11 +72,19 @@ export class UserFormComponent {
     role: this.fb.control<UserRole | ''>('', [Validators.required]),
     sendInvitation: [true],
     password: [''],
+    locationIds: this.fb.control<string[]>([]),
+  }, {
+    validators: [locationAssignmentValidator],
   });
   private readonly formEvents = toSignal(this.form.events, { initialValue: null });
   private readonly passwordValue = toSignal(this.form.controls.password.valueChanges, {
     initialValue: this.form.controls.password.value,
   });
+  private readonly roleValue = toSignal(this.form.controls.role.valueChanges, {
+    initialValue: this.form.controls.role.value,
+  });
+
+  readonly usesGlobalLocationAccess = computed(() => this.roleValue() === 'Administrador');
 
   readonly filteredLocations = computed(() => {
     const query = this.locationQuery().trim().toLowerCase();
@@ -136,6 +150,20 @@ export class UserFormComponent {
       },
     });
   });
+  readonly locationAssignmentError = computed(() => {
+    this.formEvents();
+    if (this.usesGlobalLocationAccess()) {
+      return null;
+    }
+
+    if (!this.form.errors?.['locationAssignmentRequired']) {
+      return null;
+    }
+
+    return this.form.touched || this.form.dirty
+      ? 'Asigne al menos una ubicación para este rol.'
+      : null;
+  });
   readonly passwordError = computed(() => {
     this.formEvents();
     const control = this.form.controls.password;
@@ -175,8 +203,30 @@ export class UserFormComponent {
     return this.form.controls.password;
   }
 
+  get locationIdsControl() {
+    return this.form.controls.locationIds;
+  }
+
   get shouldShowPassword() {
     return this.sendInvitationControl.value === false;
+  }
+
+  constructor() {
+    effect(() => {
+      if (this.usesGlobalLocationAccess()) {
+        this.isLocationDropdownOpen.set(false);
+        this.locationQuery.set('');
+      }
+    });
+
+    effect(() => {
+      if (this.isSubmitting()) {
+        this.form.disable({ emitEvent: false });
+        return;
+      }
+
+      this.form.enable({ emitEvent: false });
+    });
   }
 
   onLocationInput(event: Event): void {
@@ -201,6 +251,7 @@ export class UserFormComponent {
     this.selectedLocations.update((locations) => [...locations, location]);
     this.locationQuery.set('');
     this.isLocationDropdownOpen.set(false);
+    this.syncLocationAssignments();
   }
 
   removeLocation(locationId: string): void {
@@ -210,6 +261,7 @@ export class UserFormComponent {
     this.selectedLocations.update((locations) =>
       locations.filter((location) => location.id !== locationId),
     );
+    this.syncLocationAssignments();
   }
 
   onSendInvitationChange(checked: boolean): void {
@@ -253,6 +305,7 @@ export class UserFormComponent {
         role: this.usersService.toApiRole(value.role as UserRole),
         status: 'ACTIVE' as const,
         sendInvitation: value.sendInvitation,
+        ...(this.usesGlobalLocationAccess() ? {} : { locationIds: value.locationIds }),
         ...(value.sendInvitation ? {} : { password: value.password }),
       };
 
@@ -289,8 +342,26 @@ export class UserFormComponent {
 
     this.passwordControl.updateValueAndValidity();
   }
+
+  private syncLocationAssignments(): void {
+    this.locationIdsControl.setValue(this.selectedLocations().map((location) => location.id));
+    this.locationIdsControl.markAsDirty();
+    this.locationIdsControl.markAsTouched();
+    this.form.updateValueAndValidity();
+  }
 }
 
 function shouldShowPasswordError(shouldShowPassword: boolean, control: { errors: unknown; touched: boolean; dirty: boolean }): boolean {
   return shouldShowPassword && !!control.errors && (control.touched || control.dirty);
+}
+
+function locationAssignmentValidator(control: AbstractControl): ValidationErrors | null {
+  const role = control.get('role')?.value as UserRole | '' | undefined;
+  const locationIds = control.get('locationIds')?.value as string[] | undefined;
+
+  if (role === 'Administrador' || !role) {
+    return null;
+  }
+
+  return locationIds && locationIds.length > 0 ? null : { locationAssignmentRequired: true };
 }
