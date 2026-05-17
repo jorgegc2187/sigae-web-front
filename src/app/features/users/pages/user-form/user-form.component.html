@@ -32,6 +32,7 @@
               id="userFirstName"
               type="text"
               formControlName="firstName"
+              [disabled]="isSubmitting()"
               class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="Ej. Juan"
             />
@@ -47,6 +48,7 @@
               id="userLastName"
               type="text"
               formControlName="lastName"
+              [disabled]="isSubmitting()"
               class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="Ej. Pérez"
             />
@@ -63,6 +65,7 @@
               id="userEmail"
               type="email"
               formControlName="email"
+              [disabled]="isSubmitting()"
               class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
               placeholder="ejemplo@institucion.edu.pe"
               autocomplete="email"
@@ -85,6 +88,7 @@
             <select
               id="userRole"
               formControlName="role"
+              [disabled]="isSubmitting()"
               class="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 pr-8 text-sm text-base-content focus:outline-none"
             >
               <option value="" disabled>Selecciona un rol</option>
@@ -109,6 +113,7 @@
                   {{ location.name }}
                   <button
                     type="button"
+                    [disabled]="isSubmitting()"
                     class="inline-flex h-4 w-4 items-center justify-center rounded-full text-base-content/55 transition-colors hover:bg-base-content/15 hover:text-base-content"
                     [attr.aria-label]="'Quitar ' + location.name"
                     (click)="removeLocation(location.id)"
@@ -120,6 +125,7 @@
 
               <input
                 type="text"
+                [disabled]="isSubmitting()"
                 class="h-7 min-w-[140px] flex-1 border-0 bg-transparent px-1 py-0 text-sm outline-none placeholder-shown:opacity-50"
                 placeholder="Añadir ubicación..."
                 [value]="locationQuery()"
@@ -133,6 +139,7 @@
                     <li>
                       <button
                         type="button"
+                        [disabled]="isSubmitting()"
                         class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-base-200"
                         (click)="addLocation(location)"
                       >
@@ -158,6 +165,7 @@
               <app-toggle-switch
                 ariaLabel="Enviar invitación por correo"
                 [checked]="sendInvitationControl.value"
+                [disabled]="isSubmitting()"
                 (checkedChange)="onSendInvitationChange($event)"
               />
               <span class="ml-3 text-sm font-medium text-base-content">
@@ -184,6 +192,7 @@
                 id="userPassword"
                 type="password"
                 formControlName="password"
+                [disabled]="isSubmitting()"
                 class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
                 placeholder="Debe cumplir con la política de seguridad"
                 autocomplete="new-password"
@@ -230,6 +239,33 @@
 </div>
 
 <div class="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-base-200 bg-base-100 p-4 px-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:left-[240px] md:px-6">
-  <app-action-button label="Cancelar" variant="neutral" routerLink="/settings/users" />
-  <app-action-button label="Crear Usuario" icon="save" className="shadow-sm" (clicked)="onSubmit()" />
+  <app-action-button label="Cancelar" variant="neutral" routerLink="/settings/users" [disabled]="isSubmitting()" />
+  <app-action-button
+    label="Crear Usuario"
+    icon="save"
+    className="shadow-sm"
+    [disabled]="isSubmitting()"
+    [loading]="isSubmitting()"
+    loadingLabel="Creando usuario..."
+    (clicked)="onSubmit()"
+  />
 </div>
+
+@if (isSubmitting()) {
+  <div
+    class="fixed inset-0 z-[60] flex items-center justify-center bg-base-content/35 p-4 backdrop-blur-sm"
+    role="status"
+    aria-live="polite"
+    aria-label="Creando usuario"
+  >
+    <div class="w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-8 text-center shadow-xl">
+      <div class="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+        <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
+      </div>
+      <h3 class="text-xl font-bold text-base-content">Creando usuario</h3>
+      <p class="mt-2 text-sm leading-relaxed text-base-content/65">
+        Estamos guardando la información y esperando la confirmación del servidor.
+      </p>
+    </div>
+  </div>
+}

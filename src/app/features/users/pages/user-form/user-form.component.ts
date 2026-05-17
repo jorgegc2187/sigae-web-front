@@ -57,6 +57,7 @@ export class UserFormComponent {
   readonly selectedLocations = signal<LocationOption[]>([]);
   readonly locationQuery = signal('');
   readonly isLocationDropdownOpen = signal(false);
+  readonly isSubmitting = signal(false);
 
   readonly form = this.fb.group({
     firstName: ['', [Validators.required]],
@@ -179,27 +180,42 @@ export class UserFormComponent {
   }
 
   onLocationInput(event: Event): void {
+    if (this.isSubmitting()) {
+      return;
+    }
     this.locationQuery.set((event.target as HTMLInputElement).value);
     this.isLocationDropdownOpen.set(true);
   }
 
   onLocationFocus(): void {
+    if (this.isSubmitting()) {
+      return;
+    }
     this.isLocationDropdownOpen.set(true);
   }
 
   addLocation(location: LocationOption): void {
+    if (this.isSubmitting()) {
+      return;
+    }
     this.selectedLocations.update((locations) => [...locations, location]);
     this.locationQuery.set('');
     this.isLocationDropdownOpen.set(false);
   }
 
   removeLocation(locationId: string): void {
+    if (this.isSubmitting()) {
+      return;
+    }
     this.selectedLocations.update((locations) =>
       locations.filter((location) => location.id !== locationId),
     );
   }
 
   onSendInvitationChange(checked: boolean): void {
+    if (this.isSubmitting()) {
+      return;
+    }
     this.sendInvitationControl.setValue(checked);
     this.syncPasswordValidators(checked);
   }
@@ -216,6 +232,10 @@ export class UserFormComponent {
   }
 
   async onSubmit(): Promise<void> {
+    if (this.isSubmitting()) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -225,6 +245,8 @@ export class UserFormComponent {
     const fullName = `${value.firstName.trim()} ${value.lastName.trim()}`.trim();
 
     try {
+      this.isSubmitting.set(true);
+      this.isLocationDropdownOpen.set(false);
       const payload = {
         fullName,
         email: value.email,
@@ -252,6 +274,8 @@ export class UserFormComponent {
             : 'No se pudo crear el usuario.';
 
       this.notifications.error({ message: backendMessage });
+    } finally {
+      this.isSubmitting.set(false);
     }
   }
 
