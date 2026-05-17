@@ -10,7 +10,9 @@ import {
   User,
   UserResponse,
   UserRole,
+  UserRoleResponse,
   UserStatus,
+  UserStatusResponse,
 } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -37,15 +39,17 @@ export class UsersService {
   }
 
   toUser(response: UserResponse): User {
+    const role = this.toUiRole(response.role);
+
     return {
       id: response.id,
       name: response.fullName,
       email: response.email,
       initials: this.buildInitials(response.fullName),
-      avatarColor: this.avatarColor(response.role),
-      role: this.toUiRole(response.role),
+      avatarColor: this.avatarColor(role),
+      role,
       locations:
-        response.role === 'ADMINISTRADOR' ? null : this.summarizeLocations(response.locationNames),
+        role === 'Administrador' ? null : this.summarizeLocations(response.locationNames),
       status: this.toUiStatus(response.status),
       lastAccess: this.formatLastAccess(response.lastAccessAt),
     };
@@ -72,21 +76,24 @@ export class UsersService {
     return 'INACTIVE';
   }
 
-  private toUiRole(role: ApiUserRole): UserRole {
-    const roles: Record<ApiUserRole, UserRole> = {
-      ADMINISTRADOR: 'Administrador',
-      ENCARGADO: 'Encargado',
-      SOLO_LECTURA: 'Solo Lectura',
-    };
-    return roles[role];
+  private toUiRole(role: UserRoleResponse): UserRole {
+    if (role === 'ADMINISTRADOR' || role === 'Administrador') {
+      return 'Administrador';
+    }
+
+    if (role === 'ENCARGADO' || role === 'Encargado') {
+      return 'Encargado';
+    }
+
+    return 'Solo Lectura';
   }
 
-  private toUiStatus(status: ApiUserStatus): UserStatus {
-    if (status === 'ACTIVE') {
+  private toUiStatus(status: UserStatusResponse): UserStatus {
+    if (status === 'ACTIVE' || status === 'Activo') {
       return 'Activo';
     }
 
-    if (status === 'PENDING') {
+    if (status === 'PENDING' || status === 'Pendiente') {
       return 'Pendiente';
     }
 
@@ -102,9 +109,9 @@ export class UsersService {
       .join('');
   }
 
-  private avatarColor(role: ApiUserRole): string {
-    if (role === 'ADMINISTRADOR') return 'bg-primary';
-    if (role === 'ENCARGADO') return 'bg-secondary';
+  private avatarColor(role: UserRole): string {
+    if (role === 'Administrador') return 'bg-primary';
+    if (role === 'Encargado') return 'bg-secondary';
     return 'bg-neutral';
   }
 

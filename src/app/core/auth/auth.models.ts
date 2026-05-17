@@ -1,4 +1,7 @@
 export type UserRole = 'Administrador' | 'Encargado' | 'Solo Lectura';
+export type UserStatus = 'Activo' | 'Inactivo' | 'Pendiente';
+export type ApiUserRole = 'ADMINISTRADOR' | 'ENCARGADO' | 'SOLO_LECTURA';
+export type ApiUserStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING';
 export type SessionStatus = 'unknown' | 'authenticated' | 'anonymous';
 
 export interface AuthUser {
@@ -6,7 +9,16 @@ export interface AuthUser {
   fullName: string;
   email: string;
   role: UserRole;
-  status?: 'Activo' | 'Inactivo' | 'Pendiente';
+  status?: UserStatus;
+  locationIds?: string[];
+}
+
+export interface AuthUserResponsePayload {
+  id: string;
+  fullName: string;
+  email: string;
+  role: UserRole | ApiUserRole;
+  status?: UserStatus | ApiUserStatus;
   locationIds?: string[];
 }
 
@@ -30,5 +42,5 @@ export interface AuthResponse {
   refreshToken: string;
   tokenType: string;
   expiresIn: number;
-  user: AuthUser;
+  user: AuthUserResponsePayload;
 }

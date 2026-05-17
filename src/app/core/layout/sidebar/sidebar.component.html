@@ -83,24 +83,26 @@
       <!-- Sub-ítems -->
       @if (isSettingsOpen()) {
         <div class="ml-4 mt-1 space-y-0.5 border-l-2 border-base-300 pl-2">
-          <a
-            routerLink="/settings/users"
-            routerLinkActive="!text-primary !bg-primary/5 font-semibold"
-            (click)="closeOnNavigate()"
-            class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
-          >
-            <span class="material-symbols-outlined mr-3 !text-[16px]">people_alt</span>
-            Usuarios
-          </a>
-          <a
-            routerLink="/settings/categories"
-            routerLinkActive="!text-primary !bg-primary/5 font-semibold"
-            (click)="closeOnNavigate()"
-            class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
-          >
-            <span class="material-symbols-outlined mr-3 !text-[16px]">category</span>
-            Categorías y Tipos
-          </a>
+          @if (isAdministrator()) {
+            <a
+              routerLink="/settings/users"
+              routerLinkActive="!text-primary !bg-primary/5 font-semibold"
+              (click)="closeOnNavigate()"
+              class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
+            >
+              <span class="material-symbols-outlined mr-3 !text-[16px]">people_alt</span>
+              Usuarios
+            </a>
+            <a
+              routerLink="/settings/categories"
+              routerLinkActive="!text-primary !bg-primary/5 font-semibold"
+              (click)="closeOnNavigate()"
+              class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
+            >
+              <span class="material-symbols-outlined mr-3 !text-[16px]">category</span>
+              Categorías y Tipos
+            </a>
+          }
           <a
             routerLink="/settings/locations"
             routerLinkActive="!text-primary !bg-primary/5 font-semibold"
@@ -110,15 +112,17 @@
             <span class="material-symbols-outlined mr-3 !text-[16px]">location_on</span>
             Ubicaciones
           </a>
-          <a
-            routerLink="/settings/suppliers"
-            routerLinkActive="!text-primary !bg-primary/5 font-semibold"
-            (click)="closeOnNavigate()"
-            class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
-          >
-            <span class="material-symbols-outlined mr-3 !text-[16px]">storefront</span>
-            Proveedores
-          </a>
+          @if (isAdministrator()) {
+            <a
+              routerLink="/settings/suppliers"
+              routerLinkActive="!text-primary !bg-primary/5 font-semibold"
+              (click)="closeOnNavigate()"
+              class="flex items-center px-3 py-2 text-sm text-base-content/60 hover:bg-base-300 hover:text-base-content transition-all duration-150 rounded-lg"
+            >
+              <span class="material-symbols-outlined mr-3 !text-[16px]">storefront</span>
+              Proveedores
+            </a>
+          }
         </div>
       }
     </div>

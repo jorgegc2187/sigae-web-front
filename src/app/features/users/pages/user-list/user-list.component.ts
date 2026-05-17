@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
@@ -14,19 +15,49 @@ import { UsersService } from '../../services/users.service';
   selector: 'app-user-list',
   imports: [SearchInputComponent, ActionButtonComponent, DesktopPaginationComponent, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown.escape)': 'closeActionsMenu()',
+  },
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent {
+  private readonly authService = inject(AuthService);
   private readonly notifications = inject(NotificationService);
   private readonly usersService = inject(UsersService);
   private readonly usersResource = this.usersService.listResource();
+  private readonly statusDialog = viewChild<ElementRef<HTMLDialogElement>>('statusDialog');
 
   searchQuery = signal('');
   selectedRole = signal<UserRole | ''>('');
   currentPage = signal(1);
+  openActionsMenuUserId = signal<string | null>(null);
+  pendingStatusActionUser = signal<User | null>(null);
   readonly pageSize = 10;
   readonly isLoading = computed(() => this.usersResource.isLoading());
+  readonly currentUser = this.authService.currentUser;
   readonly users = computed(() => this.usersResource.value().map((user) => this.usersService.toUser(user)));
+  readonly activeAdministratorIds = computed(() =>
+    new Set(
+      this.users()
+        .filter((user) => user.role === 'Administrador' && user.status === 'Activo')
+        .map((user) => user.id),
+    ),
+  );
+  readonly pendingStatusActionLabel = computed(() =>
+    this.pendingStatusActionUser()?.status === 'Activo' ? 'Desactivar usuario' : 'Activar usuario',
+  );
+  readonly pendingStatusActionMessage = computed(() => {
+    const user = this.pendingStatusActionUser();
+    if (!user) {
+      return '';
+    }
+
+    if (user.status === 'Activo') {
+      return `El usuario ${user.name} no podrá iniciar sesión hasta que vuelva a activarse.`;
+    }
+
+    return `El usuario ${user.name} recuperará el acceso al sistema inmediatamente.`;
+  });
 
   filteredUsers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -92,17 +123,132 @@ export class UserListComponent {
     this.currentPage.set(1);
   }
 
-  onEdit(userId: string) {
-    console.log('Editar usuario:', userId);
+  toggleActionsMenu(userId: string) {
+    this.openActionsMenuUserId.update((currentUserId) => (currentUserId === userId ? null : userId));
+  }
+
+  closeActionsMenu() {
+    this.openActionsMenuUserId.set(null);
+  }
+
+  isActionsMenuOpen(userId: string): boolean {
+    return this.openActionsMenuUserId() === userId;
+  }
+
+  isCurrentUser(user: User): boolean {
+    return this.currentUser()?.id === user.id;
+  }
+
+  isLastActiveAdministrator(user: User): boolean {
+    return (
+      user.role === 'Administrador' &&
+      user.status === 'Activo' &&
+      this.activeAdministratorIds().size === 1 &&
+      this.activeAdministratorIds().has(user.id)
+    );
+  }
+
+  canToggleStatus(user: User): boolean {
+    if (user.status === 'Pendiente') {
+      return false;
+    }
+
+    if (user.status === 'Activo' && (this.isCurrentUser(user) || this.isLastActiveAdministrator(user))) {
+      return false;
+    }
+
+    return true;
+  }
+
+  getStatusRestrictionMessage(user: User): string | null {
+    if (user.status === 'Pendiente') {
+      return 'Los usuarios pendientes completan su activación desde el enlace de invitación.';
+    }
+
+    if (this.isCurrentUser(user)) {
+      return 'No puede desactivarse a sí mismo.';
+    }
+
+    if (this.isLastActiveAdministrator(user)) {
+      return 'No se puede desactivar al último administrador activo.';
+    }
+
+    return null;
+  }
+
+  openStatusDialog(user: User) {
+    this.pendingStatusActionUser.set(user);
+    const dialog = this.statusDialog()?.nativeElement;
+    if (!dialog?.open) {
+      dialog?.showModal();
+    }
+  }
+
+  closeStatusDialog() {
+    this.pendingStatusActionUser.set(null);
+    const dialog = this.statusDialog()?.nativeElement;
+    if (dialog?.open) {
+      dialog.close();
+    }
+  }
+
+  onStatusDialogClose() {
+    this.pendingStatusActionUser.set(null);
+  }
+
+  onEdit(user: User) {
+    this.closeActionsMenu();
+    console.log('Editar usuario:', user.id);
     this.notifications.info({ message: 'Edición de usuario pendiente de conectar.' });
   }
 
+  onResetPassword(user: User) {
+    this.closeActionsMenu();
+    this.notifications.info({
+      message: `Restablecimiento de contraseña para ${user.name} pendiente de conectar.`,
+    });
+  }
+
+  onViewActivity(user: User) {
+    this.closeActionsMenu();
+    this.notifications.info({
+      message: `Consulta de actividad para ${user.name} pendiente de conectar.`,
+    });
+  }
+
   onToggleStatus(user: User) {
-    if (user.status === 'Pendiente') {
+    const restrictionMessage = this.getStatusRestrictionMessage(user);
+    if (restrictionMessage) {
+      this.closeActionsMenu();
+      this.notifications.warning({ message: restrictionMessage });
       return;
     }
 
-    const nextStatus: UserStatus = user.status === 'Activo' ? 'Inactivo' : 'Activo';
+    if (user.status === 'Activo') {
+      this.closeActionsMenu();
+      this.openStatusDialog(user);
+      return;
+    }
+
+    this.performStatusUpdate(user, 'Activo');
+  }
+
+  confirmStatusChange() {
+    const user = this.pendingStatusActionUser();
+    if (!user) {
+      return;
+    }
+
+    this.performStatusUpdate(user, user.status === 'Activo' ? 'Inactivo' : 'Activo');
+  }
+
+  private performStatusUpdate(user: User, nextStatus: UserStatus) {
+    this.closeActionsMenu();
+    const dialog = this.statusDialog()?.nativeElement;
+    if (dialog?.open) {
+      dialog.close();
+    }
+    this.pendingStatusActionUser.set(null);
     this.usersService.updateStatus(user.id, this.usersService.toApiStatus(nextStatus)).subscribe({
       next: () => {
         this.usersResource.reload();
@@ -113,8 +259,11 @@ export class UserListComponent {
               : `Usuario ${user.name} activado correctamente.`,
         });
       },
-      error: () => {
-        this.notifications.error({ message: 'No se pudo actualizar el estado del usuario.' });
+      error: (error) => {
+        const message =
+          error?.error?.message ??
+          'No se pudo actualizar el estado del usuario.';
+        this.notifications.error({ message });
       },
     });
   }

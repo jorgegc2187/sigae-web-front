@@ -6,11 +6,15 @@ import { APP_CONFIG } from '../config/app.tokens';
 import {
   AuthResponse,
   AuthUser,
+  AuthUserResponsePayload,
   ForgotPasswordPayload,
   LoginCredentials,
   ResetPasswordPayload,
   SessionStatus,
+  ApiUserRole,
+  ApiUserStatus,
   UserRole,
+  UserStatus,
 } from './auth.models';
 
 const ACCESS_TOKEN_KEY = 'sigae.accessToken';
@@ -147,10 +151,11 @@ export class AuthService {
         this.persistSession(response);
 
         const user = await firstValueFrom(
-          this.http.get<AuthUser>(`${this.appConfig.apiUrl}/auth/me`),
+          this.http.get<AuthUserResponsePayload>(`${this.appConfig.apiUrl}/auth/me`),
         );
-        localStorage.setItem(USER_KEY, JSON.stringify(user));
-        this.userState.set(user);
+        const normalizedUser = this.normalizeUser(user);
+        localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+        this.userState.set(normalizedUser);
         this.sessionStatusState.set('authenticated');
         return true;
       } catch {
@@ -166,12 +171,13 @@ export class AuthService {
   }
 
   private persistSession(response: AuthResponse): void {
+    const normalizedUser = this.normalizeUser(response.user);
     localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
     this.accessTokenState.set(response.accessToken);
     this.refreshTokenState.set(response.refreshToken);
-    this.userState.set(response.user);
+    this.userState.set(normalizedUser);
   }
 
   private clearSession(): void {
@@ -188,10 +194,42 @@ export class AuthService {
     if (!rawUser) return null;
 
     try {
-      return JSON.parse(rawUser) as AuthUser;
+      return this.normalizeUser(JSON.parse(rawUser) as AuthUserResponsePayload);
     } catch {
       localStorage.removeItem(USER_KEY);
       return null;
     }
+  }
+
+  private normalizeUser(user: AuthUserResponsePayload): AuthUser {
+    return {
+      ...user,
+      role: this.normalizeRole(user.role),
+      status: user.status ? this.normalizeStatus(user.status) : undefined,
+    };
+  }
+
+  private normalizeRole(role: UserRole | ApiUserRole): UserRole {
+    if (role === 'ADMINISTRADOR' || role === 'Administrador') {
+      return 'Administrador';
+    }
+
+    if (role === 'ENCARGADO' || role === 'Encargado') {
+      return 'Encargado';
+    }
+
+    return 'Solo Lectura';
+  }
+
+  private normalizeStatus(status: UserStatus | ApiUserStatus): UserStatus {
+    if (status === 'ACTIVE' || status === 'Activo') {
+      return 'Activo';
+    }
+
+    if (status === 'PENDING' || status === 'Pendiente') {
+      return 'Pendiente';
+    }
+
+    return 'Inactivo';
   }
 }

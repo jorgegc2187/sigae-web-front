@@ -2,6 +2,8 @@ export type UserRole = 'Administrador' | 'Encargado' | 'Solo Lectura';
 export type UserStatus = 'Activo' | 'Inactivo' | 'Pendiente';
 export type ApiUserRole = 'ADMINISTRADOR' | 'ENCARGADO' | 'SOLO_LECTURA';
 export type ApiUserStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING';
+export type UserRoleResponse = UserRole | ApiUserRole;
+export type UserStatusResponse = UserStatus | ApiUserStatus;
 
 export interface User {
   id: string;
@@ -19,8 +21,8 @@ export interface UserResponse {
   id: string;
   fullName: string;
   email: string;
-  role: ApiUserRole;
-  status: ApiUserStatus;
+  role: UserRoleResponse;
+  status: UserStatusResponse;
   lastAccessAt: string | null;
   locationIds: string[];
   locationNames: string[];
