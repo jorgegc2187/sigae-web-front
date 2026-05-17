@@ -1,7 +1,7 @@
 export type UserRole = 'Administrador' | 'Encargado' | 'Solo Lectura';
-export type UserStatus = 'Activo' | 'Inactivo';
+export type UserStatus = 'Activo' | 'Inactivo' | 'Pendiente';
 export type ApiUserRole = 'ADMINISTRADOR' | 'ENCARGADO' | 'SOLO_LECTURA';
-export type ApiUserStatus = 'ACTIVE' | 'INACTIVE';
+export type ApiUserStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING';
 
 export interface User {
   id: string;
@@ -31,7 +31,6 @@ export interface CreateUserRequest {
   email: string;
   password?: string;
   role: ApiUserRole;
-  status: ApiUserStatus;
   locationIds?: string[];
   sendInvitation: boolean;
 }

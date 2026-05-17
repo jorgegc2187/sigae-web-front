@@ -303,7 +303,6 @@ export class UserFormComponent {
         fullName,
         email: value.email,
         role: this.usersService.toApiRole(value.role as UserRole),
-        status: 'ACTIVE' as const,
         sendInvitation: value.sendInvitation,
         ...(this.usesGlobalLocationAccess() ? {} : { locationIds: value.locationIds }),
         ...(value.sendInvitation ? {} : { password: value.password }),

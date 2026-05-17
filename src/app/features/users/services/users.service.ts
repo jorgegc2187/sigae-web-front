@@ -61,7 +61,15 @@ export class UsersService {
   }
 
   toApiStatus(status: UserStatus): ApiUserStatus {
-    return status === 'Activo' ? 'ACTIVE' : 'INACTIVE';
+    if (status === 'Activo') {
+      return 'ACTIVE';
+    }
+
+    if (status === 'Pendiente') {
+      return 'PENDING';
+    }
+
+    return 'INACTIVE';
   }
 
   private toUiRole(role: ApiUserRole): UserRole {
@@ -74,7 +82,15 @@ export class UsersService {
   }
 
   private toUiStatus(status: ApiUserStatus): UserStatus {
-    return status === 'ACTIVE' ? 'Activo' : 'Inactivo';
+    if (status === 'ACTIVE') {
+      return 'Activo';
+    }
+
+    if (status === 'PENDING') {
+      return 'Pendiente';
+    }
+
+    return 'Inactivo';
   }
 
   private buildInitials(fullName: string): string {

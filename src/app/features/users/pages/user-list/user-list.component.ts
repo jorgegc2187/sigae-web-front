@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
+import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import {
@@ -12,7 +12,7 @@ import { UsersService } from '../../services/users.service';
 
 @Component({
   selector: 'app-user-list',
-  imports: [SearchInputComponent, ActionButtonComponent, DataListingComponent, StatusBadgeComponent],
+  imports: [SearchInputComponent, ActionButtonComponent, DesktopPaginationComponent, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-list.component.html',
 })
@@ -26,11 +26,12 @@ export class UserListComponent {
   currentPage = signal(1);
   readonly pageSize = 10;
   readonly isLoading = computed(() => this.usersResource.isLoading());
+  readonly users = computed(() => this.usersResource.value().map((user) => this.usersService.toUser(user)));
 
   filteredUsers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const role = this.selectedRole();
-    const users = this.usersResource.value().map((user) => this.usersService.toUser(user));
+    const users = this.users();
 
     return users.filter((u) => {
       const matchesQuery =
@@ -60,6 +61,17 @@ export class UserListComponent {
     return `Mostrando ${start}-${end} de ${total} usuarios`;
   });
 
+  constructor() {
+    effect(() => {
+      const totalPages = this.totalPages();
+      const currentPage = this.currentPage();
+
+      if (currentPage > totalPages) {
+        this.currentPage.set(totalPages);
+      }
+    });
+  }
+
   onSearch(value: string) {
     this.searchQuery.set(value);
     this.currentPage.set(1);
@@ -74,12 +86,22 @@ export class UserListComponent {
     this.currentPage.set(page);
   }
 
+  clearFilters() {
+    this.searchQuery.set('');
+    this.selectedRole.set('');
+    this.currentPage.set(1);
+  }
+
   onEdit(userId: string) {
     console.log('Editar usuario:', userId);
     this.notifications.info({ message: 'Edición de usuario pendiente de conectar.' });
   }
 
   onToggleStatus(user: User) {
+    if (user.status === 'Pendiente') {
+      return;
+    }
+
     const nextStatus: UserStatus = user.status === 'Activo' ? 'Inactivo' : 'Activo';
     this.usersService.updateStatus(user.id, this.usersService.toApiStatus(nextStatus)).subscribe({
       next: () => {
@@ -107,6 +129,14 @@ export class UserListComponent {
   }
 
   getStatusBadgeTone(status: UserStatus): StatusBadgeTone {
-    return status === 'Activo' ? 'success' : 'neutral';
+    if (status === 'Activo') {
+      return 'success';
+    }
+
+    if (status === 'Pendiente') {
+      return 'warning';
+    }
+
+    return 'neutral';
   }
 }

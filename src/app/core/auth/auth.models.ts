@@ -6,7 +6,7 @@ export interface AuthUser {
   fullName: string;
   email: string;
   role: UserRole;
-  status?: 'Activo' | 'Inactivo';
+  status?: 'Activo' | 'Inactivo' | 'Pendiente';
   locationIds?: string[];
 }
 
