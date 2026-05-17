@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -18,7 +18,7 @@ import {
   passwordPolicyValidator,
 } from '../../../../shared/validators/password-policy.validator';
 
-type ResetPasswordState = 'idle' | 'invalid' | 'success';
+type ResetPasswordState = 'checking' | 'idle' | 'invalid' | 'success';
 
 @Component({
   selector: 'app-reset-password',
@@ -32,13 +32,15 @@ export class ResetPasswordComponent {
   private readonly appConfig = inject(APP_CONFIG);
 
   readonly token = input('');
+  private readonly normalizedToken = computed(() => this.token()?.trim() ?? '');
   readonly appName = this.appConfig.appName;
   readonly isSubmitting = signal(false);
   readonly showNewPassword = signal(false);
   readonly showConfirmPassword = signal(false);
   readonly submissionError = signal<string | null>(null);
   readonly invalidMessage = signal<string | null>(null);
-  private readonly resetState = signal<ResetPasswordState>('idle');
+  private readonly resetState = signal<ResetPasswordState>('checking');
+  private tokenValidationRequestId = 0;
 
   readonly form = this.fb.group(
     {
@@ -56,9 +58,13 @@ export class ResetPasswordComponent {
 
   readonly passwordRequirements = computed(() => evaluatePasswordPolicy(this.newPasswordValue()));
 
-  readonly viewState = computed<'form' | 'invalid' | 'success'>(() => {
-    if (!this.token().trim()) {
+  readonly viewState = computed<'checking' | 'form' | 'invalid' | 'success'>(() => {
+    if (!this.normalizedToken()) {
       return 'invalid';
+    }
+
+    if (this.resetState() === 'checking') {
+      return 'checking';
     }
 
     if (this.resetState() === 'invalid') {
@@ -74,7 +80,7 @@ export class ResetPasswordComponent {
 
   readonly invalidStateMessage = computed(() =>
     this.invalidMessage() ??
-    (this.token().trim()
+    (this.normalizedToken()
       ? 'El enlace de recuperación es inválido o ya expiró. Solicita uno nuevo para continuar.'
       : 'El enlace de recuperación no es válido o está incompleto. Solicita uno nuevo para continuar.'),
   );
@@ -108,6 +114,25 @@ export class ResetPasswordComponent {
     return getGroupErrorMessage(this.form, 'fieldsMismatch', 'Las contraseñas no coinciden.');
   });
 
+  constructor() {
+    effect(() => {
+      const token = this.normalizedToken();
+      this.submissionError.set(null);
+
+      if (!token) {
+        this.invalidMessage.set(null);
+        this.resetState.set('invalid');
+        return;
+      }
+
+      const requestId = ++this.tokenValidationRequestId;
+      this.resetState.set('checking');
+      this.invalidMessage.set(null);
+
+      void this.validateToken(token, requestId);
+    });
+  }
+
   toggleNewPasswordVisibility(): void {
     this.showNewPassword.update((value) => !value);
   }
@@ -119,8 +144,8 @@ export class ResetPasswordComponent {
   async onSubmit(): Promise<void> {
     this.form.markAllAsTouched();
 
-    if (this.form.invalid || !this.token().trim()) {
-      if (!this.token().trim()) {
+    if (this.form.invalid || !this.normalizedToken() || this.resetState() !== 'idle') {
+      if (!this.normalizedToken() || this.resetState() === 'checking') {
         this.resetState.set('invalid');
       }
       return;
@@ -132,7 +157,7 @@ export class ResetPasswordComponent {
     try {
       const values = this.form.getRawValue();
       await this.auth.resetPassword({
-        token: this.token(),
+        token: this.normalizedToken(),
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
@@ -153,6 +178,28 @@ export class ResetPasswordComponent {
       }
     } finally {
       this.isSubmitting.set(false);
+    }
+  }
+
+  private async validateToken(token: string, requestId: number): Promise<void> {
+    try {
+      await this.auth.validateResetPasswordToken(token);
+      if (requestId !== this.tokenValidationRequestId) {
+        return;
+      }
+
+      this.resetState.set('idle');
+    } catch (error) {
+      if (requestId !== this.tokenValidationRequestId) {
+        return;
+      }
+
+      const backendMessage =
+        error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
+          ? error.error.message
+          : 'El enlace de recuperación es inválido o ya expiró.';
+      this.invalidMessage.set(backendMessage);
+      this.resetState.set('invalid');
     }
   }
 }

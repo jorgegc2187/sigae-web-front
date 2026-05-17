@@ -74,6 +74,12 @@ export class AuthService {
     );
   }
 
+  async validateResetPasswordToken(token: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(`${this.appConfig.apiUrl}/auth/reset-password/validate`, { token }),
+    );
+  }
+
   async resetPassword(payload: ResetPasswordPayload): Promise<void> {
     await firstValueFrom(
       this.http.post<void>(`${this.appConfig.apiUrl}/auth/reset-password`, payload),
