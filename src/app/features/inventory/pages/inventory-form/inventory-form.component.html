@@ -86,7 +86,7 @@
     </section>
   </div>
 
-  <footer class="fixed bottom-0 left-0 right-0 z-30 border-t border-base-300 bg-base-100/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:left-[240px] md:px-8">
+  <footer class="fixed bottom-0 left-0 right-0 z-30 border-t border-base-300 bg-base-100/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-8">
     <div class="mx-auto flex max-w-5xl justify-end gap-3">
       <app-action-button label="Cancelar" variant="neutral" routerLink="/inventory" />
       <app-action-button label="Guardar activo" icon="save" type="submit" />

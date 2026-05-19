@@ -55,6 +55,21 @@ export const routes: Routes = [
         path: 'settings',
         children: [
           {
+            path: '',
+            pathMatch: 'full',
+            canActivate: [roleGuard],
+            data: {
+              roles: ['Administrador'],
+              pageTitle: 'Configuración',
+              pageSubtitle: 'Accesos administrativos',
+            },
+            title: 'Configuración - SIGAE',
+            loadComponent: () =>
+              import('./features/settings/pages/settings-home/settings-home.component').then(
+                (m) => m.SettingsHomeComponent,
+              ),
+          },
+          {
             path: 'users',
             canActivate: [roleGuard],
             data: { roles: ['Administrador'] },
