@@ -1,0 +1,510 @@
+<!doctype html>
+<html class="light" lang="es" style="">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Ubicaciones - SIGAE</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'surface-container-low': '#f2f4f6',
+              'on-primary-fixed-variant': '#0039b5',
+              'inverse-surface': '#2d3133',
+              'primary-container': '#1d4ed8',
+              'on-secondary-fixed-variant': '#003ea8',
+              'tertiary-container': '#a73400',
+              'on-error-container': '#93000a',
+              'on-secondary-container': '#fefcff',
+              'on-primary-fixed': '#001551',
+              'surface-variant': '#e0e3e5',
+              'surface-bright': '#f7f9fb',
+              'surface-container-highest': '#e0e3e5',
+              'on-secondary-fixed': '#00174b',
+              'on-tertiary-fixed-variant': '#832700',
+              'on-surface': '#191c1e',
+              'on-secondary': '#ffffff',
+              outline: '#747686',
+              'inverse-primary': '#b7c4ff',
+              'secondary-fixed': '#dbe1ff',
+              'on-tertiary-fixed': '#390c00',
+              'on-tertiary': '#ffffff',
+              'surface-dim': '#d8dadc',
+              surface: '#f7f9fb',
+              'error-container': '#ffdad6',
+              'primary-fixed': '#dce1ff',
+              'on-surface-variant': '#434655',
+              'on-background': '#191c1e',
+              secondary: '#0051d5',
+              error: '#ba1a1a',
+              'tertiary-fixed': '#ffdbcf',
+              'surface-container-lowest': '#ffffff',
+              'outline-variant': '#c4c5d7',
+              background: '#f7f9fb',
+              'secondary-container': '#316bf3',
+              'primary-fixed-dim': '#b7c4ff',
+              'on-error': '#ffffff',
+              primary: '#0037b0',
+              'on-primary': '#ffffff',
+              tertiary: '#7f2500',
+              'tertiary-fixed-dim': '#ffb59c',
+              'on-tertiary-container': '#ffc9b7',
+              'surface-container': '#eceef0',
+              'secondary-fixed-dim': '#b4c5ff',
+              'inverse-on-surface': '#eff1f3',
+              'surface-container-high': '#e6e8ea',
+              'on-primary-container': '#cad3ff',
+              'surface-tint': '#2151da',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+            },
+            fontFamily: {
+              headline: ['Inter', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+              label: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style class="">
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 20;
+        vertical-align: middle;
+      }
+
+      /* Improved Sidebar Toggle Transitions */
+      #sidebar,
+      #header,
+      #main-content {
+        transition: all 0.3s ease-in-out;
+      }
+
+      body.sidebar-collapsed #sidebar {
+        width: 64px;
+      }
+      body.sidebar-collapsed #sidebar .px-4 {
+        padding-left: 0;
+        padding-right: 0;
+      }
+      body.sidebar-collapsed #header {
+        left: 64px;
+      }
+      body.sidebar-collapsed #main-content {
+        margin-left: 64px;
+      }
+
+      .sidebar-text,
+      .badge-count {
+        transition:
+          opacity 0.3s ease-in-out,
+          width 0.3s ease-in-out,
+          max-width 0.3s ease-in-out,
+          margin 0.3s ease-in-out,
+          visibility 0.3s;
+        white-space: nowrap;
+        overflow: hidden;
+        display: inline-block;
+        max-width: 200px;
+        opacity: 1;
+      }
+
+      /* Consistent vertical rhythm and alignment */
+      .nav-item {
+        height: 48px;
+        display: flex;
+        align-items: center;
+      }
+
+      .icon-container {
+        width: 64px;
+        min-width: 64px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      body.sidebar-collapsed .sidebar-text,
+      body.sidebar-collapsed .badge-count {
+        opacity: 0;
+        visibility: hidden;
+        max-width: 0;
+        width: 0;
+        margin: 0 !important;
+      }
+
+      #chevron-icon {
+        transition: transform 0.3s ease-in-out;
+      }
+      body.sidebar-collapsed #chevron-icon {
+        transform: rotate(180deg);
+      }
+
+      .sidebar-tooltip {
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%) translateX(10px);
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 100;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      }
+      .sidebar-tooltip::after {
+        content: '';
+        position: absolute;
+        left: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-width: 4px 4px 4px 0;
+        border-style: solid;
+        border-color: transparent #0f172a transparent transparent;
+      }
+      /* Only show tooltips when sidebar is collapsed and hovered */
+      body.sidebar-collapsed .nav-item:hover .sidebar-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(-50%) translateX(16px);
+      }
+      /* Ensure sidebar container doesn't clip tooltips */
+      #sidebar {
+        overflow-x: visible !important;
+      }
+    </style>
+  </head>
+  <body class="bg-[#F8FAFC] text-on-surface antialiased min-h-screen">
+    <!-- Shell: SideNavBar -->
+    <aside
+      class="fixed left-0 top-0 h-full w-[240px] z-50 border-r flex flex-col py-6 px-0"
+      id="sidebar"
+      style="background-color: #0f172a; border-right: 1px solid rgba(255, 255, 255, 0.1)"
+    >
+      <div class="mb-8 flex items-center relative h-12">
+        <div class="icon-container">
+          <div
+            class="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden border border-white/20 shadow-lg shadow-blue-500/20"
+          >
+            <img
+              alt="Logo"
+              class="w-full h-full object-contain p-0.5"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuChdMOlJGq6f5xnoJ2wkW_VhzolMHQIILa7VvxdCliil8KgFqeKHJzssGvHEz61i0pV4c83YU1dlbMpHltQDwXvgl-DlJFal0QHr_gg3fsJziwXbUuOSTLtx-_BbaIJETfb5lsBtA1E3n5b4twWvpAma7Y49U2HojH0XT70NfbuUoJKcUFYjAtHYvt87bFS3iYON3e2HOp0-Tczuxgs1qH8qnzO4coXzNnB07w2Pe6E9BEYL8ZN596rcbn3GbWNSnsLQjx176-Wtph_"
+            />
+          </div>
+        </div>
+        <div class="sidebar-text overflow-hidden">
+          <div class="flex flex-col">
+            <span class="text-[18px] font-bold text-white leading-tight tracking-[-0.02em]"
+              >I.E. Simón</span
+            ><span class="text-[18px] font-bold text-white leading-tight tracking-[-0.02em]"
+              >Rodríguez</span
+            >
+          </div>
+        </div>
+      </div>
+      <nav class="flex-1 space-y-1">
+        <div class="flex-1 space-y-1 px-3">
+          <a
+            class="nav-item h-[48px] flex items-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg relative"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">grid_view</span>
+            </div>
+            <span class="text-sm font-medium sidebar-text">Dashboard</span>
+            <span class="sidebar-tooltip">Dashboard</span>
+          </a>
+          <a
+            class="nav-item h-[48px] flex items-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg relative"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">inventory_2</span>
+            </div>
+            <span class="text-sm font-medium sidebar-text">Inventario</span>
+            <span class="sidebar-tooltip">Inventario</span>
+          </a>
+          <a
+            class="nav-item h-[48px] flex items-center text-white font-semibold cursor-pointer active:scale-95 transition-all duration-200 relative mx-2 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#3B82F6] shadow-lg shadow-blue-500/30 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">location_on</span>
+            </div>
+            <span class="text-sm font-medium sidebar-text">Ubicaciones</span>
+            <span class="sidebar-tooltip">Ubicaciones</span>
+          </a>
+          <a
+            class="nav-item h-[48px] flex items-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg relative"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">swap_horiz</span>
+            </div>
+            <span class="text-sm font-medium flex-1 sidebar-text">Préstamos</span>
+            <span
+              class="bg-[#B91C1C] text-white text-[11px] font-bold px-2 py-0.5 rounded-full badge-count mr-4"
+              >3</span
+            >
+            <span class="sidebar-tooltip" content="Préstamos">Préstamos</span>
+          </a>
+          <a
+            class="nav-item h-[48px] flex items-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg relative"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">school</span>
+            </div>
+            <span class="text-sm font-medium sidebar-text">Docentes</span>
+            <span class="sidebar-tooltip">Docentes</span>
+          </a>
+          <a
+            class="nav-item h-[48px] flex items-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg relative"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">group</span>
+            </div>
+            <span class="text-sm font-medium sidebar-text">Usuarios</span>
+            <span class="sidebar-tooltip">Usuarios</span>
+          </a>
+          <a
+            class="nav-item h-[48px] flex items-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg relative"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">assessment</span>
+            </div>
+            <span class="text-sm font-medium sidebar-text">Reportes</span>
+            <span class="sidebar-tooltip">Reportes</span>
+          </a>
+          <div class="my-4 border-t border-white/10 mx-4"></div>
+          <a
+            class="nav-item h-[48px] flex items-center text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg relative text-white font-semibold mx-2 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#3B82F6] shadow-lg shadow-blue-500/30"
+            href="#"
+          >
+            <div class="icon-container w-16 flex justify-center items-center">
+              <span class="material-symbols-outlined !text-[20px]">settings</span>
+            </div>
+            <span class="text-sm font-medium sidebar-text">Configuraci3n</span>
+            <span class="sidebar-tooltip">Configuracin</span>
+          </a>
+        </div>
+      </nav>
+      <button
+        class="absolute top-8 -right-3 w-6 h-6 border rounded-full flex items-center justify-center hover:text-blue-600 shadow-sm cursor-pointer z-50 transition-colors bg-[#0F172A] border-white/20 text-white"
+        id="sidebar-toggle"
+      >
+        <span class="material-symbols-outlined !text-[16px]" id="chevron-icon">chevron_left</span>
+      </button>
+    </aside>
+    <!-- Shell: TopNavBar -->
+    <header
+      class="fixed top-0 right-0 left-[240px] h-16 z-40 border-b border-[#E2E8F0] shadow-sm flex justify-between items-center px-8 bg-white/80 backdrop-blur-md"
+      id="header"
+      style="border-bottom: 1px solid rgba(226, 232, 240, 0.8)"
+    >
+      <div class="flex-1 px-4 md:px-0 max-w-xl">
+        <div class="relative group">
+          <span
+            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px] group-focus-within:text-[#1D4ED8] transition-colors"
+            >search</span
+          >
+          <input
+            class="w-full pl-12 pr-4 py-2 bg-slate-100/50 border-none rounded-full text-sm focus:ring-2 focus:ring-[#1D4ED8]/20 focus:bg-white transition-all outline-none placeholder:text-slate-400"
+            placeholder="Buscar en el sistema..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div class="flex items-center gap-2 md:gap-4">
+        <div class="flex items-center gap-1 md:gap-2">
+          <button
+            class="w-10 h-10 flex items-center justify-center text-[#1D4ED8] hover:bg-[#1D4ED8]/10 rounded-full transition-all cursor-pointer group"
+          >
+            <span
+              class="material-symbols-outlined !text-[22px] group-hover:scale-110 transition-transform"
+              >notifications</span
+            >
+            <span
+              class="absolute top-2 right-2 w-2 h-2 bg-[#B91C1C] rounded-full border-2 border-white"
+            ></span>
+          </button>
+          <button
+            class="w-10 h-10 flex items-center justify-center text-[#1D4ED8] hover:bg-[#1D4ED8]/10 rounded-full transition-all cursor-pointer group"
+          >
+            <span
+              class="material-symbols-outlined !text-[22px] group-hover:rotate-45 transition-transform"
+              >settings</span
+            >
+          </button>
+        </div>
+        <div class="h-8 w-px bg-slate-200 mx-2"></div>
+        <div class="flex items-center gap-3 pl-2 group cursor-pointer">
+          <div class="hidden md:block text-right">
+            <p class="text-sm font-bold text-[#0F172A] leading-tight">Admin Principal</p>
+            <p class="text-[11px] font-medium text-slate-500">Gestión Global</p>
+          </div>
+          <div class="relative">
+            <img
+              alt="Avatar"
+              class="w-10 h-10 rounded-full border-2 border-[#1D4ED8]/10 group-hover:border-[#1D4ED8]/30 transition-all shadow-sm"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhSpeB-0zdwNAlwwa2GSVzRA0K6w-s_fIFAiZkl7llNZbHyhqA0pi2d8KP8X9WggBUDjwYca6DhkH5WiJEQUq-A03jS18qqIvK_SdzRWANDFfLTnG83tGZcC8EKQgX03tFmh-AVbst2vUj0M95_3AsXZXKTbJYwUnKt3stjNKgSCLyoEQRXSbaayq1INRWrvp6AHsFtesL4TNSyCF_WHpO3At0eIo67lcnf9guSVw73mF9nQ93YWOCabwnKxxrOpEomakjOte9sLjM"
+            />
+            <div
+              class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content -->
+    <main class="ml-[240px] pt-16 min-h-screen" id="main-content">
+      <div class="p-8">
+        <div class="max-w-4xl mx-auto animate-in fade-in duration-500">
+          <div class="mb-8">
+            <h2 class="text-[24px] font-bold text-slate-800">Configuración</h2>
+            <p class="text-sm text-slate-500">
+              Gestione la información institucional y la identidad visual del sistema
+            </p>
+          </div>
+          <div class="space-y-6">
+            <!-- BLOQUE 1: Identidad Institucional -->
+            <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-bold text-slate-900 mb-6">Identidad Institucional</h3>
+              <div class="flex flex-col md:flex-row gap-8 items-start">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="relative group">
+                    <div
+                      class="w-32 h-32 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center overflow-hidden shadow-sm"
+                    >
+                      <img
+                        alt="Logo Preview"
+                        class="w-full h-full object-contain"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuChdMOlJGq6f5xnoJ2wkW_VhzolMHQIILa7VvxdCliil8KgFqeKHJzssGvHEz61i0pV4c83YU1dlbMpHltQDwXvgl-DlJFal0QHr_gg3fsJziwXbUuOSTLtx-_BbaIJETfb5lsBtA1E3n5b4twWvpAma7Y49U2HojH0XT70NfbuUoJKcUFYjAtHYvt87bFS3iYON3e2HOp0-Tczuxgs1qH8qnzO4coXzNnB07w2Pe6E9BEYL8ZN596rcbn3GbWNSnsLQjx176-Wtph_"
+                      />
+                    </div>
+                    <button
+                      class="absolute bottom-0 right-0 bg-[#1D4ED8] text-white w-8 h-8 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
+                    >
+                      <span class="material-symbols-outlined text-sm">photo_camera</span>
+                    </button>
+                  </div>
+                  <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                    >Logo del Colegio</span
+                  >
+                </div>
+                <div class="flex-1 w-full space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1"
+                      >Nombre de la Institución</label
+                    >
+                    <input
+                      class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all outline-none placeholder:text-slate-400"
+                      type="text"
+                      value="I.E. Simón Rodríguez - Nasca"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- BLOQUE 2: Información de Contacto y Ubicación -->
+            <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-bold text-slate-900 mb-6">
+                Información de Contacto y Ubicación
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-slate-700 mb-1">Dirección</label>
+                  <input
+                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all outline-none"
+                    placeholder="Ej. Av. Principal 123"
+                    type="text"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-1">Ciudad</label>
+                  <input
+                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all outline-none"
+                    placeholder="Ciudad"
+                    type="text"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 mb-1"
+                    >Número de Celular</label
+                  >
+                  <input
+                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all outline-none"
+                    placeholder="+51 999 999 999"
+                    type="text"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-semibold text-slate-700 mb-1"
+                    >Correo de Atención</label
+                  >
+                  <input
+                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all outline-none"
+                    placeholder="contacto@colegio.edu.pe"
+                    type="email"
+                  />
+                </div>
+              </div>
+            </div>
+            <!-- ACCIONES -->
+            <div class="flex justify-end gap-3 mt-8">
+              <button
+                class="px-6 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                class="bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 text-white px-8 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95"
+              >
+                Guardar Cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      document.getElementById('sidebar-toggle').addEventListener('click', function () {
+        document.body.classList.toggle('sidebar-collapsed');
+      });
+    </script>
+  </body>
+</html>
