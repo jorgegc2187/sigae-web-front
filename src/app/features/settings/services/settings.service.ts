@@ -1,33 +1,71 @@
-import { Injectable } from '@angular/core';
-import { Observable, delay, of } from 'rxjs';
-import { InstitutionSettings } from '../models/institution-settings.model';
-
-const DEFAULT_LOGO_DATA_URL =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231d4ed8'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='128' height='128' rx='32' fill='url(%23bg)'/%3E%3Cpath d='M64 24 94 36v24c0 19.4-12.5 37-30 42-17.5-5-30-22.6-30-42V36l30-12Z' fill='white' fill-opacity='.18'/%3E%3Cpath d='M64 34 86 42v18c0 14.1-8.7 27-22 31-13.3-4-22-16.9-22-31V42l22-8Z' fill='white'/%3E%3Cpath d='M52 50h24v6H52zm0 12h24v6H52zm0 12h16v6H52z' fill='%231d4ed8'/%3E%3C/svg%3E";
-
-const DEFAULT_SETTINGS: InstitutionSettings = {
-  systemName: 'I.E. Simón Rodríguez - Nasca',
-  institutionLogoUrl: DEFAULT_LOGO_DATA_URL,
-  address: 'Av. Principal 123, Nasca',
-  city: 'Nasca',
-  supportPhone: '+51 999 999 999',
-  supportEmail: 'contacto@colegio.edu.pe',
-};
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Injectable, computed, inject } from '@angular/core';
+import { APP_CONFIG } from '../../../core/config/app.tokens';
+import { BrandingService } from '../../../core/services/branding.service';
+import {
+  InstitutionSettings,
+  InstitutionSettingsResponse,
+} from '../models/institution-settings.model';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  private settings: InstitutionSettings = { ...DEFAULT_SETTINGS };
+  private readonly http = inject(HttpClient);
+  private readonly appConfig = inject(APP_CONFIG);
+  private readonly brandingService = inject(BrandingService);
+  private readonly baseUrl = `${this.appConfig.apiUrl}/settings`;
 
-  getInstitutionSettings(): Observable<InstitutionSettings> {
-    return of(this.cloneSettings(this.settings)).pipe(delay(120));
+  readonly settingsResource = httpResource<InstitutionSettingsResponse>(() => this.baseUrl);
+
+  readonly settings = computed<InstitutionSettings | null>(() => {
+    const response = this.settingsResource.value();
+    if (!response) {
+      return null;
+    }
+
+    return this.mapSettings(response);
+  });
+
+  saveInstitutionSettings(settings: Omit<InstitutionSettings, 'institutionLogoUrl'>, logoFile: File | null) {
+    const formData = new FormData();
+    formData.append(
+      'payload',
+      new Blob(
+        [
+          JSON.stringify({
+            systemName: settings.systemName,
+            address: settings.address,
+            city: settings.city,
+            supportPhone: settings.supportPhone,
+            supportEmail: settings.supportEmail,
+          }),
+        ],
+        { type: 'application/json' },
+      ),
+    );
+
+    if (logoFile) {
+      formData.append('logo', logoFile, logoFile.name);
+    }
+
+    return this.http.put<InstitutionSettingsResponse>(this.baseUrl, formData);
   }
 
-  saveInstitutionSettings(settings: InstitutionSettings): Observable<InstitutionSettings> {
-    this.settings = this.cloneSettings(settings);
-    return of(this.cloneSettings(this.settings)).pipe(delay(180));
+  syncSavedSettings(response: InstitutionSettingsResponse): InstitutionSettings {
+    this.settingsResource.set(response);
+    this.brandingService.updateFromSettingsResponse(response);
+    return this.mapSettings(response);
   }
 
-  private cloneSettings(settings: InstitutionSettings): InstitutionSettings {
-    return { ...settings };
+  private mapSettings(response: InstitutionSettingsResponse): InstitutionSettings {
+    return {
+      systemName: response.systemName,
+      institutionLogoUrl: response.hasLogo
+        ? `${this.baseUrl}/logo?v=${encodeURIComponent(response.updatedAt)}`
+        : null,
+      address: response.address ?? '',
+      city: response.city ?? '',
+      supportPhone: response.supportPhone ?? '',
+      supportEmail: response.supportEmail,
+    };
   }
 }

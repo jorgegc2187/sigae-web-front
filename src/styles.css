@@ -212,6 +212,20 @@
 .app-shell .app-shell-sidebar-label {
   max-width: 200px;
   opacity: 1;
+  visibility: visible;
+}
+
+.app-shell .app-shell-brand-copy {
+  white-space: normal;
+}
+
+.app-shell .app-shell-brand-title {
+  display: -webkit-box;
+  overflow: hidden;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .app-shell .app-shell-sidebar-tooltip {

@@ -10,12 +10,16 @@
     <div class="relative z-10 flex flex-col items-center text-center max-w-lg">
       <!-- Icono institucional -->
       <div class="w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/10 flex items-center justify-center mb-8 shadow-inner border border-white/20 backdrop-blur-sm">
-        <span class="material-symbols-outlined text-primary-content text-7xl md:text-8xl"
-              style="font-variation-settings: 'FILL' 1;">school</span>
+        @if (logoUrl()) {
+          <img [src]="logoUrl()!" alt="Logo institucional" class="h-full w-full rounded-full object-cover" />
+        } @else {
+          <span class="material-symbols-outlined text-primary-content text-7xl md:text-8xl"
+                style="font-variation-settings: 'FILL' 1;">school</span>
+        }
       </div>
 
       <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-primary-content tracking-tight mb-4">
-        {{ appName }}
+        {{ appName() }}
       </h1>
       <p class="text-lg md:text-xl text-primary-content/80 font-medium leading-relaxed">
         Sistema Integrado de Gestión de Activos Escolares
@@ -35,9 +39,13 @@
 
       <!-- Logo móvil (solo visible en pantallas pequeñas) -->
       <div class="flex md:hidden items-center justify-center gap-3 mb-8">
-        <span class="material-symbols-outlined text-primary text-4xl"
-              style="font-variation-settings: 'FILL' 1;">school</span>
-        <span class="text-2xl font-bold text-base-content">{{ appName }}</span>
+        @if (logoUrl()) {
+          <img [src]="logoUrl()!" alt="Logo institucional" class="h-10 w-10 rounded-full object-cover" />
+        } @else {
+          <span class="material-symbols-outlined text-primary text-4xl"
+                style="font-variation-settings: 'FILL' 1;">school</span>
+        }
+        <span class="text-2xl font-bold text-base-content">{{ appName() }}</span>
       </div>
 
       <!-- Encabezado -->

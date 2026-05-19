@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
@@ -20,8 +20,12 @@ export class SettingsHomeComponent {
 
   readonly logoInput = viewChild<ElementRef<HTMLInputElement>>('logoInput');
   readonly isSubmitting = signal(false);
-  readonly isLoading = signal(true);
+  readonly isLoading = computed(() =>
+    this.settingsService.settingsResource.isLoading() && !this.settingsService.settings(),
+  );
   readonly logoPreview = signal<string | null>(null);
+  readonly selectedLogoFile = signal<File | null>(null);
+  private readonly settingsLoadError = signal<unknown>(null);
   private initialSettings: InstitutionSettings | null = null;
 
   readonly form = this.fb.group({
@@ -63,7 +67,29 @@ export class SettingsHomeComponent {
   });
 
   constructor() {
-    void this.loadSettings();
+    effect(() => {
+      const settings = this.settingsService.settings();
+      if (!settings) {
+        return;
+      }
+
+      this.initialSettings = settings;
+      this.applySettings(settings);
+      this.form.markAsPristine();
+      this.form.markAsUntouched();
+    });
+
+    effect(() => {
+      const error = this.settingsService.settingsResource.error();
+      if (!error || error === this.settingsLoadError()) {
+        return;
+      }
+
+      this.settingsLoadError.set(error);
+      this.notifications.error({
+        message: 'No se pudo cargar la configuración institucional.',
+      });
+    });
   }
 
   triggerLogoSelection(): void {
@@ -90,6 +116,7 @@ export class SettingsHomeComponent {
 
     try {
       const preview = await this.readFileAsDataUrl(file);
+      this.selectedLogoFile.set(file);
       this.logoPreview.set(preview);
     } catch {
       this.notifications.error({ message: 'No se pudo cargar la imagen seleccionada.' });
@@ -121,9 +148,13 @@ export class SettingsHomeComponent {
 
     try {
       this.isSubmitting.set(true);
-      const savedSettings = await firstValueFrom(
-        this.settingsService.saveInstitutionSettings(this.buildSettingsPayload()),
+      const response = await firstValueFrom(
+        this.settingsService.saveInstitutionSettings(
+          this.buildSettingsPayload(),
+          this.selectedLogoFile(),
+        ),
       );
+      const savedSettings = this.settingsService.syncSavedSettings(response);
 
       this.initialSettings = savedSettings;
       this.applySettings(savedSettings);
@@ -141,23 +172,6 @@ export class SettingsHomeComponent {
     }
   }
 
-  private async loadSettings(): Promise<void> {
-    try {
-      this.isLoading.set(true);
-      const settings = await firstValueFrom(this.settingsService.getInstitutionSettings());
-      this.initialSettings = settings;
-      this.applySettings(settings);
-      this.form.markAsPristine();
-      this.form.markAsUntouched();
-    } catch {
-      this.notifications.error({
-        message: 'No se pudo cargar la configuración institucional.',
-      });
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
-
   private applySettings(settings: InstitutionSettings): void {
     this.form.reset({
       systemName: settings.systemName,
@@ -166,14 +180,14 @@ export class SettingsHomeComponent {
       supportPhone: settings.supportPhone,
       supportEmail: settings.supportEmail,
     });
+    this.selectedLogoFile.set(null);
     this.logoPreview.set(settings.institutionLogoUrl);
   }
 
-  private buildSettingsPayload(): InstitutionSettings {
+  private buildSettingsPayload(): Omit<InstitutionSettings, 'institutionLogoUrl'> {
     const value = this.form.getRawValue();
     return {
       systemName: value.systemName.trim(),
-      institutionLogoUrl: this.logoPreview(),
       address: value.address.trim(),
       city: value.city.trim(),
       supportPhone: value.supportPhone.trim(),

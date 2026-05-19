@@ -6,25 +6,26 @@
   [class.pointer-events-auto]="isMobileOpen()"
 >
   <div class="app-shell-sidebar-inner flex h-full flex-col px-0">
-    <div class="relative mb-8 flex h-12 items-center">
+    <div class="relative mb-8 flex min-h-14 items-center">
       <div class="app-shell-icon-container">
         <div
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/25"
+          class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-lg shadow-primary/15 ring-1 ring-slate-200"
         >
-          <span
-            class="material-symbols-outlined text-primary-content"
-            style="font-variation-settings: 'FILL' 1"
-            >account_balance</span
-          >
+          @if (logoUrl()) {
+            <img [src]="logoUrl()!" alt="Logo institucional" class="h-full w-full object-contain p-0.5" />
+          } @else {
+            <span
+              class="material-symbols-outlined text-primary"
+              style="font-variation-settings: 'FILL' 1"
+              >account_balance</span
+            >
+          }
         </div>
       </div>
-      <div class="app-shell-brand-copy min-w-0 overflow-hidden">
-        <h1 class="truncate text-2xl font-bold leading-tight tracking-tight text-blue-700">
-          {{ appName }}
+      <div class="app-shell-brand-copy min-w-0">
+        <h1 class="app-shell-brand-title text-[1.125rem] font-bold leading-tight tracking-[-0.02em] text-slate-900">
+          {{ appName() }}
         </h1>
-        <p class="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-          Gestión Global
-        </p>
       </div>
     </div>
 

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { APP_CONFIG } from '../../config/app.tokens';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
+import { BrandingService } from '../../services/branding.service';
 
 interface SidebarNavItem {
   label: string;
@@ -23,9 +23,9 @@ interface SidebarNavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
-  private readonly appConfig = inject(APP_CONFIG);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly brandingService = inject(BrandingService);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -39,7 +39,8 @@ export class SidebarComponent {
   readonly isDesktopCollapsed = input(false);
   readonly closeMobile = output<void>();
   readonly toggleDesktop = output<void>();
-  readonly appName = this.appConfig.appName;
+  readonly appName = this.brandingService.systemName;
+  readonly logoUrl = this.brandingService.logoUrl;
   readonly currentUser = this.authService.currentUser;
   readonly isAdministrator = computed(() => this.currentUser()?.role === 'Administrador');
   readonly navItems = computed(() =>

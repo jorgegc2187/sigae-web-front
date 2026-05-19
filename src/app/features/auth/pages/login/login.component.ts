@@ -13,7 +13,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { APP_CONFIG } from '../../../../core/config/app.tokens';
+import { BrandingService } from '../../../../core/services/branding.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { emailFormatValidator } from '../../../../shared/validators/email-format.validator';
@@ -27,10 +27,11 @@ import { emailFormatValidator } from '../../../../shared/validators/email-format
 export class LoginComponent {
   private fb = inject(NonNullableFormBuilder);
   private router = inject(Router);
-  private appConfig = inject(APP_CONFIG);
   private auth = inject(AuthService);
+  private branding = inject(BrandingService);
 
-  readonly appName = this.appConfig.appName;
+  readonly appName = this.branding.systemName;
+  readonly logoUrl = this.branding.logoUrl;
   isSubmitting = signal(false);
   showPassword = signal(false);
   loginError = signal<string | null>(null);

@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { APP_CONFIG } from '../../../../core/config/app.tokens';
+import { BrandingService } from '../../../../core/services/branding.service';
 import {
   getControlErrorMessage,
   getGroupErrorMessage,
@@ -29,11 +29,12 @@ type ResetPasswordState = 'checking' | 'idle' | 'invalid' | 'success';
 export class ResetPasswordComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly auth = inject(AuthService);
-  private readonly appConfig = inject(APP_CONFIG);
+  private readonly branding = inject(BrandingService);
 
   readonly token = input('');
   private readonly normalizedToken = computed(() => this.token()?.trim() ?? '');
-  readonly appName = this.appConfig.appName;
+  readonly appName = this.branding.systemName;
+  readonly logoUrl = this.branding.logoUrl;
   readonly isSubmitting = signal(false);
   readonly showNewPassword = signal(false);
   readonly showConfirmPassword = signal(false);

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, output } from '@a
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
-import { APP_CONFIG } from '../../config/app.tokens';
+import { BrandingService } from '../../services/branding.service';
 
 @Component({
   selector: 'app-header',
@@ -13,7 +13,7 @@ export class HeaderComponent {
   readonly menuClick = output<void>();
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
-  private readonly appConfig = inject(APP_CONFIG);
+  private readonly brandingService = inject(BrandingService);
 
   private readonly activeRouteData = toSignal(
     this.router.events.pipe(
@@ -23,7 +23,7 @@ export class HeaderComponent {
     { initialValue: this.getDeepestRouteData() },
   );
 
-  readonly pageTitle = computed(() => this.activeRouteData()?.['pageTitle'] ?? this.appConfig.appName);
+  readonly pageTitle = computed(() => this.activeRouteData()?.['pageTitle'] ?? this.brandingService.systemName());
   readonly pageSubtitle = computed(() => this.activeRouteData()?.['pageSubtitle'] ?? '');
 
   onMenuClick() {
