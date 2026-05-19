@@ -61,7 +61,7 @@ export const routes: Routes = [
             data: {
               roles: ['Administrador'],
               pageTitle: 'Configuración',
-              pageSubtitle: 'Accesos administrativos',
+              pageSubtitle: 'Gestione la información institucional y la identidad visual del sistema',
             },
             title: 'Configuración - SIGAE',
             loadComponent: () =>
