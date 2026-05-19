@@ -1,0 +1,642 @@
+<!doctype html>
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Ubicaciones - SIGAE</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'surface-container-low': '#f2f4f6',
+              'on-primary-fixed-variant': '#0039b5',
+              'inverse-surface': '#2d3133',
+              'primary-container': '#1d4ed8',
+              'on-secondary-fixed-variant': '#003ea8',
+              'tertiary-container': '#a73400',
+              'on-error-container': '#93000a',
+              'on-secondary-container': '#fefcff',
+              'on-primary-fixed': '#001551',
+              'surface-variant': '#e0e3e5',
+              'surface-bright': '#f7f9fb',
+              'surface-container-highest': '#e0e3e5',
+              'on-secondary-fixed': '#00174b',
+              'on-tertiary-fixed-variant': '#832700',
+              'on-surface': '#191c1e',
+              'on-secondary': '#ffffff',
+              outline: '#747686',
+              'inverse-primary': '#b7c4ff',
+              'secondary-fixed': '#dbe1ff',
+              'on-tertiary-fixed': '#390c00',
+              'on-tertiary': '#ffffff',
+              'surface-dim': '#d8dadc',
+              surface: '#f7f9fb',
+              'error-container': '#ffdad6',
+              'primary-fixed': '#dce1ff',
+              'on-surface-variant': '#434655',
+              'on-background': '#191c1e',
+              secondary: '#0051d5',
+              error: '#ba1a1a',
+              'tertiary-fixed': '#ffdbcf',
+              'surface-container-lowest': '#ffffff',
+              'outline-variant': '#c4c5d7',
+              background: '#f7f9fb',
+              'secondary-container': '#316bf3',
+              'primary-fixed-dim': '#b7c4ff',
+              'on-error': '#ffffff',
+              primary: '#0037b0',
+              'on-primary': '#ffffff',
+              tertiary: '#7f2500',
+              'tertiary-fixed-dim': '#ffb59c',
+              'on-tertiary-container': '#ffc9b7',
+              'surface-container': '#eceef0',
+              'secondary-fixed-dim': '#b4c5ff',
+              'inverse-on-surface': '#eff1f3',
+              'surface-container-high': '#e6e8ea',
+              'on-primary-container': '#cad3ff',
+              'surface-tint': '#2151da',
+            },
+            borderRadius: {
+              DEFAULT: '0.125rem',
+              lg: '0.25rem',
+              xl: '0.5rem',
+              full: '0.75rem',
+            },
+            fontFamily: {
+              headline: ['Inter', 'sans-serif'],
+              body: ['Inter', 'sans-serif'],
+              label: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 20;
+        vertical-align: middle;
+      }
+
+      /* Sidebar Toggle Transitions */
+      #sidebar,
+      #header,
+      #main-content {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body.sidebar-collapsed #sidebar {
+        width: 64px;
+        px: 0;
+      }
+      body.sidebar-collapsed #sidebar .px-4 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+      body.sidebar-collapsed #sidebar .px-2 {
+        padding-left: 0;
+        padding-right: 0;
+        justify-content: center;
+      }
+      body.sidebar-collapsed #header {
+        left: 64px;
+      }
+      body.sidebar-collapsed #main-content {
+        margin-left: 64px;
+      }
+
+      .sidebar-text,
+      .badge-count {
+        transition: opacity 0.2s;
+        white-space: nowrap;
+      }
+
+      body.sidebar-collapsed .sidebar-text,
+      body.sidebar-collapsed .badge-count {
+        opacity: 0;
+        display: none;
+      }
+
+      body.sidebar-collapsed .nav-item {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      body.sidebar-collapsed .nav-item .material-symbols-outlined {
+        margin-right: 0;
+      }
+
+      #chevron-icon {
+        transition: transform 0.3s;
+      }
+      body.sidebar-collapsed #chevron-icon {
+        transform: rotate(180deg);
+      }
+    </style>
+  </head>
+  <body class="bg-[#F8FAFC] text-on-surface antialiased min-h-screen">
+    <!-- Shell: SideNavBar -->
+    <aside
+      class="fixed left-0 top-0 h-full w-[240px] z-50 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col py-6 px-4"
+      id="sidebar"
+    >
+      <div class="mb-8 px-2 flex items-center gap-3 relative">
+        <div
+          class="w-10 h-10 min-w-[40px] bg-primary-container rounded-lg flex items-center justify-center"
+        >
+          <span
+            class="material-symbols-outlined text-white"
+            style="font-variation-settings: 'FILL' 1"
+            >account_balance</span
+          >
+        </div>
+        <div class="sidebar-text">
+          <h1
+            class="text-2xl font-bold tracking-tight text-blue-700 dark:text-blue-400 leading-tight"
+          >
+            SIGAE
+          </h1>
+          <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500">
+            Gestión Global
+          </p>
+        </div>
+      </div>
+      <nav class="flex-1 space-y-1">
+        <a
+          class="nav-item flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            data-icon="grid_view"
+            style="color: rgb(100, 116, 139)"
+            >grid_view</span
+          >
+          <span class="text-sm sidebar-text">Dashboard</span>
+        </a>
+        <a
+          class="nav-item flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            data-icon="inventory_2"
+            style="color: rgb(100, 116, 139)"
+            >inventory_2</span
+          >
+          <span class="text-sm sidebar-text">Inventario</span>
+        </a>
+        <!-- Active Tab: Ubicaciones -->
+        <a
+          class="nav-item flex items-center px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-[#1D4ED8] dark:text-blue-400 border-l-[3px] border-[#1D4ED8] font-semibold cursor-pointer active:scale-95 transition-all duration-200 rounded-r-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            data-icon="location_on"
+            style="color: rgb(29, 78, 216)"
+            >location_on</span
+          >
+          <span class="text-sm sidebar-text">Ubicaciones</span>
+        </a>
+        <a
+          class="nav-item flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            data-icon="swap_horiz"
+            style="color: rgb(100, 116, 139)"
+            >swap_horiz</span
+          >
+          <span class="text-sm flex-1 sidebar-text">Préstamos</span>
+          <span
+            class="bg-[#B91C1C] text-white text-[11px] font-bold px-2 py-0.5 rounded-full badge-count"
+            >3</span
+          >
+        </a>
+        <a
+          class="nav-item flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            data-icon="group"
+            style="color: rgb(100, 116, 139)"
+            >group</span
+          >
+          <span class="text-sm sidebar-text">Docentes</span>
+        </a>
+        <a
+          class="nav-item flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            style="color: rgb(100, 116, 139)"
+            >person</span
+          >
+          <span class="text-sm sidebar-text">Usuarios</span>
+        </a>
+        <a
+          class="nav-item flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            data-icon="bar_chart"
+            style="color: rgb(100, 116, 139)"
+            >bar_chart</span
+          >
+          <span class="text-sm sidebar-text">Reportes</span>
+        </a>
+        <div class="my-2 border-t border-[#E2E8F0]"></div>
+        <a
+          class="nav-item flex items-center px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer active:scale-95 rounded-lg"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined mr-4 !text-[18px]"
+            data-icon="settings"
+            style="color: rgb(100, 116, 139)"
+            >settings</span
+          >
+          <span class="text-sm sidebar-text">Configuración</span>
+        </a>
+      </nav>
+      <button
+        class="absolute top-8 -right-3 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 shadow-sm cursor-pointer z-50"
+        id="sidebar-toggle"
+      >
+        <span class="material-symbols-outlined !text-[16px]" id="chevron-icon">chevron_left</span>
+      </button>
+    </aside>
+    <!-- Shell: TopNavBar -->
+    <header
+      class="fixed top-0 right-0 left-[240px] h-16 z-40 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none flex justify-between items-center px-8"
+      id="header"
+    >
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-6">
+        <button
+          class="w-9 h-9 flex items-center justify-center text-[#64748B] hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+        >
+          <span class="material-symbols-outlined !text-[20px]">search</span>
+        </button>
+        <div class="flex items-center gap-3">
+          <button
+            class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+          >
+            <span class="material-symbols-outlined">notifications</span>
+            <span
+              class="absolute top-1 right-1 w-4 h-4 bg-[#B91C1C] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"
+              >5</span
+            >
+          </button>
+          <button
+            class="w-9 h-9 relative flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+          >
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+        </div>
+        <div class="h-8 w-px bg-slate-200"></div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <p class="text-[13px] font-medium text-slate-900 leading-none">Admin Principal</p>
+            <p class="text-[11px] text-slate-400 leading-none mt-1">Gestión Global</p>
+          </div>
+          <button class="flex items-center gap-2 cursor-pointer transition-all">
+            <img
+              alt="Avatar"
+              class="w-9 h-9 rounded-full border-2 border-white shadow-sm"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhSpeB-0zdwNAlwwa2GSVzRA0K6w-s_fIFAiZkl7llNZbHyhqA0pi2d8KP8X9WggBUDjwYca6DhkH5WiJEQUq-A03jS18qqIvK_SdzRWANDFfLTnG83tGZcC8EKQgX03tFmh-AVbst2vUj0M95_3AsXZXKTbJYwUnKt3stjNKgSCLyoEQRXSbaayq1INRWrvp6AHsFtesL4TNSyCF_WHpO3At0eIo67lcnf9guSVw73mF9nQ93YWOCabwnKxxrOpEomakjOte9sLjM"
+            />
+          </button>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content -->
+    <main class="ml-[240px] pt-16 min-h-screen" id="main-content">
+      <div class="p-8">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-[24px] font-bold text-slate-800">Ubicaciones</h2>
+          <div class="flex items-center gap-4">
+            <div class="relative w-[320px]">
+              <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
+                >search</span
+              >
+              <input
+                class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                placeholder="Buscar ubicación..."
+                type="text"
+              />
+            </div>
+            <button
+              class="flex items-center gap-2 bg-[#1D4ED8] hover:bg-[#1D4ED8]/90 text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95"
+            >
+              <span class="material-symbols-outlined text-sm">add</span>
+              Nueva Ubicación
+            </button>
+          </div>
+        </div>
+        <!-- Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Card 1: Aula de Cómputo -->
+          <div
+            class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+          >
+            <div class="h-2 bg-[#DBEAFE] w-full"></div>
+            <div class="p-6 flex-grow">
+              <h3 class="text-lg font-bold text-slate-900">Aula de Cómputo</h3>
+              <p class="text-sm text-slate-500 mt-2 line-clamp-2">
+                Laboratorio principal equipado con 30 estaciones de trabajo y proyector multimedia.
+              </p>
+              <div class="h-px bg-slate-100 my-5"></div>
+              <div class="space-y-4">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >Encargados:</span
+                >
+                <div class="flex items-center gap-3">
+                  <div class="flex -space-x-2">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                      title="Juan Perez"
+                    >
+                      JP
+                    </div>
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                      title="Maria Garcia"
+                    >
+                      MG
+                    </div>
+                  </div>
+                  <span class="text-sm text-slate-600 italic">Juan Perez, Maria Garcia</span>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50/50 flex justify-end gap-1 border-t border-slate-100">
+              <button
+                class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+              <button
+                class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+          <!-- Card 2: Biblioteca -->
+          <div
+            class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+          >
+            <div class="h-2 bg-[#DBEAFE] w-full"></div>
+            <div class="p-6 flex-grow">
+              <h3 class="text-lg font-bold text-slate-900">Biblioteca</h3>
+              <p class="text-sm text-slate-500 mt-2 line-clamp-2">
+                Espacio de lectura y consulta bibliográfica. Contiene el archivo histórico escolar.
+              </p>
+              <div class="h-px bg-slate-100 my-5"></div>
+              <div class="space-y-4">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >Encargados:</span
+                >
+                <div class="flex items-center gap-3">
+                  <div class="flex">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      RL
+                    </div>
+                  </div>
+                  <span class="text-sm text-slate-600 italic">Rosa Luna</span>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50/50 flex justify-end gap-1 border-t border-slate-100">
+              <button
+                class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+              <button
+                class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+          <!-- Card 3: Dirección -->
+          <div
+            class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+          >
+            <div class="h-2 bg-[#DBEAFE] w-full"></div>
+            <div class="p-6 flex-grow">
+              <h3 class="text-lg font-bold text-slate-900">Dirección</h3>
+              <p class="text-sm text-slate-500 mt-2 line-clamp-2">
+                Oficina administrativa central para la gestión escolar y atención a padres.
+              </p>
+              <div class="h-px bg-slate-100 my-5"></div>
+              <div class="space-y-4">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >Encargados:</span
+                >
+                <div class="flex items-center">
+                  <span class="text-sm text-slate-400 italic">Sin encargado asignado</span>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50/50 flex justify-end gap-1 border-t border-slate-100">
+              <button
+                class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+              <button
+                class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+          <!-- Card 4: Sala de Profesores -->
+          <div
+            class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+          >
+            <div class="h-2 bg-[#DBEAFE] w-full"></div>
+            <div class="p-6 flex-grow">
+              <h3 class="text-lg font-bold text-slate-900">Sala de Profesores</h3>
+              <p class="text-sm text-slate-500 mt-2 line-clamp-2">
+                Área común para planificación docente y descanso entre periodos de clase.
+              </p>
+              <div class="h-px bg-slate-100 my-5"></div>
+              <div class="space-y-4">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >Encargados:</span
+                >
+                <div class="flex items-center gap-3">
+                  <div class="flex -space-x-2">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-800 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      CH
+                    </div>
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      AM
+                    </div>
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      PV
+                    </div>
+                  </div>
+                  <span class="text-sm text-slate-600 italic"
+                    >Carlos Huaman, Ana Mori, Pedro Vera</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50/50 flex justify-end gap-1 border-t border-slate-100">
+              <button
+                class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+              <button
+                class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+          <!-- Card 5: Aula 1A -->
+          <div
+            class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+          >
+            <div class="h-2 bg-[#DBEAFE] w-full"></div>
+            <div class="p-6 flex-grow">
+              <h3 class="text-lg font-bold text-slate-900">Aula 1A</h3>
+              <p class="text-sm text-slate-500 mt-2 line-clamp-2">
+                Salón de clases para primer grado de secundaria. Mobiliario completo.
+              </p>
+              <div class="h-px bg-slate-100 my-5"></div>
+              <div class="space-y-4">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >Encargados:</span
+                >
+                <div class="flex items-center gap-3">
+                  <div class="flex">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      LC
+                    </div>
+                  </div>
+                  <span class="text-sm text-slate-600 italic">Luis Castro</span>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50/50 flex justify-end gap-1 border-t border-slate-100">
+              <button
+                class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+              <button
+                class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+          <!-- Card 6: Laboratorio de Ciencias -->
+          <div
+            class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+          >
+            <div class="h-2 bg-[#DBEAFE] w-full"></div>
+            <div class="p-6 flex-grow">
+              <h3 class="text-lg font-bold text-slate-900">Laboratorio de Ciencias</h3>
+              <p class="text-sm text-slate-500 mt-2 line-clamp-2">
+                Equipado para experimentos de física, química y biología. Normas de seguridad
+                estrictas.
+              </p>
+              <div class="h-px bg-slate-100 my-5"></div>
+              <div class="space-y-4">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >Encargados:</span
+                >
+                <div class="flex items-center gap-3">
+                  <div class="flex -space-x-2">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-900 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      ET
+                    </div>
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-700 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      FM
+                    </div>
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                    >
+                      JS
+                    </div>
+                    <div
+                      class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] text-slate-600 font-bold"
+                    >
+                      +1
+                    </div>
+                  </div>
+                  <span class="text-sm text-slate-600 italic">Torres, Mora, S. y 1 más</span>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50/50 flex justify-end gap-1 border-t border-slate-100">
+              <button
+                class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">edit</span>
+              </button>
+              <button
+                class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      document.getElementById('sidebar-toggle').addEventListener('click', function () {
+        document.body.classList.toggle('sidebar-collapsed');
+      });
+    </script>
+  </body>
+</html>

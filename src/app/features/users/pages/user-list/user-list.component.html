@@ -58,7 +58,7 @@
     </div>
   </section>
 
-  <section class="relative overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+  <section class="relative rounded-xl border border-base-300 bg-base-100 shadow-sm">
     @if (isLoading()) {
       <div class="space-y-4 px-6 py-6">
         <div class="skeleton h-10 w-full"></div>
@@ -67,7 +67,7 @@
         <div class="skeleton h-16 w-full"></div>
       </div>
     } @else {
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto rounded-t-xl">
         <table class="w-full min-w-[960px] border-collapse text-left">
           <thead>
             <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
@@ -118,7 +118,7 @@
                 </td>
 
                 <td class="px-6 py-4 text-center">
-                  <app-status-badge [label]="user.status" [tone]="getStatusBadgeTone(user.status)" />
+                  <app-status-badge [label]="getStatusLabel(user)" [tone]="getStatusBadgeTone(user)" />
                 </td>
 
                 <td class="px-6 py-4">
@@ -131,67 +131,11 @@
                       type="button"
                       class="inline-flex h-8 w-8 items-center justify-center rounded-md p-1 text-base-content/40 transition-colors hover:bg-base-200 hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                       aria-label="Más acciones"
-                      [attr.aria-expanded]="isActionsMenuOpen(user.id)"
-                      (click)="toggleActionsMenu(user.id)"
+                      [attr.aria-expanded]="openActionsMenuUser()?.id === user.id"
+                      (click)="toggleActionsMenu(user, $any($event.currentTarget))"
                     >
                       <span class="material-symbols-outlined text-[20px]">more_vert</span>
                     </button>
-                    @if (isActionsMenuOpen(user.id)) {
-                      <div
-                        class="absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-lg border border-base-300 bg-base-100 py-1 text-left shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)]"
-                        role="menu"
-                        aria-label="Acciones de usuario"
-                      >
-                        <button
-                          type="button"
-                          class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
-                          (click)="onEdit(user)"
-                        >
-                          <span class="material-symbols-outlined text-[18px] text-base-content/50">edit</span>
-                          Editar usuario
-                        </button>
-
-                        <button
-                          type="button"
-                          class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
-                          (click)="onResetPassword(user)"
-                        >
-                          <span class="material-symbols-outlined text-[18px] text-base-content/50">lock_reset</span>
-                          Restablecer contraseña
-                        </button>
-
-                        <button
-                          type="button"
-                          class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
-                          (click)="onViewActivity(user)"
-                        >
-                          <span class="material-symbols-outlined text-[18px] text-base-content/50">history</span>
-                          Ver actividad
-                        </button>
-
-                        <div class="my-1 border-t border-base-300"></div>
-
-                        @if (canToggleStatus(user)) {
-                          <button
-                            type="button"
-                            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-base-200/80"
-                            [class.text-warning]="user.status === 'Activo'"
-                            [class.hover:text-warning]="user.status === 'Activo'"
-                            [class.text-base-content/75]="user.status !== 'Activo'"
-                            [class.hover:text-base-content]="user.status !== 'Activo'"
-                            (click)="onToggleStatus(user)"
-                          >
-                            @if (user.status === 'Activo') {
-                              <span class="material-symbols-outlined text-[18px] text-warning">person_off</span>
-                              Desactivar usuario
-                            } @else {
-                              <span class="material-symbols-outlined text-[18px] text-success">person</span>
-                              Activar usuario
-                            }
-                          </button>
-                        }
-                      </div>
-                    }
                   </div>
                 </td>
               </tr>
@@ -218,13 +162,94 @@
       />
     }
 
-    @if (openActionsMenuUserId()) {
+    @if (openActionsMenu()) {
       <button
         type="button"
         class="fixed inset-0 z-20 cursor-default bg-transparent"
         aria-label="Cerrar menú de acciones"
         (click)="closeActionsMenu()"
       ></button>
+
+      <div
+        class="fixed z-30 w-56 overflow-hidden rounded-lg border border-base-300 bg-base-100 py-1 text-left shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)]"
+        role="menu"
+        aria-label="Acciones de usuario"
+        [style.top.px]="openActionsMenu()!.top"
+        [style.right.px]="openActionsMenu()!.right"
+      >
+        <button
+          type="button"
+          class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
+          (click)="onEdit(openActionsMenu()!.user)"
+        >
+          <span class="material-symbols-outlined text-[18px] text-base-content/50">edit</span>
+          Editar usuario
+        </button>
+
+        @if (openActionsMenu()!.user.status !== 'Pendiente') {
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
+            (click)="onResetPassword(openActionsMenu()!.user)"
+          >
+            <span class="material-symbols-outlined text-[18px] text-base-content/50">lock_reset</span>
+            Restablecer contraseña
+          </button>
+        }
+
+        <button
+          type="button"
+          class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
+          (click)="onViewActivity(openActionsMenu()!.user)"
+        >
+          <span class="material-symbols-outlined text-[18px] text-base-content/50">history</span>
+          Ver actividad
+        </button>
+
+        <div class="my-1 border-t border-base-300"></div>
+
+        @if (canCancelInvitation(openActionsMenu()!.user)) {
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-warning transition-colors hover:bg-base-200/80 hover:text-warning"
+            (click)="openInvitationDialog(openActionsMenu()!.user, 'cancel')"
+          >
+            <span class="material-symbols-outlined text-[18px] text-warning">cancel</span>
+            Anular invitación
+          </button>
+        }
+
+        @if (canResendInvitation(openActionsMenu()!.user)) {
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
+            (click)="openInvitationDialog(openActionsMenu()!.user, 'resend')"
+          >
+            <span class="material-symbols-outlined text-[18px] text-base-content/50">mail</span>
+            Reenviar invitación
+          </button>
+        }
+
+        @if (canToggleStatus(openActionsMenu()!.user)) {
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-base-200/80"
+            [class.text-warning]="openActionsMenu()!.user.status === 'Activo'"
+            [class.hover:text-warning]="openActionsMenu()!.user.status === 'Activo'"
+            [class.text-base-content/75]="openActionsMenu()!.user.status !== 'Activo'"
+            [class.hover:text-base-content]="openActionsMenu()!.user.status !== 'Activo'"
+            (click)="onToggleStatus(openActionsMenu()!.user)"
+          >
+            @if (openActionsMenu()!.user.status === 'Activo') {
+              <span class="material-symbols-outlined text-[18px] text-warning">person_off</span>
+              Desactivar usuario
+            } @else {
+              <span class="material-symbols-outlined text-[18px] text-success">person</span>
+              Activar usuario
+            }
+          </button>
+        }
+      </div>
     }
   </section>
 
@@ -257,7 +282,7 @@
             <p class="mt-1 text-sm text-base-content/60">{{ selectedUser.email }}</p>
             <p class="mt-3 text-xs font-medium uppercase tracking-wide text-base-content/45">Estado actual</p>
             <div class="mt-2">
-              <app-status-badge [label]="selectedUser.status" [tone]="getStatusBadgeTone(selectedUser.status)" />
+              <app-status-badge [label]="getStatusLabel(selectedUser)" [tone]="getStatusBadgeTone(selectedUser)" />
             </div>
           </div>
         }
@@ -272,6 +297,58 @@
           [variant]="pendingStatusActionUser()?.status === 'Activo' ? 'neutral' : 'primary'"
           [className]="pendingStatusActionUser()?.status === 'Activo' ? '!border-error/20 !bg-error !text-error-content hover:!bg-error/90' : ''"
           (clicked)="confirmStatusChange()"
+        />
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button type="submit">Cerrar</button>
+    </form>
+  </dialog>
+
+  <dialog #invitationDialog class="modal" (close)="onInvitationDialogClose()">
+    <div class="modal-box mx-3 flex max-h-[calc(100dvh-1.5rem)] w-auto max-w-md flex-col rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl sm:mx-0 sm:w-full sm:rounded-xl">
+      <div class="flex items-start justify-between gap-4 border-b border-base-300 px-6 py-5">
+        <div class="space-y-1">
+          <h2 class="text-lg font-semibold text-base-content">{{ pendingInvitationActionLabel() }}</h2>
+          <p class="text-sm text-base-content/65">Confirme la acción sobre la invitación del usuario seleccionado.</p>
+        </div>
+        <form method="dialog">
+          <button
+            type="submit"
+            class="btn btn-ghost btn-sm btn-circle"
+            aria-label="Cerrar confirmación de invitación"
+          >
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="space-y-4 px-6 py-5">
+        <div class="rounded-xl border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-base-content/80">
+          {{ pendingInvitationActionMessage() }}
+        </div>
+
+        @if (pendingInvitationAction(); as action) {
+          <div class="rounded-xl border border-base-300 bg-base-200/50 px-4 py-4">
+            <p class="text-sm font-semibold text-base-content">{{ action.user.name }}</p>
+            <p class="mt-1 text-sm text-base-content/60">{{ action.user.email }}</p>
+            <p class="mt-3 text-xs font-medium uppercase tracking-wide text-base-content/45">Estado actual</p>
+            <div class="mt-2">
+              <app-status-badge [label]="getStatusLabel(action.user)" [tone]="getStatusBadgeTone(action.user)" />
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-base-300 px-6 py-4">
+        <form method="dialog">
+          <button type="submit" class="btn btn-ghost">Cancelar</button>
+        </form>
+        <app-action-button
+          [label]="pendingInvitationAction()?.type === 'cancel' ? 'Anular invitación' : 'Reenviar invitación'"
+          [variant]="pendingInvitationAction()?.type === 'cancel' ? 'neutral' : 'primary'"
+          [className]="pendingInvitationAction()?.type === 'cancel' ? '!border-warning/20 !bg-warning !text-warning-content hover:!bg-warning/90' : ''"
+          (clicked)="confirmInvitationAction()"
         />
       </div>
     </div>

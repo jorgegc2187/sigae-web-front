@@ -1,5 +1,6 @@
 export type UserRole = 'Administrador' | 'Encargado' | 'Solo Lectura';
 export type UserStatus = 'Activo' | 'Inactivo' | 'Pendiente';
+export type InvitationStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
 export type ApiUserRole = 'ADMINISTRADOR' | 'ENCARGADO' | 'SOLO_LECTURA';
 export type ApiUserStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING';
 export type UserRoleResponse = UserRole | ApiUserRole;
@@ -14,6 +15,8 @@ export interface User {
   role: UserRole;
   locations: string | null; // 'Acceso global' | 'Aula de Cómputo, +1 más' | null
   status: UserStatus;
+  invitationStatus: InvitationStatus | null;
+  invitationExpiresAt: string | null;
   lastAccess: string; // texto relativo, ej. 'Hoy', 'Hace 1 día'
 }
 
@@ -26,6 +29,8 @@ export interface UserResponse {
   lastAccessAt: string | null;
   locationIds: string[];
   locationNames: string[];
+  invitationStatus: InvitationStatus | null;
+  invitationExpiresAt: string | null;
 }
 
 export interface CreateUserRequest {

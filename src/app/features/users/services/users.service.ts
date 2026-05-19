@@ -38,6 +38,14 @@ export class UsersService {
     return this.http.patch<UserResponse>(`${this.baseUrl}/${id}/status`, payload);
   }
 
+  cancelInvitation(id: string) {
+    return this.http.post<UserResponse>(`${this.baseUrl}/${id}/invitation/cancel`, {});
+  }
+
+  resendInvitation(id: string) {
+    return this.http.post<UserResponse>(`${this.baseUrl}/${id}/invitation/resend`, {});
+  }
+
   toUser(response: UserResponse): User {
     const role = this.toUiRole(response.role);
 
@@ -51,6 +59,8 @@ export class UsersService {
       locations:
         role === 'Administrador' ? null : this.summarizeLocations(response.locationNames),
       status: this.toUiStatus(response.status),
+      invitationStatus: response.invitationStatus,
+      invitationExpiresAt: response.invitationExpiresAt,
       lastAccess: this.formatLastAccess(response.lastAccessAt),
     };
   }

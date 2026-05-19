@@ -11,12 +11,25 @@ import {
 import { User, UserRole, UserStatus } from '../../models/user.model';
 import { UsersService } from '../../services/users.service';
 
+interface UserActionsMenuState {
+  user: User;
+  top: number;
+  right: number;
+}
+
+interface PendingInvitationAction {
+  user: User;
+  type: 'cancel' | 'resend';
+}
+
 @Component({
   selector: 'app-user-list',
   imports: [SearchInputComponent, ActionButtonComponent, DesktopPaginationComponent, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown.escape)': 'closeActionsMenu()',
+    '(window:scroll)': 'closeActionsMenu()',
+    '(window:resize)': 'closeActionsMenu()',
   },
   templateUrl: './user-list.component.html',
 })
@@ -26,16 +39,19 @@ export class UserListComponent {
   private readonly usersService = inject(UsersService);
   private readonly usersResource = this.usersService.listResource();
   private readonly statusDialog = viewChild<ElementRef<HTMLDialogElement>>('statusDialog');
+  private readonly invitationDialog = viewChild<ElementRef<HTMLDialogElement>>('invitationDialog');
 
   searchQuery = signal('');
   selectedRole = signal<UserRole | ''>('');
   currentPage = signal(1);
-  openActionsMenuUserId = signal<string | null>(null);
+  openActionsMenu = signal<UserActionsMenuState | null>(null);
   pendingStatusActionUser = signal<User | null>(null);
+  pendingInvitationAction = signal<PendingInvitationAction | null>(null);
   readonly pageSize = 10;
   readonly isLoading = computed(() => this.usersResource.isLoading());
   readonly currentUser = this.authService.currentUser;
   readonly users = computed(() => this.usersResource.value().map((user) => this.usersService.toUser(user)));
+  readonly openActionsMenuUser = computed(() => this.openActionsMenu()?.user ?? null);
   readonly activeAdministratorIds = computed(() =>
     new Set(
       this.users()
@@ -57,6 +73,21 @@ export class UserListComponent {
     }
 
     return `El usuario ${user.name} recuperará el acceso al sistema inmediatamente.`;
+  });
+  readonly pendingInvitationActionLabel = computed(() =>
+    this.pendingInvitationAction()?.type === 'cancel' ? 'Anular invitación' : 'Reenviar invitación',
+  );
+  readonly pendingInvitationActionMessage = computed(() => {
+    const action = this.pendingInvitationAction();
+    if (!action) {
+      return '';
+    }
+
+    if (action.type === 'cancel') {
+      return `El enlace actual de ${action.user.name} dejará de funcionar inmediatamente.`;
+    }
+
+    return `Se invalidará cualquier enlace anterior y se enviará una nueva invitación al correo ${action.user.email}.`;
   });
 
   filteredUsers = computed(() => {
@@ -104,35 +135,46 @@ export class UserListComponent {
   }
 
   onSearch(value: string) {
+    this.closeActionsMenu();
     this.searchQuery.set(value);
     this.currentPage.set(1);
   }
 
   onRoleFilter(event: Event) {
+    this.closeActionsMenu();
     this.selectedRole.set((event.target as HTMLSelectElement).value as UserRole | '');
     this.currentPage.set(1);
   }
 
   onPageChange(page: number) {
+    this.closeActionsMenu();
     this.currentPage.set(page);
   }
 
   clearFilters() {
+    this.closeActionsMenu();
     this.searchQuery.set('');
     this.selectedRole.set('');
     this.currentPage.set(1);
   }
 
-  toggleActionsMenu(userId: string) {
-    this.openActionsMenuUserId.update((currentUserId) => (currentUserId === userId ? null : userId));
+  toggleActionsMenu(user: User, trigger: HTMLElement) {
+    const currentMenu = this.openActionsMenu();
+    if (currentMenu?.user.id === user.id) {
+      this.closeActionsMenu();
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    this.openActionsMenu.set({
+      user,
+      top: rect.bottom + 8,
+      right: Math.max(window.innerWidth - rect.right, 16),
+    });
   }
 
   closeActionsMenu() {
-    this.openActionsMenuUserId.set(null);
-  }
-
-  isActionsMenuOpen(userId: string): boolean {
-    return this.openActionsMenuUserId() === userId;
+    this.openActionsMenu.set(null);
   }
 
   isCurrentUser(user: User): boolean {
@@ -198,7 +240,6 @@ export class UserListComponent {
 
   onEdit(user: User) {
     this.closeActionsMenu();
-    console.log('Editar usuario:', user.id);
     this.notifications.info({ message: 'Edición de usuario pendiente de conectar.' });
   }
 
@@ -231,6 +272,74 @@ export class UserListComponent {
     }
 
     this.performStatusUpdate(user, 'Activo');
+  }
+
+  canCancelInvitation(user: User): boolean {
+    return user.status === 'Pendiente' && user.invitationStatus === 'ACTIVE';
+  }
+
+  canResendInvitation(user: User): boolean {
+    return (
+      user.status === 'Pendiente' &&
+      (user.invitationStatus === 'ACTIVE' ||
+        user.invitationStatus === 'EXPIRED' ||
+        user.invitationStatus === 'CANCELLED')
+    );
+  }
+
+  openInvitationDialog(user: User, type: PendingInvitationAction['type']) {
+    this.closeActionsMenu();
+    this.pendingInvitationAction.set({ user, type });
+    const dialog = this.invitationDialog()?.nativeElement;
+    if (!dialog?.open) {
+      dialog?.showModal();
+    }
+  }
+
+  closeInvitationDialog() {
+    this.pendingInvitationAction.set(null);
+    const dialog = this.invitationDialog()?.nativeElement;
+    if (dialog?.open) {
+      dialog.close();
+    }
+  }
+
+  onInvitationDialogClose() {
+    this.pendingInvitationAction.set(null);
+  }
+
+  confirmInvitationAction() {
+    const action = this.pendingInvitationAction();
+    if (!action) {
+      return;
+    }
+
+    const request$ =
+      action.type === 'cancel'
+        ? this.usersService.cancelInvitation(action.user.id)
+        : this.usersService.resendInvitation(action.user.id);
+
+    const dialog = this.invitationDialog()?.nativeElement;
+    if (dialog?.open) {
+      dialog.close();
+    }
+    this.pendingInvitationAction.set(null);
+
+    request$.subscribe({
+      next: () => {
+        this.usersResource.reload();
+        this.notifications.success({
+          message:
+            action.type === 'cancel'
+              ? `Invitación anulada para ${action.user.name}.`
+              : `Invitación reenviada correctamente a ${action.user.name}.`,
+        });
+      },
+      error: (error) => {
+        const message = error?.error?.message ?? 'No se pudo completar la acción sobre la invitación.';
+        this.notifications.error({ message });
+      },
+    });
   }
 
   confirmStatusChange() {
@@ -277,13 +386,41 @@ export class UserListComponent {
     return map[role];
   }
 
-  getStatusBadgeTone(status: UserStatus): StatusBadgeTone {
-    if (status === 'Activo') {
+  getStatusLabel(user: User): string {
+    if (user.status !== 'Pendiente') {
+      return user.status;
+    }
+
+    if (user.invitationStatus === 'ACTIVE') {
+      return 'Invitación activa';
+    }
+
+    if (user.invitationStatus === 'EXPIRED') {
+      return 'Invitación vencida';
+    }
+
+    if (user.invitationStatus === 'CANCELLED') {
+      return 'Invitación anulada';
+    }
+
+    return 'Pendiente';
+  }
+
+  getStatusBadgeTone(user: User): StatusBadgeTone {
+    if (user.status === 'Activo') {
       return 'success';
     }
 
-    if (status === 'Pendiente') {
-      return 'warning';
+    if (user.status === 'Pendiente') {
+      if (user.invitationStatus === 'ACTIVE') {
+        return 'warning';
+      }
+
+      if (user.invitationStatus === 'CANCELLED') {
+        return 'error';
+      }
+
+      return 'neutral';
     }
 
     return 'neutral';
