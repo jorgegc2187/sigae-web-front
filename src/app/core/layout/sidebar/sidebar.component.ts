@@ -49,6 +49,7 @@ export class SidebarComponent {
       { label: 'Préstamos', icon: 'swap_horiz', route: '/loans', badgeCount: 3 },
       { label: 'Reportes', icon: 'bar_chart', route: '/reports' },
       { label: 'Categorías y Tipos', icon: 'category', route: '/settings/categories', adminOnly: true, showDividerBefore: true },
+      { label: 'Ubicaciones', icon: 'location_on', route: '/settings/locations', adminOnly: true },
       { label: 'Proveedores', icon: 'local_shipping', route: '/settings/suppliers', adminOnly: true },
       { label: 'Docentes', icon: 'group', route: '/teachers' },
       { label: 'Usuarios', icon: 'person', route: '/settings/users', adminOnly: true, showDividerBefore: true },

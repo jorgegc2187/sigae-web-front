@@ -3,7 +3,6 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { APP_CONFIG } from '../../config/app.tokens';
-import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -12,7 +11,6 @@ import { ThemeService } from '../../services/theme.service';
 })
 export class HeaderComponent {
   readonly menuClick = output<void>();
-  readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly appConfig = inject(APP_CONFIG);
