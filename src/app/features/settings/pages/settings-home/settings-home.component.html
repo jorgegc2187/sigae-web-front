@@ -1,13 +1,4 @@
 <section class="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-28">
-  <header class="space-y-2">
-    <h1 class="text-2xl font-bold tracking-tight text-slate-800 md:text-[28px]">
-      Configuración
-    </h1>
-    <p class="text-sm leading-6 text-slate-500 md:text-[15px]">
-      Gestione la información institucional y la identidad visual del sistema
-    </p>
-  </header>
-
   @if (isLoading()) {
     <div class="rounded-xl border border-slate-200 bg-white p-10 text-center shadow-sm">
       <span class="loading loading-spinner loading-md text-primary"></span>
@@ -137,21 +128,19 @@
   }
 </section>
 
-<div class="fixed bottom-0 left-0 right-0 z-30 border-t border-base-200 bg-base-100 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-6">
-  <div class="mx-auto flex w-full max-w-4xl justify-end gap-3">
-    <app-action-button
-      label="Cancelar"
-      variant="ghost"
-      [disabled]="isLoading() || isSubmitting()"
-      (clicked)="onCancel()"
-    />
-    <app-action-button
-      label="Guardar Cambios"
-      icon="save"
-      [loading]="isSubmitting()"
-      loadingLabel="Guardando..."
-      [disabled]="isLoading()"
-      (clicked)="onSubmit()"
-    />
-  </div>
+<div class="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-base-200 bg-base-100 p-4 px-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-6">
+  <app-action-button
+    label="Cancelar"
+    variant="neutral"
+    [disabled]="isLoading() || isSubmitting()"
+    (clicked)="onCancel()"
+  />
+  <app-action-button
+    label="Guardar Cambios"
+    icon="save"
+    [loading]="isSubmitting()"
+    loadingLabel="Guardando..."
+    [disabled]="isLoading() || isSubmitting()"
+    (clicked)="onSubmit()"
+  />
 </div>
