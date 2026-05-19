@@ -62,7 +62,7 @@
                 id="systemName"
                 type="text"
                 formControlName="systemName"
-                class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder:text-base-content/40 focus:outline-none"
+                [class]="fieldInputClass"
                 placeholder="Ej. I.E. Simón Rodríguez - Nasca"
               />
             </app-form-field>
@@ -80,7 +80,7 @@
                 id="address"
                 type="text"
                 formControlName="address"
-                class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder:text-base-content/40 focus:outline-none"
+                [class]="fieldInputClass"
                 placeholder="Ej. Av. Principal 123"
               />
             </app-form-field>
@@ -91,7 +91,7 @@
               id="city"
               type="text"
               formControlName="city"
-              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder:text-base-content/40 focus:outline-none"
+              [class]="fieldInputClass"
               placeholder="Ciudad"
             />
           </app-form-field>
@@ -101,7 +101,7 @@
               id="supportPhone"
               type="text"
               formControlName="supportPhone"
-              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder:text-base-content/40 focus:outline-none"
+              [class]="fieldInputClass"
               placeholder="+51 999 999 999"
             />
           </app-form-field>
@@ -117,7 +117,7 @@
                 id="supportEmail"
                 type="email"
                 formControlName="supportEmail"
-                class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder:text-base-content/40 focus:outline-none"
+                [class]="fieldInputClass"
                 placeholder="contacto@colegio.edu.pe"
               />
             </app-form-field>

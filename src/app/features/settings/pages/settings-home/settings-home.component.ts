@@ -17,6 +17,8 @@ export class SettingsHomeComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly settingsService = inject(SettingsService);
   private readonly notifications = inject(NotificationService);
+  readonly fieldInputClass =
+    'w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none';
 
   readonly logoInput = viewChild<ElementRef<HTMLInputElement>>('logoInput');
   readonly isSubmitting = signal(false);
