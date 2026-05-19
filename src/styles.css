@@ -166,6 +166,15 @@
 }
 
 /* ─── APP SHELL / SIDEBAR ────────────────────────── */
+.app-shell {
+  --shell-sidebar-expanded-width: 240px;
+  --shell-sidebar-collapsed-rail-width: 64px;
+  --shell-sidebar-inline-padding: 8px;
+  --shell-sidebar-collapsed-width: calc(
+    var(--shell-sidebar-collapsed-rail-width) + (var(--shell-sidebar-inline-padding) * 2)
+  );
+}
+
 .app-shell .app-shell-sidebar,
 .app-shell .app-shell-header,
 .app-shell .app-shell-main {
@@ -174,12 +183,13 @@
 
 .app-shell .app-shell-sidebar {
   overflow-x: visible;
+  width: var(--shell-sidebar-expanded-width);
 }
 
 .app-shell .app-shell-icon-container {
   display: flex;
-  width: 64px;
-  min-width: 64px;
+  width: var(--shell-sidebar-collapsed-rail-width);
+  min-width: var(--shell-sidebar-collapsed-rail-width);
   align-items: center;
   justify-content: center;
 }
@@ -232,7 +242,8 @@
   transform: translateY(-50%);
   border-width: 4px 4px 4px 0;
   border-style: solid;
-  border-color: transparent color-mix(in oklab, black 78%, var(--color-base-content) 22%) transparent transparent;
+  border-color: transparent color-mix(in oklab, black 78%, var(--color-base-content) 22%)
+    transparent transparent;
 }
 
 @media (min-width: 768px) {
@@ -247,7 +258,9 @@
   }
 
   .app-shell.sidebar-collapsed .app-shell-sidebar-nav-item:hover .app-shell-sidebar-tooltip,
-  .app-shell.sidebar-collapsed .app-shell-sidebar-nav-item:focus-visible .app-shell-sidebar-tooltip {
+  .app-shell.sidebar-collapsed
+    .app-shell-sidebar-nav-item:focus-visible
+    .app-shell-sidebar-tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateY(-50%) translateX(16px);
@@ -258,14 +271,14 @@
   }
 
   .app-shell.sidebar-collapsed .app-shell-sidebar {
-    width: 64px;
+    width: var(--shell-sidebar-collapsed-width);
   }
 
   .app-shell.sidebar-collapsed .app-shell-header {
-    left: 64px;
+    left: var(--shell-sidebar-collapsed-width);
   }
 
   .app-shell.sidebar-collapsed .app-shell-main {
-    margin-left: 64px;
+    margin-left: var(--shell-sidebar-collapsed-width);
   }
 }

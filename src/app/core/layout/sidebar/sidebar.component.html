@@ -1,5 +1,5 @@
 <aside
-  class="app-shell-sidebar fixed left-0 top-0 z-50 flex h-full w-[240px] -translate-x-full flex-col border-r border-slate-200 bg-slate-50 py-6 md:pointer-events-auto md:translate-x-0"
+  class="app-shell-sidebar fixed left-0 top-0 z-50 flex h-full -translate-x-full flex-col border-r border-slate-200 bg-slate-50 py-6 px-2 md:pointer-events-auto md:translate-x-0"
   [class.translate-x-0]="isMobileOpen()"
   [class.pointer-events-none]="!isMobileOpen()"
   [class.pointer-events-auto]="isMobileOpen()"
@@ -7,13 +7,23 @@
   <div class="app-shell-sidebar-inner flex h-full flex-col px-0">
     <div class="relative mb-8 flex h-12 items-center">
       <div class="app-shell-icon-container">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/25">
-          <span class="material-symbols-outlined text-primary-content" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/25"
+        >
+          <span
+            class="material-symbols-outlined text-primary-content"
+            style="font-variation-settings: 'FILL' 1"
+            >account_balance</span
+          >
         </div>
       </div>
       <div class="app-shell-brand-copy min-w-0 overflow-hidden">
-        <h1 class="truncate text-2xl font-bold leading-tight tracking-tight text-blue-700">{{ appName }}</h1>
-        <p class="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-500">Gestión Global</p>
+        <h1 class="truncate text-2xl font-bold leading-tight tracking-tight text-blue-700">
+          {{ appName }}
+        </h1>
+        <p class="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          Gestión Global
+        </p>
       </div>
     </div>
 
@@ -58,7 +68,9 @@
             {{ item.label }}
           </span>
           @if (item.badgeCount) {
-            <span class="app-shell-sidebar-badge mr-4 rounded-full bg-error px-2 py-0.5 text-[11px] font-bold text-error-content">
+            <span
+              class="app-shell-sidebar-badge mr-4 rounded-full bg-error px-2 py-0.5 text-[11px] font-bold text-error-content"
+            >
               {{ item.badgeCount }}
             </span>
           }
@@ -74,7 +86,10 @@
       [attr.aria-expanded]="!isDesktopCollapsed()"
       (click)="onToggleDesktop()"
     >
-      <span class="app-shell-sidebar-toggle-icon material-symbols-outlined !text-[16px] transition-transform duration-300">chevron_left</span>
+      <span
+        class="app-shell-sidebar-toggle-icon material-symbols-outlined !text-[16px] transition-transform duration-300"
+        >chevron_left</span
+      >
     </button>
   </div>
 </aside>
