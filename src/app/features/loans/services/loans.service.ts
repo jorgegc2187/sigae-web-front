@@ -4,6 +4,11 @@ import { catchError, map, of, throwError } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
 import { CreateLoanPayload, LoanDetail, LoanSummary } from '../models/loan.model';
 
+interface ApiErrorResponse {
+  message?: string;
+  validationErrors?: Record<string, string>;
+}
+
 export interface LoanListFilters {
   search?: string;
   status?: string;
@@ -70,6 +75,30 @@ export class LoansService {
 
   isLoansEndpointError(error: unknown): error is HttpErrorResponse {
     return error instanceof HttpErrorResponse && error.status === 404 && this.isLoansUrl(error.url);
+  }
+
+  isPayloadTooLarge(error: unknown): error is HttpErrorResponse {
+    return error instanceof HttpErrorResponse && error.status === 413 && this.isLoansUrl(error.url);
+  }
+
+  isValidationError(error: unknown): error is HttpErrorResponse {
+    return error instanceof HttpErrorResponse && (error.status === 400 || error.status === 422) && this.isLoansUrl(error.url);
+  }
+
+  isUnauthorizedOrForbidden(error: unknown): error is HttpErrorResponse {
+    return error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403) && this.isLoansUrl(error.url);
+  }
+
+  getApiErrorMessage(error: HttpErrorResponse): string | null {
+    const payload = error.error;
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const apiError = payload as ApiErrorResponse;
+    return typeof apiError.message === 'string' && apiError.message.trim().length > 0
+      ? apiError.message.trim()
+      : null;
   }
 
   private buildParams(filters: LoanListFilters): HttpParams {

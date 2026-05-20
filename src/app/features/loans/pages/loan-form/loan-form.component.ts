@@ -929,13 +929,36 @@ export class LoanFormComponent implements OnDestroy {
       );
       this.notifications.success({ message: 'Préstamo registrado correctamente.' });
       await this.router.navigate(['/loans', createdLoan.id]);
-    } catch {
-      this.notifications.info({
-        message: 'El módulo de préstamos aún no está disponible en la API; no se guardó información local.',
+    } catch (error) {
+      this.notifications.error({
+        message: this.resolveLoanCreationErrorMessage(error),
       });
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  private resolveLoanCreationErrorMessage(error: unknown): string {
+    if (this.loansService.isCollectionEndpointMissing(error)) {
+      return 'El módulo de préstamos aún no está disponible en la API; no se guardó información local.';
+    }
+
+    if (this.loansService.isPayloadTooLarge(error)) {
+      return 'Los archivos adjuntos exceden el tamaño máximo permitido para registrar el préstamo.';
+    }
+
+    if (this.loansService.isUnauthorizedOrForbidden(error)) {
+      return 'No tiene permisos para registrar préstamos o su sesión ya no es válida.';
+    }
+
+    if (this.loansService.isValidationError(error)) {
+      return (
+        this.loansService.getApiErrorMessage(error) ??
+        'La información del préstamo no pasó las validaciones del servidor.'
+      );
+    }
+
+    return 'No se pudo registrar el préstamo. Intente nuevamente.';
   }
 
   private createAttachmentDraft(file: File, source: LoanAttachmentSource): LoanAttachmentDraft {
