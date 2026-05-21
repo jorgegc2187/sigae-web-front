@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom, map } from 'rxjs';
+import { AuthService } from '../../../../core/auth/auth.service';
 import {
   getControlErrorMessage,
   shouldShowControlError,
@@ -52,6 +53,7 @@ export class UserFormComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   private readonly usersService = inject(UsersService);
   private readonly locationsService = inject(LocationsService);
   private readonly notifications = inject(NotificationService);
@@ -99,6 +101,11 @@ export class UserFormComponent {
   });
   readonly userId = computed(() => this.routeUserId());
   readonly isEditMode = computed(() => this.userId() !== null);
+  readonly isEditingCurrentUser = computed(() => {
+    const userId = this.userId();
+    const currentUserId = this.authService.currentUser()?.id;
+    return !!userId && !!currentUserId && userId === currentUserId;
+  });
   readonly isBusy = computed(() => this.isSubmitting() || this.isLoadingUser());
   readonly breadcrumbLabel = computed(() =>
     this.isEditMode() ? 'Editar Usuario' : 'Crear Nuevo Usuario',
@@ -191,6 +198,9 @@ export class UserFormComponent {
       },
     });
   });
+  readonly roleHint = computed(() =>
+    this.isEditingCurrentUser() ? 'No puedes cambiar tu propio rol.' : null,
+  );
   readonly locationAssignmentError = computed(() => {
     this.formEvents();
     if (this.usesGlobalLocationAccess()) {
@@ -278,6 +288,7 @@ export class UserFormComponent {
       }
 
       this.form.enable({ emitEvent: false });
+      this.syncRoleControlAvailability();
     });
   }
 
@@ -475,6 +486,15 @@ export class UserFormComponent {
     }
 
     this.syncPasswordValidators(this.sendInvitationControl.value);
+  }
+
+  private syncRoleControlAvailability(): void {
+    if (this.isEditingCurrentUser()) {
+      this.roleControl.disable({ emitEvent: false });
+      return;
+    }
+
+    this.roleControl.enable({ emitEvent: false });
   }
 
   private syncPasswordValidators(sendInvitation: boolean): void {
