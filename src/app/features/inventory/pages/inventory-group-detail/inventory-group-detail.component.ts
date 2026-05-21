@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
 import { AssetCondition } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
@@ -16,6 +17,7 @@ import { AssetsService } from '../../services/assets.service';
     ActionButtonComponent,
     DataListingComponent,
     SearchInputComponent,
+    SelectFieldComponent,
     StatusBadgeComponent,
   ],
   templateUrl: './inventory-group-detail.component.html',
@@ -27,6 +29,14 @@ export class InventoryGroupDetailComponent {
   readonly groupId = input.required<string>();
   readonly searchQuery = signal('');
   readonly selectedStatus = signal<'all' | AssetCondition>('all');
+  readonly statusOptions: SelectFieldOption[] = [
+    { value: 'all', label: 'Todos los estados' },
+    { value: 'Bueno', label: 'Operativo' },
+    { value: 'Regular', label: 'Regular' },
+    { value: 'Malo', label: 'Malo' },
+    { value: 'Mantenimiento', label: 'Mantenimiento' },
+    { value: 'Dado de baja', label: 'Dado de baja' },
+  ];
   readonly currentPage = signal(1);
   readonly pageSize = 10;
 
@@ -75,8 +85,8 @@ export class InventoryGroupDetailComponent {
     this.currentPage.set(1);
   }
 
-  updateStatusFilter(event: Event): void {
-    this.selectedStatus.set((event.target as HTMLSelectElement).value as 'all' | AssetCondition);
+  updateStatusFilter(status: string): void {
+    this.selectedStatus.set(status as 'all' | AssetCondition);
     this.currentPage.set(1);
   }
 

@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { CategoriesService } from '../../../categories/services/categories.service';
 import { LocationsService } from '../../../locations/services/locations.service';
 import { SuppliersService } from '../../../suppliers/services/suppliers.service';
@@ -14,7 +15,7 @@ import { AssetsService } from '../../services/assets.service';
 
 @Component({
   selector: 'app-inventory-form',
-  imports: [ReactiveFormsModule, RouterLink, ActionButtonComponent, FormFieldComponent],
+  imports: [ReactiveFormsModule, RouterLink, ActionButtonComponent, FormFieldComponent, SelectFieldComponent],
   templateUrl: './inventory-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -38,6 +39,26 @@ export class InventoryFormComponent {
   readonly availableTypes = computed(() =>
     this.categories().find((category) => category.id === this.selectedCategoryId())?.types ?? [],
   );
+  readonly categoryOptions = computed<SelectFieldOption[]>(() =>
+    this.categories().map((category) => ({ value: category.id, label: category.name })),
+  );
+  readonly typeOptions = computed<SelectFieldOption[]>(() =>
+    this.availableTypes().map((type) => ({ value: type.id, label: type.name })),
+  );
+  readonly locationOptions = computed<SelectFieldOption[]>(() =>
+    this.locations().map((location) => ({ value: location.id, label: location.name })),
+  );
+  readonly supplierOptions = computed<SelectFieldOption[]>(() => [
+    { value: '', label: 'Sin proveedor' },
+    ...this.suppliers().map((supplier) => ({ value: supplier.id, label: supplier.name })),
+  ]);
+  readonly conditionOptions: SelectFieldOption[] = [
+    { value: 'Bueno', label: 'Bueno' },
+    { value: 'Regular', label: 'Regular' },
+    { value: 'Malo', label: 'Malo' },
+    { value: 'Mantenimiento', label: 'Mantenimiento' },
+    { value: 'Dado de baja', label: 'Dado de baja' },
+  ];
 
   readonly form = this.fb.group({
     code: ['', Validators.required],
@@ -74,8 +95,7 @@ export class InventoryFormComponent {
     });
   }
 
-  updateCategory(event: Event): void {
-    const categoryId = (event.target as HTMLSelectElement).value;
+  updateCategory(categoryId: string): void {
     this.selectedCategoryId.set(categoryId);
     this.form.patchValue({
       categoryId,

@@ -9,6 +9,7 @@ import { ActionButtonComponent } from '../../../../shared/ui/action-button/actio
 import { AssetQrScannerModalComponent } from '../../../../shared/ui/asset-qr-scanner-modal/asset-qr-scanner-modal.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { CategoriesService } from '../../../categories/services/categories.service';
 import { AssetsService } from '../../services/assets.service';
 
@@ -21,6 +22,7 @@ import { AssetsService } from '../../services/assets.service';
     ActionButtonComponent,
     DesktopPaginationComponent,
     SearchInputComponent,
+    SelectFieldComponent,
   ],
   templateUrl: './inventory-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +42,10 @@ export class InventoryListComponent {
 
   readonly groupedAssetsResource = this.assetsService.listGroupedResource(this.query, this.categoryId);
   readonly categories = toSignal(this.categoriesService.list(), { initialValue: [] });
+  readonly categoryOptions = computed<SelectFieldOption[]>(() => [
+    { value: 'all', label: 'Todas las categorías' },
+    ...this.categories().map((category) => ({ value: category.id, label: category.name })),
+  ]);
   readonly groupedAssets = computed(() => this.groupedAssetsResource.value());
   readonly isLoading = computed(() => this.groupedAssetsResource.isLoading());
   readonly isEmpty = computed(() => !this.isLoading() && this.groupedAssets().length === 0);
@@ -63,8 +69,8 @@ export class InventoryListComponent {
     this.selectedGroupIds.set([]);
   }
 
-  updateCategory(event: Event): void {
-    this.categoryId.set((event.target as HTMLSelectElement).value);
+  updateCategory(categoryId: string): void {
+    this.categoryId.set(categoryId);
     this.currentPage.set(1);
     this.selectedGroupIds.set([]);
   }

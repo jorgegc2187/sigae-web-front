@@ -15,6 +15,7 @@ import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagina
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
 import { inferAssetTypeIcon, inferCategoryIcon } from '../../../../shared/utils/icon-inference.util';
 import { AssetType, Attribute, Category } from '../../models/category.model';
@@ -72,6 +73,7 @@ interface DeleteTarget {
     SearchInputComponent,
     FormFieldComponent,
     MobilePaginationComponent,
+    SelectFieldComponent,
     ToggleSwitchComponent,
   ],
   templateUrl: './categories-panel.component.html',
@@ -108,6 +110,12 @@ export class CategoriesPanelComponent {
       ...category,
       typesCount: category.types.length,
       assetsCount: category.assetsCount,
+    })),
+  );
+  readonly categorySelectOptions = computed<SelectFieldOption[]>(() =>
+    this.categoriesWithMetrics().map((category) => ({
+      value: category.id,
+      label: category.name,
     })),
   );
 

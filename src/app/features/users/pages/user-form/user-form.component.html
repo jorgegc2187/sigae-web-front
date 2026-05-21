@@ -6,10 +6,10 @@
           <li>
             <a routerLink="/settings/users" class="transition-colors hover:text-primary">Usuarios</a>
           </li>
-          <li class="font-medium text-base-content">Crear Nuevo Usuario</li>
+          <li class="font-medium text-base-content">{{ breadcrumbLabel() }}</li>
         </ul>
       </div>
-      <h2 class="text-2xl font-bold text-base-content">Crear Nuevo Usuario</h2>
+      <h2 class="text-2xl font-bold text-base-content">{{ formTitle() }}</h2>
     </div>
   </div>
 
@@ -32,7 +32,7 @@
               id="userFirstName"
               type="text"
               formControlName="firstName"
-              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+              [class]="inputClass"
               placeholder="Ej. Juan"
             />
           </app-form-field>
@@ -47,7 +47,7 @@
               id="userLastName"
               type="text"
               formControlName="lastName"
-              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+              [class]="inputClass"
               placeholder="Ej. Pérez"
             />
           </app-form-field>
@@ -63,7 +63,7 @@
               id="userEmail"
               type="email"
               formControlName="email"
-              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
+              [class]="inputClass"
               placeholder="ejemplo@institucion.edu.pe"
               autocomplete="email"
             />
@@ -76,26 +76,15 @@
         </h3>
 
         <div class="mb-8 grid grid-cols-1 gap-y-5">
-          <app-form-field
+          <app-select-field
             label="Rol"
             fieldId="userRole"
             [required]="true"
             [error]="roleError()"
-          >
-            <select
-              id="userRole"
-              formControlName="role"
-              class="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 pr-8 text-sm text-base-content focus:outline-none"
-            >
-              <option value="" disabled>Selecciona un rol</option>
-              @for (role of roles; track role) {
-                <option [value]="role">{{ role }}</option>
-              }
-            </select>
-            <span formFieldSuffix class="material-symbols-outlined pointer-events-none text-[18px] text-base-content/40">
-              expand_more
-            </span>
-          </app-form-field>
+            [options]="roleOptions"
+            placeholder="Selecciona un rol"
+            formControlName="role"
+          />
 
           @if (usesGlobalLocationAccess()) {
             <div class="rounded-2xl border border-primary/15 bg-primary/5 p-4">
@@ -122,7 +111,7 @@
                     {{ location.name }}
                     <button
                       type="button"
-                      [disabled]="isSubmitting()"
+                      [disabled]="isBusy()"
                       class="inline-flex h-4 w-4 items-center justify-center rounded-full text-base-content/55 transition-colors hover:bg-base-content/15 hover:text-base-content"
                       [attr.aria-label]="'Quitar ' + location.name"
                       (click)="removeLocation(location.id)"
@@ -134,7 +123,7 @@
 
                 <input
                   type="text"
-                  [disabled]="isSubmitting()"
+                  [disabled]="isBusy()"
                   class="h-7 min-w-[140px] flex-1 border-0 bg-transparent px-1 py-0 text-sm outline-none placeholder-shown:opacity-50"
                   placeholder="Añadir ubicación..."
                   [value]="locationQuery()"
@@ -148,7 +137,7 @@
                       <li>
                         <button
                           type="button"
-                          [disabled]="isSubmitting()"
+                          [disabled]="isBusy()"
                           class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-base-200"
                           (click)="addLocation(location)"
                         >
@@ -168,116 +157,118 @@
           }
         </div>
 
-        <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
-          <span class="material-symbols-outlined text-primary text-[20px]">security</span>
-          Seguridad
-        </h3>
+        @if (!isEditMode()) {
+          <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+            <span class="material-symbols-outlined text-primary text-[20px]">security</span>
+            Seguridad
+          </h3>
 
-        <div class="space-y-5">
-          <div>
-            <div class="flex items-center">
-              <app-toggle-switch
-                ariaLabel="Enviar invitación por correo"
-                [checked]="sendInvitationControl.value"
-                [disabled]="isSubmitting()"
-                (checkedChange)="onSendInvitationChange($event)"
-              />
-              <span class="ml-3 text-sm font-medium text-base-content">
-              Enviar invitación por correo
-              </span>
-            </div>
-            <p class="ml-[52px] mt-1 text-xs text-base-content/55">
-              @if (shouldShowPassword) {
-                Esta contraseña se usará como acceso inicial del usuario.
-              } @else {
-                Se enviará un correo para que configure su contraseña.
-              }
-            </p>
-          </div>
-
-          @if (shouldShowPassword) {
-            <app-form-field
-              label="Contraseña temporal"
-              fieldId="userPassword"
-              [required]="true"
-              [error]="passwordError()"
-            >
-              <input
-                id="userPassword"
-                type="password"
-                formControlName="password"
-                class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
-                placeholder="Debe cumplir con la política de seguridad"
-                autocomplete="new-password"
-              />
-            </app-form-field>
-
-            <div class="rounded-2xl bg-base-200/55 p-4">
-              <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-base-content/55">
-                Requisitos de seguridad
+          <div class="space-y-5">
+            <div>
+              <div class="flex items-center">
+                <app-toggle-switch
+                  ariaLabel="Enviar invitación por correo"
+                  [checked]="sendInvitationControl.value"
+                  [disabled]="isBusy()"
+                  (checkedChange)="onSendInvitationChange($event)"
+                />
+                <span class="ml-3 text-sm font-medium text-base-content">
+                Enviar invitación por correo
+                </span>
+              </div>
+              <p class="ml-[52px] mt-1 text-xs text-base-content/55">
+                @if (shouldShowPassword) {
+                  Esta contraseña se usará como acceso inicial del usuario.
+                } @else {
+                  Se enviará un correo para que configure su contraseña.
+                }
               </p>
-
-              <ul class="space-y-2 text-sm">
-                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasMinLength" [class.text-base-content/55]="!passwordRequirements().hasMinLength">
-                  <span class="material-symbols-outlined text-[18px]">
-                    {{ passwordRequirements().hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}
-                  </span>
-                  Al menos 8 caracteres
-                </li>
-                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasUppercase" [class.text-base-content/55]="!passwordRequirements().hasUppercase">
-                  <span class="material-symbols-outlined text-[18px]">
-                    {{ passwordRequirements().hasUppercase ? 'check_circle' : 'radio_button_unchecked' }}
-                  </span>
-                  Al menos una letra mayúscula
-                </li>
-                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasNumber" [class.text-base-content/55]="!passwordRequirements().hasNumber">
-                  <span class="material-symbols-outlined text-[18px]">
-                    {{ passwordRequirements().hasNumber ? 'check_circle' : 'radio_button_unchecked' }}
-                  </span>
-                  Al menos un número
-                </li>
-                <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasSpecial" [class.text-base-content/55]="!passwordRequirements().hasSpecial">
-                  <span class="material-symbols-outlined text-[18px]">
-                    {{ passwordRequirements().hasSpecial ? 'check_circle' : 'radio_button_unchecked' }}
-                  </span>
-                  Al menos un carácter especial
-                </li>
-              </ul>
             </div>
-          }
-        </div>
+
+            @if (shouldShowPassword) {
+              <app-form-field
+                label="Contraseña temporal"
+                fieldId="userPassword"
+                [required]="true"
+                [error]="passwordError()"
+              >
+                <input
+                  id="userPassword"
+                  type="password"
+                  formControlName="password"
+                  [class]="inputClass"
+                  placeholder="Debe cumplir con la política de seguridad"
+                  autocomplete="new-password"
+                />
+              </app-form-field>
+
+              <div class="rounded-2xl bg-base-200/55 p-4">
+                <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-base-content/55">
+                  Requisitos de seguridad
+                </p>
+
+                <ul class="space-y-2 text-sm">
+                  <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasMinLength" [class.text-base-content/55]="!passwordRequirements().hasMinLength">
+                    <span class="material-symbols-outlined text-[18px]">
+                      {{ passwordRequirements().hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}
+                    </span>
+                    Al menos 8 caracteres
+                  </li>
+                  <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasUppercase" [class.text-base-content/55]="!passwordRequirements().hasUppercase">
+                    <span class="material-symbols-outlined text-[18px]">
+                      {{ passwordRequirements().hasUppercase ? 'check_circle' : 'radio_button_unchecked' }}
+                    </span>
+                    Al menos una letra mayúscula
+                  </li>
+                  <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasNumber" [class.text-base-content/55]="!passwordRequirements().hasNumber">
+                    <span class="material-symbols-outlined text-[18px]">
+                      {{ passwordRequirements().hasNumber ? 'check_circle' : 'radio_button_unchecked' }}
+                    </span>
+                    Al menos un número
+                  </li>
+                  <li class="flex items-center gap-2" [class.text-success]="passwordRequirements().hasSpecial" [class.text-base-content/55]="!passwordRequirements().hasSpecial">
+                    <span class="material-symbols-outlined text-[18px]">
+                      {{ passwordRequirements().hasSpecial ? 'check_circle' : 'radio_button_unchecked' }}
+                    </span>
+                    Al menos un carácter especial
+                  </li>
+                </ul>
+              </div>
+            }
+          </div>
+        }
       </form>
     </div>
   </section>
 </div>
 
 <div class="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-base-200 bg-base-100 p-4 px-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-6">
-  <app-action-button label="Cancelar" variant="neutral" routerLink="/settings/users" [disabled]="isSubmitting()" />
+  <app-action-button label="Cancelar" variant="neutral" routerLink="/settings/users" [disabled]="isBusy()" />
   <app-action-button
-    label="Crear Usuario"
+    [label]="submitLabel()"
     icon="save"
     className="shadow-sm"
-    [disabled]="isSubmitting()"
+    [disabled]="isBusy()"
     [loading]="isSubmitting()"
-    loadingLabel="Creando usuario..."
+    [loadingLabel]="loadingLabel()"
     (clicked)="onSubmit()"
   />
 </div>
 
-@if (isSubmitting()) {
+@if (isBusy()) {
   <div
     class="fixed inset-0 z-[60] flex items-center justify-center bg-base-content/35 p-4 backdrop-blur-sm"
     role="status"
     aria-live="polite"
-    aria-label="Creando usuario"
+    [attr.aria-label]="blockingTitle()"
   >
     <div class="w-full max-w-md rounded-2xl border border-base-300 bg-base-100 p-8 text-center shadow-xl">
       <div class="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
         <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
       </div>
-      <h3 class="text-xl font-bold text-base-content">Creando usuario</h3>
+      <h3 class="text-xl font-bold text-base-content">{{ blockingTitle() }}</h3>
       <p class="mt-2 text-sm leading-relaxed text-base-content/65">
-        Estamos guardando la información y esperando la confirmación del servidor.
+        {{ blockingDescription() }}
       </p>
     </div>
   </div>

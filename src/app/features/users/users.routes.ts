@@ -2,6 +2,16 @@ import { Routes } from '@angular/router';
 
 export const USERS_ROUTES: Routes = [
   {
+    path: ':id/edit',
+    loadComponent: () =>
+      import('./pages/user-form/user-form.component').then((m) => m.UserFormComponent),
+    title: 'Editar Usuario - SIGAE',
+    data: {
+      pageTitle: 'Usuarios',
+      pageSubtitle: 'Editar usuario',
+    },
+  },
+  {
     path: 'new',
     loadComponent: () =>
       import('./pages/user-form/user-form.component').then((m) => m.UserFormComponent),

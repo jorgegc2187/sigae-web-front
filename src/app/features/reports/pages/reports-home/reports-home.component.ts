@@ -5,6 +5,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DatePickerComponent, DateRangeValue } from '../../../../shared/ui/date-picker/date-picker.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/status-badge/status-badge.component';
 import {
   AssetReportFilters,
@@ -25,7 +26,7 @@ interface PendingReportExport {
 
 @Component({
   selector: 'app-reports-home',
-  imports: [RouterLink, ActionButtonComponent, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent],
+  imports: [RouterLink, ActionButtonComponent, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent, SelectFieldComponent],
   templateUrl: './reports-home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -57,6 +58,18 @@ export class ReportsHomeComponent {
 
   readonly assetCategories = signal<ReportFilterOption[]>([]);
   readonly assetLocations = signal<ReportFilterOption[]>([]);
+  readonly assetCategoryOptions = computed<SelectFieldOption[]>(() => [
+    { value: 'all', label: 'Todas las categorías' },
+    ...this.assetCategories().map((category) => ({ value: category.id, label: category.name })),
+  ]);
+  readonly assetLocationOptions = computed<SelectFieldOption[]>(() => [
+    { value: 'all', label: 'Todas las ubicaciones' },
+    ...this.assetLocations().map((location) => ({ value: location.id, label: location.name })),
+  ]);
+  readonly loanLocationOptions = computed<SelectFieldOption[]>(() => [
+    { value: 'all', label: 'Todas las ubicaciones' },
+    ...this.loanLocations().map((location) => ({ value: location.id, label: location.name })),
+  ]);
 
   readonly loanLocations = computed<ReportFilterOption[]>(() => this.assetLocations());
 
@@ -179,13 +192,13 @@ export class ReportsHomeComponent {
     }
   }
 
-  updateAssetCategory(event: Event): void {
-    this.assetCategoryId.set((event.target as HTMLSelectElement).value);
+  updateAssetCategory(categoryId: string): void {
+    this.assetCategoryId.set(categoryId);
     this.assetCurrentPage.set(1);
   }
 
-  updateAssetLocation(event: Event): void {
-    this.assetLocationId.set((event.target as HTMLSelectElement).value);
+  updateAssetLocation(locationId: string): void {
+    this.assetLocationId.set(locationId);
     this.assetCurrentPage.set(1);
   }
 
@@ -206,8 +219,8 @@ export class ReportsHomeComponent {
     this.loanCurrentPage.set(1);
   }
 
-  updateLoanLocation(event: Event): void {
-    this.loanLocation.set((event.target as HTMLSelectElement).value);
+  updateLoanLocation(locationId: string): void {
+    this.loanLocation.set(locationId);
     this.loanCurrentPage.set(1);
   }
 

@@ -453,25 +453,14 @@
             />
           </app-form-field>
 
-          <app-form-field label="Categoría" fieldId="type-category" controlType="select">
-            <select
-              id="type-category"
-              class="w-full cursor-pointer appearance-none border-0 bg-transparent p-0 pr-10 text-sm text-base-content focus:outline-none"
-              [ngModel]="typeFormDraft().categoryId"
-              (ngModelChange)="updateTypeDraftCategory($event)"
-            >
-              <option disabled value="">Seleccione una categoría</option>
-              @for (category of categoriesWithMetrics(); track category.id) {
-                <option [value]="category.id">{{ category.name }}</option>
-              }
-            </select>
-            <span
-              formFieldSuffix
-              class="material-symbols-outlined pointer-events-none text-[20px] text-base-content/40"
-            >
-              expand_more
-            </span>
-          </app-form-field>
+          <app-select-field
+            label="Categoría"
+            fieldId="type-category"
+            placeholder="Seleccione una categoría"
+            [options]="categorySelectOptions()"
+            [value]="typeFormDraft().categoryId"
+            (valueChange)="updateTypeDraftCategory($event)"
+          />
         </div>
 
         <div class="border-t border-base-300 pt-5">

@@ -22,48 +22,40 @@
           <input class="input input-bordered w-full bg-base-100" formControlName="name" placeholder="Laptop Lenovo ThinkPad" />
         </app-form-field>
 
-        <app-form-field label="Categoría">
-          <select class="select select-bordered w-full bg-base-100" formControlName="categoryId" (change)="updateCategory($event)">
-            @for (category of categories(); track category.id) {
-              <option [value]="category.id">{{ category.name }}</option>
-            }
-          </select>
-        </app-form-field>
+        <app-select-field
+          label="Categoría"
+          placeholder="Seleccione una categoría"
+          [options]="categoryOptions()"
+          formControlName="categoryId"
+          (valueChange)="updateCategory($event)"
+        />
 
-        <app-form-field label="Tipo de activo">
-          <select class="select select-bordered w-full bg-base-100" formControlName="typeId">
-            @for (type of availableTypes(); track type.id) {
-              <option [value]="type.id">{{ type.name }}</option>
-            }
-          </select>
-        </app-form-field>
+        <app-select-field
+          label="Tipo de activo"
+          placeholder="Seleccione un tipo"
+          [options]="typeOptions()"
+          formControlName="typeId"
+        />
 
-        <app-form-field label="Ubicación">
-          <select class="select select-bordered w-full bg-base-100" formControlName="locationId">
-            @for (location of locations(); track location.id) {
-              <option [value]="location.id">{{ location.name }}</option>
-            }
-          </select>
-        </app-form-field>
+        <app-select-field
+          label="Ubicación"
+          placeholder="Seleccione una ubicación"
+          [options]="locationOptions()"
+          formControlName="locationId"
+        />
 
-        <app-form-field label="Proveedor">
-          <select class="select select-bordered w-full bg-base-100" formControlName="supplierId">
-            <option value="">Sin proveedor</option>
-            @for (supplier of suppliers(); track supplier.id) {
-              <option [value]="supplier.id">{{ supplier.name }}</option>
-            }
-          </select>
-        </app-form-field>
+        <app-select-field
+          label="Proveedor"
+          placeholder="Sin proveedor"
+          [options]="supplierOptions()"
+          formControlName="supplierId"
+        />
 
-        <app-form-field label="Estado">
-          <select class="select select-bordered w-full bg-base-100" formControlName="condition">
-            <option>Bueno</option>
-            <option>Regular</option>
-            <option>Malo</option>
-            <option>Mantenimiento</option>
-            <option>Dado de baja</option>
-          </select>
-        </app-form-field>
+        <app-select-field
+          label="Estado"
+          [options]="conditionOptions"
+          formControlName="condition"
+        />
 
         <app-form-field label="Serie" [error]="form.get('serial')?.invalid && form.get('serial')?.touched ? 'La serie es requerida.' : null">
           <input class="input input-bordered w-full bg-base-100" formControlName="serial" placeholder="SN-0001" />

@@ -1,0 +1,83 @@
+<div #container class="relative w-full">
+  @if (isToolbar()) {
+    @if (label()) {
+      <label [attr.for]="fieldId()" [class]="toolbarLabelClass()">{{ label() }}</label>
+    }
+
+    <div [class]="toolbarWrapperClass()">
+      <button
+        type="button"
+        [id]="fieldId() ?? null"
+        [class]="triggerClass()"
+        role="combobox"
+        aria-haspopup="listbox"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="menuId"
+        [attr.aria-label]="ariaLabel() ?? (label() || placeholder())"
+        [disabled]="isDisabled()"
+        (click)="toggleMenu()"
+        (keydown)="onTriggerKeydown($event)"
+      >
+        <span [class]="valueClass()">{{ displayLabel() }}</span>
+        <span [class]="chevronClass()">expand_more</span>
+      </button>
+    </div>
+
+    @if (error()) {
+      <span [class]="helperTextClass()">{{ error() }}</span>
+    } @else if (hint()) {
+      <span [class]="helperTextClass()">{{ hint() }}</span>
+    }
+  } @else {
+    <app-form-field
+      [label]="label()"
+      [hint]="hint()"
+      [error]="error()"
+      [required]="required()"
+      [fieldId]="fieldId()"
+      [size]="size()"
+      controlType="select"
+    >
+      <button
+        type="button"
+        [id]="fieldId() ?? null"
+        [class]="triggerClass()"
+        role="combobox"
+        aria-haspopup="listbox"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="menuId"
+        [attr.aria-label]="ariaLabel() ?? (label() || placeholder())"
+        [disabled]="isDisabled()"
+        (click)="toggleMenu()"
+        (keydown)="onTriggerKeydown($event)"
+      >
+        <span [class]="valueClass()">{{ displayLabel() }}</span>
+        <span [class]="chevronClass()">expand_more</span>
+      </button>
+    </app-form-field>
+  }
+
+  <div [id]="menuId" [class]="menuClass()" role="listbox">
+    @if (options().length > 0) {
+      <ul class="max-h-60 overflow-auto py-1">
+        @for (option of options(); track option.value; let index = $index) {
+          <li>
+            <button
+              type="button"
+              [class]="optionClass(index, option)"
+              [attr.aria-selected]="option.value === internalValue()"
+              [disabled]="option.disabled"
+              (mouseenter)="onOptionMouseEnter(index)"
+              (click)="selectOption(option)"
+            >
+              <span class="truncate">{{ option.label }}</span>
+              <span [class]="checkIconClass(option)">check</span>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="px-4 py-3 text-sm text-base-content/45">No hay opciones disponibles</div>
+    }
+  </div>
+</div>

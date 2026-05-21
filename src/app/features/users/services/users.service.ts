@@ -25,6 +25,10 @@ export class UsersService {
     return httpResource<UserResponse[]>(() => this.baseUrl, { defaultValue: [] });
   }
 
+  getById(id: string) {
+    return this.http.get<UserResponse>(`${this.baseUrl}/${id}`);
+  }
+
   create(payload: CreateUserRequest) {
     return this.http.post<UserResponse>(this.baseUrl, payload);
   }

@@ -45,18 +45,13 @@
           />
 
           <div class="w-full lg:w-64">
-            <select
-              class="select w-full border border-base-300 bg-base-100"
+            <app-select-field
+              appearance="toolbar"
+              placeholder="Todos los estados"
+              [options]="statusOptions"
               [value]="selectedStatus()"
-              (change)="updateStatusFilter($event)"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="Bueno">Operativo</option>
-              <option value="Regular">Regular</option>
-              <option value="Malo">Malo</option>
-              <option value="Mantenimiento">Mantenimiento</option>
-              <option value="Dado de baja">Dado de baja</option>
-            </select>
+              (valueChange)="updateStatusFilter($event)"
+            />
           </div>
         </div>
       </div>

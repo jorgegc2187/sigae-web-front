@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import {
   StatusBadgeComponent,
   StatusBadgeTone,
@@ -24,7 +26,7 @@ interface PendingInvitationAction {
 
 @Component({
   selector: 'app-user-list',
-  imports: [SearchInputComponent, ActionButtonComponent, DesktopPaginationComponent, StatusBadgeComponent],
+  imports: [SearchInputComponent, ActionButtonComponent, DesktopPaginationComponent, StatusBadgeComponent, SelectFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown.escape)': 'closeActionsMenu()',
@@ -36,6 +38,7 @@ interface PendingInvitationAction {
 export class UserListComponent {
   private readonly authService = inject(AuthService);
   private readonly notifications = inject(NotificationService);
+  private readonly router = inject(Router);
   private readonly usersService = inject(UsersService);
   private readonly usersResource = this.usersService.listResource();
   private readonly statusDialog = viewChild<ElementRef<HTMLDialogElement>>('statusDialog');
@@ -43,6 +46,12 @@ export class UserListComponent {
 
   searchQuery = signal('');
   selectedRole = signal<UserRole | ''>('');
+  readonly roleFilterOptions: SelectFieldOption[] = [
+    { value: '', label: 'Todos los roles' },
+    { value: 'Administrador', label: 'Administrador' },
+    { value: 'Encargado', label: 'Encargado' },
+    { value: 'Solo Lectura', label: 'Solo Lectura' },
+  ];
   currentPage = signal(1);
   openActionsMenu = signal<UserActionsMenuState | null>(null);
   pendingStatusActionUser = signal<User | null>(null);
@@ -140,9 +149,9 @@ export class UserListComponent {
     this.currentPage.set(1);
   }
 
-  onRoleFilter(event: Event) {
+  onRoleFilter(role: string) {
     this.closeActionsMenu();
-    this.selectedRole.set((event.target as HTMLSelectElement).value as UserRole | '');
+    this.selectedRole.set(role as UserRole | '');
     this.currentPage.set(1);
   }
 
@@ -240,7 +249,7 @@ export class UserListComponent {
 
   onEdit(user: User) {
     this.closeActionsMenu();
-    this.notifications.info({ message: 'Edición de usuario pendiente de conectar.' });
+    void this.router.navigate(['/settings/users', user.id, 'edit']);
   }
 
   onResetPassword(user: User) {

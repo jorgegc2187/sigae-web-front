@@ -7,8 +7,8 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { firstValueFrom, map } from 'rxjs';
 import {
   getControlErrorMessage,
   shouldShowControlError,
@@ -16,13 +16,14 @@ import {
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
 import { emailFormatValidator } from '../../../../shared/validators/email-format.validator';
 import {
   evaluatePasswordPolicy,
   passwordPolicyValidator,
 } from '../../../../shared/validators/password-policy.validator';
-import { UserRole } from '../../models/user.model';
+import { UserResponse, UserRole } from '../../models/user.model';
 import { UsersService } from '../../services/users.service';
 import { LocationsService } from '../../../locations/services/locations.service';
 
@@ -38,6 +39,7 @@ interface LocationOption {
     RouterLink,
     FormFieldComponent,
     ActionButtonComponent,
+    SelectFieldComponent,
     ToggleSwitchComponent,
   ],
   templateUrl: './user-form.component.html',
@@ -48,6 +50,7 @@ interface LocationOption {
 })
 export class UserFormComponent {
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly usersService = inject(UsersService);
   private readonly locationsService = inject(LocationsService);
@@ -56,6 +59,10 @@ export class UserFormComponent {
   readonly locationSearchContainer = viewChild<ElementRef>('locationSearchContainer');
 
   readonly roles: UserRole[] = ['Administrador', 'Encargado', 'Solo Lectura'];
+  readonly roleOptions: SelectFieldOption[] = this.roles.map((role) => ({
+    value: role,
+    label: role,
+  }));
   private readonly locationsResource = this.locationsService.listResource();
   readonly locations = computed<LocationOption[]>(() =>
     this.locationsResource.value().map((location) => ({ id: location.id, name: location.name })),
@@ -63,7 +70,10 @@ export class UserFormComponent {
   readonly selectedLocations = signal<LocationOption[]>([]);
   readonly locationQuery = signal('');
   readonly isLocationDropdownOpen = signal(false);
+  readonly isLoadingUser = signal(false);
   readonly isSubmitting = signal(false);
+  readonly inputClass =
+    'w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none';
 
   readonly form = this.fb.group({
     firstName: ['', [Validators.required]],
@@ -76,6 +86,10 @@ export class UserFormComponent {
   }, {
     validators: [locationAssignmentValidator],
   });
+  private readonly routeUserId = toSignal(
+    this.route.paramMap.pipe(map((params) => params.get('id'))),
+    { initialValue: null },
+  );
   private readonly formEvents = toSignal(this.form.events, { initialValue: null });
   private readonly passwordValue = toSignal(this.form.controls.password.valueChanges, {
     initialValue: this.form.controls.password.value,
@@ -83,6 +97,33 @@ export class UserFormComponent {
   private readonly roleValue = toSignal(this.form.controls.role.valueChanges, {
     initialValue: this.form.controls.role.value,
   });
+  readonly userId = computed(() => this.routeUserId());
+  readonly isEditMode = computed(() => this.userId() !== null);
+  readonly isBusy = computed(() => this.isSubmitting() || this.isLoadingUser());
+  readonly breadcrumbLabel = computed(() =>
+    this.isEditMode() ? 'Editar Usuario' : 'Crear Nuevo Usuario',
+  );
+  readonly formTitle = computed(() =>
+    this.isEditMode() ? 'Editar Usuario' : 'Crear Nuevo Usuario',
+  );
+  readonly submitLabel = computed(() =>
+    this.isEditMode() ? 'Guardar Cambios' : 'Crear Usuario',
+  );
+  readonly loadingLabel = computed(() =>
+    this.isEditMode() ? 'Guardando cambios...' : 'Creando usuario...',
+  );
+  readonly blockingTitle = computed(() =>
+    this.isLoadingUser()
+      ? 'Cargando usuario'
+      : this.isEditMode()
+        ? 'Guardando cambios'
+        : 'Creando usuario',
+  );
+  readonly blockingDescription = computed(() =>
+    this.isLoadingUser()
+      ? 'Estamos recuperando la información actual del usuario.'
+      : 'Estamos guardando la información y esperando la confirmación del servidor.',
+  );
 
   readonly usesGlobalLocationAccess = computed(() => this.roleValue() === 'Administrador');
 
@@ -208,10 +249,21 @@ export class UserFormComponent {
   }
 
   get shouldShowPassword() {
-    return this.sendInvitationControl.value === false;
+    return !this.isEditMode() && this.sendInvitationControl.value === false;
   }
 
   constructor() {
+    effect(() => {
+      const userId = this.userId();
+      this.configurePasswordForCurrentMode();
+
+      if (!userId) {
+        return;
+      }
+
+      void this.loadUser(userId);
+    });
+
     effect(() => {
       if (this.usesGlobalLocationAccess()) {
         this.isLocationDropdownOpen.set(false);
@@ -220,7 +272,7 @@ export class UserFormComponent {
     });
 
     effect(() => {
-      if (this.isSubmitting()) {
+      if (this.isBusy()) {
         this.form.disable({ emitEvent: false });
         return;
       }
@@ -230,7 +282,7 @@ export class UserFormComponent {
   }
 
   onLocationInput(event: Event): void {
-    if (this.isSubmitting()) {
+    if (this.isBusy()) {
       return;
     }
     this.locationQuery.set((event.target as HTMLInputElement).value);
@@ -238,34 +290,34 @@ export class UserFormComponent {
   }
 
   onLocationFocus(): void {
-    if (this.isSubmitting()) {
+    if (this.isBusy()) {
       return;
     }
     this.isLocationDropdownOpen.set(true);
   }
 
   addLocation(location: LocationOption): void {
-    if (this.isSubmitting()) {
+    if (this.isBusy()) {
       return;
     }
     this.selectedLocations.update((locations) => [...locations, location]);
     this.locationQuery.set('');
     this.isLocationDropdownOpen.set(false);
-    this.syncLocationAssignments();
+    this.syncLocationAssignments({ markAsInteracted: true });
   }
 
   removeLocation(locationId: string): void {
-    if (this.isSubmitting()) {
+    if (this.isBusy()) {
       return;
     }
     this.selectedLocations.update((locations) =>
       locations.filter((location) => location.id !== locationId),
     );
-    this.syncLocationAssignments();
+    this.syncLocationAssignments({ markAsInteracted: true });
   }
 
   onSendInvitationChange(checked: boolean): void {
-    if (this.isSubmitting()) {
+    if (this.isBusy() || this.isEditMode()) {
       return;
     }
     this.sendInvitationControl.setValue(checked);
@@ -284,7 +336,7 @@ export class UserFormComponent {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.isSubmitting()) {
+    if (this.isBusy()) {
       return;
     }
 
@@ -299,22 +351,20 @@ export class UserFormComponent {
     try {
       this.isSubmitting.set(true);
       this.isLocationDropdownOpen.set(false);
-      const payload = {
-        fullName,
-        email: value.email,
-        role: this.usersService.toApiRole(value.role as UserRole),
-        sendInvitation: value.sendInvitation,
-        ...(this.usesGlobalLocationAccess() ? {} : { locationIds: value.locationIds }),
-        ...(value.sendInvitation ? {} : { password: value.password }),
-      };
+      if (this.isEditMode()) {
+        const user = await this.updateUser(fullName, value.email, value.role as UserRole, value.locationIds);
+        this.notifications.success({
+          message: `Usuario "${user.fullName}" actualizado correctamente.`,
+        });
+      } else {
+        const user = await this.createUser(fullName, value.email, value.role as UserRole, value.sendInvitation, value.password, value.locationIds);
+        this.notifications.success({
+          message: value.sendInvitation
+            ? `Usuario "${user.fullName}" creado correctamente. Se envió una invitación por correo para configurar su contraseña.`
+            : `Usuario "${user.fullName}" creado correctamente.`,
+        });
+      }
 
-      const user = await firstValueFrom(this.usersService.create(payload));
-
-      this.notifications.success({
-        message: value.sendInvitation
-          ? `Usuario "${user.fullName}" creado correctamente. Se envió una invitación por correo para configurar su contraseña.`
-          : `Usuario "${user.fullName}" creado correctamente.`,
-      });
       await this.router.navigate(['/settings/users']);
     } catch (error: unknown) {
       const status = (error as { status?: unknown })?.status;
@@ -323,12 +373,108 @@ export class UserFormComponent {
           ? ((error as { error: { message: string } }).error.message)
           : status === 503
             ? 'No se pudo enviar el correo de invitación. Verifique la configuración SMTP e intente nuevamente.'
-            : 'No se pudo crear el usuario.';
+            : this.isEditMode()
+              ? 'No se pudo actualizar el usuario.'
+              : 'No se pudo crear el usuario.';
 
       this.notifications.error({ message: backendMessage });
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  private async createUser(
+    fullName: string,
+    email: string,
+    role: UserRole,
+    sendInvitation: boolean,
+    password: string,
+    locationIds: string[],
+  ): Promise<UserResponse> {
+    const payload = {
+      fullName,
+      email,
+      role: this.usersService.toApiRole(role),
+      sendInvitation,
+      ...(this.usesGlobalLocationAccess() ? {} : { locationIds }),
+      ...(sendInvitation ? {} : { password }),
+    };
+
+    return firstValueFrom(this.usersService.create(payload));
+  }
+
+  private async updateUser(
+    fullName: string,
+    email: string,
+    role: UserRole,
+    locationIds: string[],
+  ): Promise<UserResponse> {
+    const userId = this.userId();
+    if (!userId) {
+      throw new Error('No se encontró el usuario a editar.');
+    }
+
+    const payload = {
+      fullName,
+      email,
+      role: this.usersService.toApiRole(role),
+      ...(this.usesGlobalLocationAccess() ? {} : { locationIds }),
+    };
+
+    return firstValueFrom(this.usersService.update(userId, payload));
+  }
+
+  private async loadUser(userId: string): Promise<void> {
+    try {
+      this.isLoadingUser.set(true);
+      const user = await firstValueFrom(this.usersService.getById(userId));
+      const nameParts = splitFullName(user.fullName);
+      const selectedLocations = user.locationIds.map((id, index) => ({
+        id,
+        name: user.locationNames[index] ?? this.findLocationName(id),
+      }));
+
+      this.selectedLocations.set(selectedLocations);
+      this.form.reset({
+        firstName: nameParts.firstName,
+        lastName: nameParts.lastName,
+        email: user.email,
+        role: this.usersService.toUser(user).role,
+        sendInvitation: true,
+        password: '',
+        locationIds: user.locationIds,
+      });
+      this.locationQuery.set('');
+      this.isLocationDropdownOpen.set(false);
+      this.form.markAsPristine();
+      this.form.markAsUntouched();
+      this.syncLocationAssignments({ markAsInteracted: false });
+    } catch (error) {
+      const message =
+        typeof (error as { error?: { message?: unknown } })?.error?.message === 'string'
+          ? (error as { error: { message: string } }).error.message
+          : 'No se pudo cargar la información del usuario.';
+
+      this.notifications.error({ message });
+      await this.router.navigate(['/settings/users']);
+    } finally {
+      this.isLoadingUser.set(false);
+    }
+  }
+
+  private findLocationName(locationId: string): string {
+    return this.locations().find((location) => location.id === locationId)?.name ?? 'Ubicación';
+  }
+
+  private configurePasswordForCurrentMode(): void {
+    if (this.isEditMode()) {
+      this.passwordControl.clearValidators();
+      this.passwordControl.setValue('', { emitEvent: false });
+      this.passwordControl.updateValueAndValidity({ emitEvent: false });
+      return;
+    }
+
+    this.syncPasswordValidators(this.sendInvitationControl.value);
   }
 
   private syncPasswordValidators(sendInvitation: boolean): void {
@@ -342,10 +488,14 @@ export class UserFormComponent {
     this.passwordControl.updateValueAndValidity();
   }
 
-  private syncLocationAssignments(): void {
+  private syncLocationAssignments(options: { markAsInteracted: boolean }): void {
     this.locationIdsControl.setValue(this.selectedLocations().map((location) => location.id));
-    this.locationIdsControl.markAsDirty();
-    this.locationIdsControl.markAsTouched();
+
+    if (options.markAsInteracted) {
+      this.locationIdsControl.markAsDirty();
+      this.locationIdsControl.markAsTouched();
+    }
+
     this.form.updateValueAndValidity();
   }
 }
@@ -363,4 +513,20 @@ function locationAssignmentValidator(control: AbstractControl): ValidationErrors
   }
 
   return locationIds && locationIds.length > 0 ? null : { locationAssignmentRequired: true };
+}
+
+function splitFullName(fullName: string): { firstName: string; lastName: string } {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return { firstName: '', lastName: '' };
+  }
+
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: '' };
+  }
+
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(' '),
+  };
 }
