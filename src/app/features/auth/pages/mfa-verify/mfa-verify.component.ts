@@ -5,11 +5,11 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { BrandingService } from '../../../../core/services/branding.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { VerificationCodeInputComponent } from '../../../../shared/ui/verification-code-input/verification-code-input.component';
 
 @Component({
   selector: 'app-mfa-verify',
-  imports: [ReactiveFormsModule, FormFieldComponent, ActionButtonComponent],
+  imports: [ReactiveFormsModule, VerificationCodeInputComponent, ActionButtonComponent],
   templateUrl: './mfa-verify.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

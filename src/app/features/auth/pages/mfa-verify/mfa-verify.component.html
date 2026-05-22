@@ -44,18 +44,12 @@
       }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
-        <app-form-field label="Código de verificación" fieldId="mfa-verify-code" prefixIcon="pin" [required]="true" [error]="codeError()">
-          <input
-            id="mfa-verify-code"
-            type="text"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            formControlName="code"
-            placeholder="123456"
-            maxlength="6"
-            class="w-full border-0 bg-transparent p-0 text-sm tracking-[0.35em] placeholder-shown:opacity-50 focus:outline-none"
-          />
-        </app-form-field>
+        <app-verification-code-input
+          fieldId="mfa-verify-code"
+          formControlName="code"
+          [disabled]="isSubmitting()"
+          [error]="codeError()"
+        />
 
         <app-action-button
           label="Verificar y entrar"

@@ -1,0 +1,47 @@
+<div class="space-y-3">
+  <div class="flex items-center justify-between gap-3">
+    <label [id]="baseId() + '-label'" [attr.for]="baseId() + '-0'" class="block text-sm font-medium text-base-content/70">
+      {{ label() }}
+    </label>
+
+    @if (hint()) {
+      <span [id]="baseId() + '-hint'" class="text-xs font-medium text-base-content/45">{{ hint() }}</span>
+    }
+  </div>
+
+  <div
+    role="group"
+    class="flex items-center justify-center gap-2 sm:gap-3"
+    [attr.aria-labelledby]="baseId() + '-label'"
+    [attr.aria-describedby]="error() ? baseId() + '-error' : baseId() + '-hint'"
+  >
+    @for (index of indexes(); track index) {
+      @if (index === 3) {
+        <span class="px-1 text-lg font-semibold text-base-content/30" aria-hidden="true">-</span>
+      }
+
+      <input
+        #digitInput
+        [id]="baseId() + '-' + index"
+        type="text"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="1"
+        pattern="[0-9]*"
+        [class]="inputClass()"
+        [disabled]="isDisabled()"
+        [value]="digits()[index]"
+        [attr.aria-label]="'Dígito ' + (index + 1) + ' de ' + normalizedLength()"
+        [attr.aria-invalid]="hasError()"
+        (input)="handleInput($event, index)"
+        (keydown)="handleKeydown($event, index)"
+        (paste)="handlePaste($event, index)"
+        (blur)="markAsTouched()"
+      />
+    }
+  </div>
+
+  @if (error()) {
+    <p [id]="baseId() + '-error'" class="text-xs font-medium text-error">{{ error() }}</p>
+  }
+</div>
