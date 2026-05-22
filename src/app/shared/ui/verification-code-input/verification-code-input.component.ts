@@ -19,6 +19,9 @@ let nextVerificationCodeInputId = 0;
   imports: [],
   templateUrl: './verification-code-input.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block w-full',
+  },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
