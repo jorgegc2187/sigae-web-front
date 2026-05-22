@@ -75,6 +75,9 @@ export class UserFormComponent {
   readonly isLoadingUser = signal(false);
   readonly isSubmitting = signal(false);
   readonly initialMfaRequired = signal(false);
+  readonly currentMfaRequired = signal(false);
+  readonly currentMfaEnabled = signal(false);
+  readonly currentMfaEnabledAt = signal<string | null>(null);
   readonly inputClass =
     'w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none';
 
@@ -133,6 +136,28 @@ export class UserFormComponent {
       ? 'Estamos recuperando la información actual del usuario.'
       : 'Estamos guardando la información y esperando la confirmación del servidor.',
   );
+  readonly mfaStatusLabel = computed(() => {
+    if (this.currentMfaEnabled()) {
+      return '2FA activo';
+    }
+
+    if (this.currentMfaRequired()) {
+      return '2FA requerido pendiente';
+    }
+
+    return '2FA no requerido';
+  });
+  readonly mfaStatusDescription = computed(() => {
+    if (this.currentMfaEnabled()) {
+      return 'El usuario ya configuró una app autenticadora y deberá verificar su código al iniciar sesión.';
+    }
+
+    if (this.currentMfaRequired()) {
+      return 'El usuario deberá configurar su app autenticadora en el próximo inicio de sesión.';
+    }
+
+    return 'El usuario puede iniciar sesión sin verificación en dos pasos.';
+  });
 
   readonly usesGlobalLocationAccess = computed(() => this.roleValue() === 'Administrador');
 
@@ -349,6 +374,42 @@ export class UserFormComponent {
     this.mfaRequiredControl.markAsDirty();
   }
 
+  async onRemoveMfa(): Promise<void> {
+    const userId = this.userId();
+    if (!userId || this.isBusy()) {
+      return;
+    }
+
+    try {
+      this.isSubmitting.set(true);
+      const user = await firstValueFrom(this.usersService.updateMfaPolicy(userId, false));
+      this.applyMfaState(user);
+      this.notifications.success({ message: '2FA desactivado correctamente para este usuario.' });
+    } catch (error: unknown) {
+      this.notifications.error({ message: this.getBackendMessage(error, 'No se pudo desactivar el 2FA.') });
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
+  async onResetMfa(): Promise<void> {
+    const userId = this.userId();
+    if (!userId || this.isBusy()) {
+      return;
+    }
+
+    try {
+      this.isSubmitting.set(true);
+      const user = await firstValueFrom(this.usersService.resetMfa(userId));
+      this.applyMfaState(user);
+      this.notifications.success({ message: '2FA reseteado correctamente. El usuario deberá enrolar un autenticador nuevo.' });
+    } catch (error: unknown) {
+      this.notifications.error({ message: this.getBackendMessage(error, 'No se pudo resetear el 2FA.') });
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
   onClickOutside(event: MouseEvent): void {
     const container = this.locationSearchContainer();
     if (
@@ -378,8 +439,9 @@ export class UserFormComponent {
       this.isLocationDropdownOpen.set(false);
       if (this.isEditMode()) {
         const user = await this.updateUser(fullName, value.email, value.role as UserRole, value.locationIds);
-        if (value.mfaRequired !== this.initialMfaRequired()) {
-          await firstValueFrom(this.usersService.updateMfaPolicy(user.id, value.mfaRequired));
+        if (!this.currentMfaEnabled() && value.mfaRequired !== this.initialMfaRequired()) {
+          const updatedMfaUser = await firstValueFrom(this.usersService.updateMfaPolicy(user.id, value.mfaRequired));
+          this.applyMfaState(updatedMfaUser);
         }
         this.notifications.success({
           message: `Usuario "${user.fullName}" actualizado correctamente.`,
@@ -473,7 +535,7 @@ export class UserFormComponent {
         locationIds: user.locationIds,
         mfaRequired: user.mfaRequired,
       });
-      this.initialMfaRequired.set(user.mfaRequired);
+      this.applyMfaState(user);
       this.locationQuery.set('');
       this.isLocationDropdownOpen.set(false);
       this.form.markAsPristine();
@@ -536,6 +598,21 @@ export class UserFormComponent {
     }
 
     this.form.updateValueAndValidity();
+  }
+
+  private applyMfaState(user: Pick<UserResponse, 'mfaRequired' | 'mfaEnabled' | 'mfaEnabledAt'>): void {
+    this.currentMfaRequired.set(user.mfaRequired);
+    this.currentMfaEnabled.set(user.mfaEnabled);
+    this.currentMfaEnabledAt.set(user.mfaEnabledAt);
+    this.initialMfaRequired.set(user.mfaRequired);
+    this.mfaRequiredControl.setValue(user.mfaRequired, { emitEvent: false });
+    this.mfaRequiredControl.markAsPristine();
+  }
+
+  private getBackendMessage(error: unknown, fallback: string): string {
+    return typeof (error as { error?: { message?: unknown } })?.error?.message === 'string'
+      ? (error as { error: { message: string } }).error.message
+      : fallback;
   }
 }
 

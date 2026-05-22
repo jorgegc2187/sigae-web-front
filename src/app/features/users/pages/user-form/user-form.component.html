@@ -165,20 +165,72 @@
           </h3>
 
           <div class="rounded-2xl border border-base-300 bg-base-200/45 p-4">
-            <div class="flex items-center">
-              <app-toggle-switch
-                ariaLabel="Requerir verificación en dos pasos"
-                [checked]="mfaRequiredControl.value"
-                [disabled]="isBusy()"
-                (checkedChange)="onMfaRequiredChange($event)"
-              />
-              <span class="ml-3 text-sm font-medium text-base-content">
-                Requerir 2FA en el próximo inicio de sesión
-              </span>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div class="flex items-start gap-3">
+                <span
+                  class="material-symbols-outlined mt-0.5 text-[22px]"
+                  [class.text-success]="currentMfaEnabled()"
+                  [class.text-warning]="!currentMfaEnabled() && currentMfaRequired()"
+                  [class.text-base-content/45]="!currentMfaEnabled() && !currentMfaRequired()"
+                >
+                  {{ currentMfaEnabled() ? 'verified_user' : currentMfaRequired() ? 'shield_lock' : 'shield' }}
+                </span>
+                <div class="space-y-1">
+                  <p class="text-sm font-semibold text-base-content">{{ mfaStatusLabel() }}</p>
+                  <p class="text-xs leading-relaxed text-base-content/55">{{ mfaStatusDescription() }}</p>
+                </div>
+              </div>
+
+              @if (currentMfaEnabled()) {
+                <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
+                  <app-action-button
+                    label="Quitar 2FA"
+                    icon="lock_open"
+                    variant="neutral"
+                    size="sm"
+                    [disabled]="isBusy()"
+                    (clicked)="onRemoveMfa()"
+                  />
+                  <app-action-button
+                    label="Resetear 2FA"
+                    icon="restart_alt"
+                    variant="outline"
+                    size="sm"
+                    [disabled]="isBusy()"
+                    (clicked)="onResetMfa()"
+                  />
+                </div>
+              } @else if (currentMfaRequired()) {
+                <app-action-button
+                  label="Quitar requisito"
+                  icon="lock_open"
+                  variant="neutral"
+                  size="sm"
+                  hostClass="shrink-0"
+                  [disabled]="isBusy()"
+                  (clicked)="onRemoveMfa()"
+                />
+              }
             </div>
-            <p class="ml-[52px] mt-1 text-xs leading-relaxed text-base-content/55">
-              Si el usuario aún no tiene autenticador enrolado, deberá configurarlo al iniciar sesión.
-            </p>
+
+            @if (!currentMfaEnabled() && !currentMfaRequired()) {
+              <div class="mt-4 border-t border-base-300 pt-4">
+                <div class="flex items-center">
+                  <app-toggle-switch
+                    ariaLabel="Requerir verificación en dos pasos"
+                    [checked]="mfaRequiredControl.value"
+                    [disabled]="isBusy()"
+                    (checkedChange)="onMfaRequiredChange($event)"
+                  />
+                  <span class="ml-3 text-sm font-medium text-base-content">
+                    Requerir 2FA en el próximo inicio de sesión
+                  </span>
+                </div>
+                <p class="ml-[52px] mt-1 text-xs leading-relaxed text-base-content/55">
+                  El usuario deberá configurar su autenticador después de validar sus credenciales.
+                </p>
+              </div>
+            }
           </div>
         } @else {
           <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
