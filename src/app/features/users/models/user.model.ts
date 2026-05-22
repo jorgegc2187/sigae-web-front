@@ -18,6 +18,10 @@ export interface User {
   invitationStatus: InvitationStatus | null;
   invitationExpiresAt: string | null;
   lastAccess: string; // texto relativo, ej. 'Hoy', 'Hace 1 día'
+  mfaRequired: boolean;
+  mfaEnabled: boolean;
+  mfaEnabledAt: string | null;
+  mfaLabel: string;
 }
 
 export interface UserResponse {
@@ -31,6 +35,9 @@ export interface UserResponse {
   locationNames: string[];
   invitationStatus: InvitationStatus | null;
   invitationExpiresAt: string | null;
+  mfaRequired: boolean;
+  mfaEnabled: boolean;
+  mfaEnabledAt: string | null;
 }
 
 export interface CreateUserRequest {
@@ -51,4 +58,8 @@ export interface UpdateUserRequest {
 
 export interface UpdateUserStatusRequest {
   status: ApiUserStatus;
+}
+
+export interface UpdateUserMfaPolicyRequest {
+  mfaRequired: boolean;
 }

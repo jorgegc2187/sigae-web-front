@@ -266,6 +266,42 @@ export class UserListComponent {
     });
   }
 
+  onToggleMfaRequirement(user: User) {
+    this.closeActionsMenu();
+    this.usersService.updateMfaPolicy(user.id, !user.mfaRequired).subscribe({
+      next: () => {
+        this.usersResource.reload();
+        this.notifications.success({
+          message: !user.mfaRequired
+            ? `2FA requerido para ${user.name}.`
+            : `2FA desactivado para ${user.name}.`,
+        });
+      },
+      error: (error) => {
+        const message = error?.error?.message ?? 'No se pudo actualizar la política 2FA.';
+        this.notifications.error({ message });
+      },
+    });
+  }
+
+  onResetMfa(user: User) {
+    this.closeActionsMenu();
+    if (!window.confirm(`¿Resetear 2FA para ${user.name}? El usuario deberá enrolar nuevamente su autenticador.`)) {
+      return;
+    }
+
+    this.usersService.resetMfa(user.id).subscribe({
+      next: () => {
+        this.usersResource.reload();
+        this.notifications.success({ message: `2FA reseteado para ${user.name}.` });
+      },
+      error: (error) => {
+        const message = error?.error?.message ?? 'No se pudo resetear el 2FA del usuario.';
+        this.notifications.error({ message });
+      },
+    });
+  }
+
   onToggleStatus(user: User) {
     const restrictionMessage = this.getStatusRestrictionMessage(user);
     if (restrictionMessage) {
@@ -432,6 +468,16 @@ export class UserListComponent {
       return 'neutral';
     }
 
+    return 'neutral';
+  }
+
+  getMfaBadgeTone(user: User): StatusBadgeTone {
+    if (user.mfaEnabled) {
+      return 'success';
+    }
+    if (user.mfaRequired) {
+      return 'warning';
+    }
     return 'neutral';
   }
 }

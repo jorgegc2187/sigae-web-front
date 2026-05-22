@@ -73,11 +73,19 @@ export class LoginComponent {
 
     try {
       const credentials = this.form.getRawValue();
-      await this.auth.login({
+      const response = await this.auth.login({
         email: credentials.email,
         password: credentials.password,
       });
-      this.router.navigate(['/dashboard']);
+      if (response.type === 'MFA_ENROLL_REQUIRED') {
+        await this.router.navigate(['/auth/mfa/enroll']);
+        return;
+      }
+      if (response.type === 'MFA_CHALLENGE_REQUIRED') {
+        await this.router.navigate(['/auth/mfa/verify']);
+        return;
+      }
+      await this.router.navigate(['/dashboard']);
     } catch {
       this.loginError.set('No pudimos iniciar sesión con esas credenciales.');
     } finally {

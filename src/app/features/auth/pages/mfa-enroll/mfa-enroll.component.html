@@ -1,0 +1,94 @@
+<div class="flex min-h-screen w-full flex-col md:flex-row">
+  <div class="hidden w-full shrink-0 flex-col items-center justify-center overflow-hidden bg-primary p-8 md:flex md:w-1/2 md:p-16 lg:p-24">
+    <div class="flex max-w-lg flex-col items-center text-center">
+      <div class="mb-8 flex h-24 w-24 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-inner backdrop-blur-sm md:h-32 md:w-32">
+        @if (logoUrl()) {
+          <img [src]="logoUrl()!" alt="Logo institucional" class="h-full w-full rounded-full object-cover" />
+        } @else {
+          <span class="material-symbols-outlined text-7xl text-primary-content md:text-8xl" style="font-variation-settings: 'FILL' 1">verified_user</span>
+        }
+      </div>
+      <h1 class="mb-4 text-5xl font-bold tracking-tight text-primary-content md:text-6xl lg:text-7xl">{{ appName() }}</h1>
+      <p class="text-lg font-medium leading-relaxed text-primary-content/80 md:text-xl">
+        Configure su segundo factor de autenticación.
+      </p>
+    </div>
+  </div>
+
+  <div class="flex min-h-screen w-full items-center justify-center bg-base-100 p-6 md:w-1/2 md:p-16">
+    <div class="w-full max-w-md">
+      <div class="mb-8 flex items-center justify-center gap-3 md:hidden">
+        @if (logoUrl()) {
+          <img [src]="logoUrl()!" alt="Logo institucional" class="h-10 w-10 rounded-full object-cover" />
+        } @else {
+          <span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1">verified_user</span>
+        }
+        <span class="text-2xl font-bold text-base-content">{{ appName() }}</span>
+      </div>
+
+      <div class="mb-8 text-center md:text-left">
+        <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+          <span class="material-symbols-outlined text-[24px] text-primary">qr_code_2</span>
+        </div>
+        <h2 class="mb-2 text-2xl font-bold text-base-content md:text-3xl">Activar verificación 2FA</h2>
+        <p class="text-sm leading-relaxed text-base-content/60 md:text-base">
+          Escanee el QR con Google Authenticator, Microsoft Authenticator u otra app compatible con TOTP.
+        </p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error mb-6" role="alert">
+          <span class="material-symbols-outlined text-[20px]">error</span>
+          <span class="text-sm">{{ errorMessage() }}</span>
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="rounded-2xl border border-base-300 bg-base-200 p-8 text-center text-sm text-base-content/60">
+          Preparando código QR...
+        </div>
+      } @else if (enrollData()) {
+        <div class="mb-6 rounded-2xl border border-base-300 bg-base-200 p-5 text-center">
+          @if (qrDataUrl()) {
+            <img [src]="qrDataUrl()!" alt="Código QR para configurar 2FA" class="mx-auto rounded-xl bg-white p-3 shadow-sm" />
+          }
+          <div class="mt-4 rounded-xl bg-base-100 p-3 text-left">
+            <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Clave manual</p>
+            <p class="mt-1 break-all font-mono text-sm text-base-content">{{ enrollData()!.manualKey }}</p>
+          </div>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
+          <app-form-field label="Código de verificación" fieldId="mfa-enroll-code" prefixIcon="pin" [required]="true" [error]="codeError()">
+            <input
+              id="mfa-enroll-code"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              formControlName="code"
+              placeholder="123456"
+              maxlength="6"
+              class="w-full border-0 bg-transparent p-0 text-sm tracking-[0.35em] placeholder-shown:opacity-50 focus:outline-none"
+            />
+          </app-form-field>
+
+          <app-action-button
+            label="Confirmar y entrar"
+            icon="verified"
+            iconPosition="end"
+            size="lg"
+            [fullWidth]="true"
+            [loading]="isSubmitting()"
+            loadingLabel="Verificando..."
+            type="submit"
+          />
+        </form>
+      }
+
+      <button type="button" class="mt-6 flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80" (click)="cancel()">
+        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+        Volver al inicio de sesión
+      </button>
+    </div>
+  </div>
+</div>

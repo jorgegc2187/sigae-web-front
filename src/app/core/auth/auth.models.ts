@@ -11,6 +11,9 @@ export interface AuthUser {
   role: UserRole;
   status?: UserStatus;
   locationIds?: string[];
+  mfaRequired?: boolean;
+  mfaEnabled?: boolean;
+  mfaEnabledAt?: string | null;
 }
 
 export interface AuthUserResponsePayload {
@@ -20,6 +23,9 @@ export interface AuthUserResponsePayload {
   role: UserRole | ApiUserRole;
   status?: UserStatus | ApiUserStatus;
   locationIds?: string[];
+  mfaRequired?: boolean;
+  mfaEnabled?: boolean;
+  mfaEnabledAt?: string | null;
 }
 
 export interface LoginCredentials {
@@ -38,9 +44,30 @@ export interface ResetPasswordPayload {
 }
 
 export interface AuthResponse {
+  type?: 'AUTHENTICATED';
   accessToken: string;
   refreshToken: string;
   tokenType: string;
   expiresIn: number;
   user: AuthUserResponsePayload;
+}
+
+export interface MfaChallengeResponse {
+  type: 'MFA_ENROLL_REQUIRED' | 'MFA_CHALLENGE_REQUIRED';
+  challengeToken: string;
+  expiresIn: number;
+}
+
+export type LoginResponse = AuthResponse | MfaChallengeResponse;
+
+export interface MfaChallengeSession {
+  type: MfaChallengeResponse['type'];
+  challengeToken: string;
+  expiresAt: number;
+}
+
+export interface MfaEnrollStartResponse {
+  otpauthUri: string;
+  manualKey: string;
+  expiresIn: number;
 }

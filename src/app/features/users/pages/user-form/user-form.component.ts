@@ -74,6 +74,7 @@ export class UserFormComponent {
   readonly isLocationDropdownOpen = signal(false);
   readonly isLoadingUser = signal(false);
   readonly isSubmitting = signal(false);
+  readonly initialMfaRequired = signal(false);
   readonly inputClass =
     'w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none';
 
@@ -85,6 +86,7 @@ export class UserFormComponent {
     sendInvitation: [true],
     password: [''],
     locationIds: this.fb.control<string[]>([]),
+    mfaRequired: [false],
   }, {
     validators: [locationAssignmentValidator],
   });
@@ -258,6 +260,10 @@ export class UserFormComponent {
     return this.form.controls.locationIds;
   }
 
+  get mfaRequiredControl() {
+    return this.form.controls.mfaRequired;
+  }
+
   get shouldShowPassword() {
     return !this.isEditMode() && this.sendInvitationControl.value === false;
   }
@@ -335,6 +341,14 @@ export class UserFormComponent {
     this.syncPasswordValidators(checked);
   }
 
+  onMfaRequiredChange(checked: boolean): void {
+    if (this.isBusy() || !this.isEditMode()) {
+      return;
+    }
+    this.mfaRequiredControl.setValue(checked);
+    this.mfaRequiredControl.markAsDirty();
+  }
+
   onClickOutside(event: MouseEvent): void {
     const container = this.locationSearchContainer();
     if (
@@ -364,6 +378,9 @@ export class UserFormComponent {
       this.isLocationDropdownOpen.set(false);
       if (this.isEditMode()) {
         const user = await this.updateUser(fullName, value.email, value.role as UserRole, value.locationIds);
+        if (value.mfaRequired !== this.initialMfaRequired()) {
+          await firstValueFrom(this.usersService.updateMfaPolicy(user.id, value.mfaRequired));
+        }
         this.notifications.success({
           message: `Usuario "${user.fullName}" actualizado correctamente.`,
         });
@@ -454,7 +471,9 @@ export class UserFormComponent {
         sendInvitation: true,
         password: '',
         locationIds: user.locationIds,
+        mfaRequired: user.mfaRequired,
       });
+      this.initialMfaRequired.set(user.mfaRequired);
       this.locationQuery.set('');
       this.isLocationDropdownOpen.set(false);
       this.form.markAsPristine();

@@ -6,6 +6,7 @@ import {
   ApiUserStatus,
   CreateUserRequest,
   UpdateUserRequest,
+  UpdateUserMfaPolicyRequest,
   UpdateUserStatusRequest,
   User,
   UserResponse,
@@ -50,6 +51,15 @@ export class UsersService {
     return this.http.post<UserResponse>(`${this.baseUrl}/${id}/invitation/resend`, {});
   }
 
+  updateMfaPolicy(id: string, mfaRequired: boolean) {
+    const payload: UpdateUserMfaPolicyRequest = { mfaRequired };
+    return this.http.patch<UserResponse>(`${this.baseUrl}/${id}/mfa-policy`, payload);
+  }
+
+  resetMfa(id: string) {
+    return this.http.post<UserResponse>(`${this.baseUrl}/${id}/mfa-reset`, {});
+  }
+
   toUser(response: UserResponse): User {
     const role = this.toUiRole(response.role);
 
@@ -66,6 +76,10 @@ export class UsersService {
       invitationStatus: response.invitationStatus,
       invitationExpiresAt: response.invitationExpiresAt,
       lastAccess: this.formatLastAccess(response.lastAccessAt),
+      mfaRequired: response.mfaRequired,
+      mfaEnabled: response.mfaEnabled,
+      mfaEnabledAt: response.mfaEnabledAt,
+      mfaLabel: this.formatMfaLabel(response),
     };
   }
 
@@ -151,5 +165,15 @@ export class UsersService {
     }
 
     return `${locationNames[0]}, +${locationNames.length - 1} más`;
+  }
+
+  private formatMfaLabel(user: Pick<UserResponse, 'mfaRequired' | 'mfaEnabled'>): string {
+    if (user.mfaEnabled) {
+      return '2FA activo';
+    }
+    if (user.mfaRequired) {
+      return '2FA requerido pendiente';
+    }
+    return '2FA no requerido';
   }
 }

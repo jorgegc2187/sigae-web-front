@@ -9,6 +9,10 @@ import {
   AuthUserResponsePayload,
   ForgotPasswordPayload,
   LoginCredentials,
+  LoginResponse,
+  MfaChallengeResponse,
+  MfaChallengeSession,
+  MfaEnrollStartResponse,
   ResetPasswordPayload,
   SessionStatus,
   ApiUserRole,
@@ -20,6 +24,7 @@ import {
 const ACCESS_TOKEN_KEY = 'sigae.accessToken';
 const REFRESH_TOKEN_KEY = 'sigae.refreshToken';
 const USER_KEY = 'sigae.user';
+const MFA_CHALLENGE_KEY = 'sigae.mfaChallenge';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -30,12 +35,14 @@ export class AuthService {
   private readonly accessTokenState = signal<string | null>(localStorage.getItem(ACCESS_TOKEN_KEY));
   private readonly refreshTokenState = signal<string | null>(localStorage.getItem(REFRESH_TOKEN_KEY));
   private readonly userState = signal<AuthUser | null>(this.readStoredUser());
+  private readonly mfaChallengeState = signal<MfaChallengeSession | null>(this.readStoredMfaChallenge());
   private readonly sessionStatusState = signal<SessionStatus>('unknown');
   private refreshInFlight: Promise<boolean> | null = null;
   private sessionFailureNavigationInFlight = false;
 
   readonly accessToken = this.accessTokenState.asReadonly();
   readonly currentUser = this.userState.asReadonly();
+  readonly mfaChallenge = this.mfaChallengeState.asReadonly();
   readonly sessionStatus = this.sessionStatusState.asReadonly();
   readonly isAuthenticated = computed(() => this.sessionStatusState() === 'authenticated');
 
@@ -63,12 +70,41 @@ export class AuthService {
     this.sessionStatusState.set(restored ? 'authenticated' : 'anonymous');
   }
 
-  async login(credentials: LoginCredentials): Promise<void> {
+  async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await firstValueFrom(
-      this.http.post<AuthResponse>(`${this.appConfig.apiUrl}/auth/login`, credentials),
+      this.http.post<LoginResponse>(`${this.appConfig.apiUrl}/auth/login`, credentials),
     );
+    if (this.isMfaChallengeResponse(response)) {
+      this.storeMfaChallenge(response);
+      this.clearSession();
+      this.sessionStatusState.set('anonymous');
+      return response;
+    }
+
+    this.clearMfaChallenge();
     this.persistSession(response);
     this.sessionStatusState.set('authenticated');
+    return response;
+  }
+
+  async startMfaEnrollment(challengeToken: string): Promise<MfaEnrollStartResponse> {
+    return firstValueFrom(
+      this.http.post<MfaEnrollStartResponse>(`${this.appConfig.apiUrl}/auth/mfa/enroll/start`, { challengeToken }),
+    );
+  }
+
+  async confirmMfaEnrollment(challengeToken: string, code: string): Promise<void> {
+    const response = await firstValueFrom(
+      this.http.post<AuthResponse>(`${this.appConfig.apiUrl}/auth/mfa/enroll/confirm`, { challengeToken, code }),
+    );
+    this.completeMfaAuthentication(response);
+  }
+
+  async verifyMfa(challengeToken: string, code: string): Promise<void> {
+    const response = await firstValueFrom(
+      this.http.post<AuthResponse>(`${this.appConfig.apiUrl}/auth/mfa/verify`, { challengeToken, code }),
+    );
+    this.completeMfaAuthentication(response);
   }
 
   async requestPasswordReset(email: string): Promise<void> {
@@ -187,6 +223,48 @@ export class AuthService {
     this.accessTokenState.set(null);
     this.refreshTokenState.set(null);
     this.userState.set(null);
+  }
+
+  private completeMfaAuthentication(response: AuthResponse): void {
+    this.clearMfaChallenge();
+    this.persistSession(response);
+    this.sessionStatusState.set('authenticated');
+  }
+
+  private isMfaChallengeResponse(response: LoginResponse): response is MfaChallengeResponse {
+    return response.type === 'MFA_ENROLL_REQUIRED' || response.type === 'MFA_CHALLENGE_REQUIRED';
+  }
+
+  private storeMfaChallenge(response: MfaChallengeResponse): void {
+    const challenge: MfaChallengeSession = {
+      type: response.type,
+      challengeToken: response.challengeToken,
+      expiresAt: Date.now() + response.expiresIn * 1000,
+    };
+    sessionStorage.setItem(MFA_CHALLENGE_KEY, JSON.stringify(challenge));
+    this.mfaChallengeState.set(challenge);
+  }
+
+  clearMfaChallenge(): void {
+    sessionStorage.removeItem(MFA_CHALLENGE_KEY);
+    this.mfaChallengeState.set(null);
+  }
+
+  private readStoredMfaChallenge(): MfaChallengeSession | null {
+    const rawChallenge = sessionStorage.getItem(MFA_CHALLENGE_KEY);
+    if (!rawChallenge) return null;
+
+    try {
+      const challenge = JSON.parse(rawChallenge) as MfaChallengeSession;
+      if (!challenge.challengeToken || challenge.expiresAt <= Date.now()) {
+        sessionStorage.removeItem(MFA_CHALLENGE_KEY);
+        return null;
+      }
+      return challenge;
+    } catch {
+      sessionStorage.removeItem(MFA_CHALLENGE_KEY);
+      return null;
+    }
   }
 
   private readStoredUser(): AuthUser | null {

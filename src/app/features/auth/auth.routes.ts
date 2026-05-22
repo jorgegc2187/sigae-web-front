@@ -19,6 +19,20 @@ export const AUTH_ROUTES: Routes = [
       ),
   },
   {
+    path: 'mfa/enroll',
+    loadComponent: () =>
+      import('./pages/mfa-enroll/mfa-enroll.component').then(
+        (m) => m.MfaEnrollComponent
+      ),
+  },
+  {
+    path: 'mfa/verify',
+    loadComponent: () =>
+      import('./pages/mfa-verify/mfa-verify.component').then(
+        (m) => m.MfaVerifyComponent
+      ),
+  },
+  {
     path: 'reset-password',
     loadComponent: () =>
       import('./pages/reset-password/reset-password.component').then(
