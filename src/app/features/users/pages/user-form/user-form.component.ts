@@ -17,6 +17,7 @@ import {
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
+import { ProcessingLoaderComponent } from '../../../../shared/ui/processing-loader/processing-loader.component';
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { ToggleSwitchComponent } from '../../../../shared/ui/toggle-switch/toggle-switch.component';
 import { emailFormatValidator } from '../../../../shared/validators/email-format.validator';
@@ -40,6 +41,7 @@ interface LocationOption {
     RouterLink,
     FormFieldComponent,
     ActionButtonComponent,
+    ProcessingLoaderComponent,
     SelectFieldComponent,
     ToggleSwitchComponent,
   ],

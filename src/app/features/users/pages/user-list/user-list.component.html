@@ -228,7 +228,7 @@
           <button
             type="button"
             class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-warning transition-colors hover:bg-base-200/80 hover:text-warning"
-            (click)="openInvitationDialog(openActionsMenu()!.user, 'cancel')"
+            (click)="openUserConfirmation(openActionsMenu()!.user, 'cancelInvitation')"
           >
             <span class="material-symbols-outlined text-[18px] text-warning">cancel</span>
             Anular invitación
@@ -239,7 +239,7 @@
           <button
             type="button"
             class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200/80 hover:text-base-content"
-            (click)="openInvitationDialog(openActionsMenu()!.user, 'resend')"
+            (click)="openUserConfirmation(openActionsMenu()!.user, 'resendInvitation')"
           >
             <span class="material-symbols-outlined text-[18px] text-base-content/50">mail</span>
             Reenviar invitación
@@ -269,107 +269,32 @@
     }
   </section>
 
-  <dialog #statusDialog class="modal" (close)="onStatusDialogClose()">
-    <div class="modal-box mx-3 flex max-h-[calc(100dvh-1.5rem)] w-auto max-w-md flex-col rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl sm:mx-0 sm:w-full sm:rounded-xl">
-      <div class="flex items-start justify-between gap-4 border-b border-base-300 px-6 py-5">
-        <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-base-content">{{ pendingStatusActionLabel() }}</h2>
-          <p class="text-sm text-base-content/65">Confirme el cambio de estado del usuario seleccionado.</p>
+  <app-confirmation-modal
+    [open]="pendingConfirmation() !== null"
+    [title]="pendingConfirmationTitle()"
+    [message]="pendingConfirmationMessage()"
+    [tone]="pendingConfirmationTone()"
+    [confirmLabel]="pendingConfirmationLabel()"
+    [confirmIcon]="pendingConfirmationIcon()"
+    [loading]="isConfirmingAction()"
+    loadingLabel="Procesando..."
+    (confirmed)="confirmUserAction()"
+    (cancelled)="closeUserConfirmation()"
+    (closed)="closeUserConfirmation()"
+  >
+    @if (pendingConfirmationUser(); as selectedUser) {
+      <div modal-details class="rounded-xl border border-base-300 bg-base-200/50 px-4 py-4">
+        <p class="text-sm font-semibold text-base-content">{{ selectedUser.name }}</p>
+        <p class="mt-1 text-sm text-base-content/60">{{ selectedUser.email }}</p>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <app-status-badge [label]="getStatusLabel(selectedUser)" [tone]="getStatusBadgeTone(selectedUser)" />
+
+          @if (isMfaConfirmation()) {
+            <app-status-badge [label]="selectedUser.mfaLabel" [tone]="getMfaBadgeTone(selectedUser)" [compact]="true" />
+          }
         </div>
-        <form method="dialog">
-          <button
-            type="submit"
-            class="btn btn-ghost btn-sm btn-circle"
-            aria-label="Cerrar confirmación de cambio de estado"
-          >
-            <span class="material-symbols-outlined text-[18px]">close</span>
-          </button>
-        </form>
       </div>
-
-      <div class="space-y-4 px-6 py-5">
-        <div class="rounded-xl border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-base-content/80">
-          {{ pendingStatusActionMessage() }}
-        </div>
-
-        @if (pendingStatusActionUser(); as selectedUser) {
-          <div class="rounded-xl border border-base-300 bg-base-200/50 px-4 py-4">
-            <p class="text-sm font-semibold text-base-content">{{ selectedUser.name }}</p>
-            <p class="mt-1 text-sm text-base-content/60">{{ selectedUser.email }}</p>
-            <p class="mt-3 text-xs font-medium uppercase tracking-wide text-base-content/45">Estado actual</p>
-            <div class="mt-2">
-              <app-status-badge [label]="getStatusLabel(selectedUser)" [tone]="getStatusBadgeTone(selectedUser)" />
-            </div>
-          </div>
-        }
-      </div>
-
-      <div class="flex justify-end gap-3 border-t border-base-300 px-6 py-4">
-        <form method="dialog">
-          <button type="submit" class="btn btn-ghost">Cancelar</button>
-        </form>
-        <app-action-button
-          [label]="pendingStatusActionUser()?.status === 'Activo' ? 'Desactivar usuario' : 'Activar usuario'"
-          [variant]="pendingStatusActionUser()?.status === 'Activo' ? 'neutral' : 'primary'"
-          [className]="pendingStatusActionUser()?.status === 'Activo' ? '!border-error/20 !bg-error !text-error-content hover:!bg-error/90' : ''"
-          (clicked)="confirmStatusChange()"
-        />
-      </div>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button type="submit">Cerrar</button>
-    </form>
-  </dialog>
-
-  <dialog #invitationDialog class="modal" (close)="onInvitationDialogClose()">
-    <div class="modal-box mx-3 flex max-h-[calc(100dvh-1.5rem)] w-auto max-w-md flex-col rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl sm:mx-0 sm:w-full sm:rounded-xl">
-      <div class="flex items-start justify-between gap-4 border-b border-base-300 px-6 py-5">
-        <div class="space-y-1">
-          <h2 class="text-lg font-semibold text-base-content">{{ pendingInvitationActionLabel() }}</h2>
-          <p class="text-sm text-base-content/65">Confirme la acción sobre la invitación del usuario seleccionado.</p>
-        </div>
-        <form method="dialog">
-          <button
-            type="submit"
-            class="btn btn-ghost btn-sm btn-circle"
-            aria-label="Cerrar confirmación de invitación"
-          >
-            <span class="material-symbols-outlined text-[18px]">close</span>
-          </button>
-        </form>
-      </div>
-
-      <div class="space-y-4 px-6 py-5">
-        <div class="rounded-xl border border-warning/20 bg-warning/10 px-4 py-3 text-sm text-base-content/80">
-          {{ pendingInvitationActionMessage() }}
-        </div>
-
-        @if (pendingInvitationAction(); as action) {
-          <div class="rounded-xl border border-base-300 bg-base-200/50 px-4 py-4">
-            <p class="text-sm font-semibold text-base-content">{{ action.user.name }}</p>
-            <p class="mt-1 text-sm text-base-content/60">{{ action.user.email }}</p>
-            <p class="mt-3 text-xs font-medium uppercase tracking-wide text-base-content/45">Estado actual</p>
-            <div class="mt-2">
-              <app-status-badge [label]="getStatusLabel(action.user)" [tone]="getStatusBadgeTone(action.user)" />
-            </div>
-          </div>
-        }
-      </div>
-
-      <div class="flex justify-end gap-3 border-t border-base-300 px-6 py-4">
-        <form method="dialog">
-          <button type="submit" class="btn btn-ghost">Cancelar</button>
-        </form>
-        <app-action-button
-          [label]="pendingInvitationAction()?.type === 'cancel' ? 'Anular invitación' : 'Reenviar invitación'"
-          [variant]="pendingInvitationAction()?.type === 'cancel' ? 'neutral' : 'primary'"
-          [className]="pendingInvitationAction()?.type === 'cancel' ? '!border-warning/20 !bg-warning !text-warning-content hover:!bg-warning/90' : ''"
-          (clicked)="confirmInvitationAction()"
-        />
-      </div>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button type="submit">Cerrar</button>
-    </form>
-  </dialog>
+    }
+  </app-confirmation-modal>
 </div>

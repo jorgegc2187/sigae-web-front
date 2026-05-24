@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 type ActionButtonVariant = 'primary' | 'outline' | 'ghost' | 'neutral';
@@ -23,6 +23,7 @@ export class ActionButtonComponent {
   readonly size = input<ActionButtonSize>('md');
   readonly fullWidth = input(false);
   readonly disabled = input(false);
+  readonly showPointer = input(true, { transform: booleanAttribute });
   readonly loading = input(false);
   readonly loadingLabel = input<string | null>(null);
   readonly href = input<string | null>(null);
@@ -54,12 +55,13 @@ export class ActionButtonComponent {
           : 'border border-primary bg-primary text-primary-content shadow-sm hover:bg-primary/90';
 
     const widthClass = this.fullWidth() ? 'w-full' : '';
+    const pointerClass = !this.isDisabled() && this.showPointer() ? 'cursor-pointer' : '';
     const disabledClass = this.isDisabled()
       ? 'cursor-not-allowed border-base-300 bg-base-300 text-base-content/45 shadow-none pointer-events-none'
       : '';
     const extraClass = this.className().trim();
 
-    return `inline-flex items-center justify-center font-semibold transition-colors ${sizeClass} ${variantClass} ${widthClass} ${disabledClass} ${extraClass}`.trim();
+    return `inline-flex items-center justify-center font-semibold transition-colors ${sizeClass} ${variantClass} ${widthClass} ${pointerClass} ${disabledClass} ${extraClass}`.trim();
   });
 
   readonly iconClass = computed(() =>

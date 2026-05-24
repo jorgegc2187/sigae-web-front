@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { ConfirmationModalComponent } from '../../../../shared/ui/confirmation-modal/confirmation-modal.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { FormFieldComponent } from '../../../../shared/ui/form-field/form-field.component';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
@@ -69,6 +70,7 @@ interface DeleteTarget {
   imports: [
     FormsModule,
     ActionButtonComponent,
+    ConfirmationModalComponent,
     DesktopPaginationComponent,
     SearchInputComponent,
     FormFieldComponent,
@@ -86,7 +88,6 @@ export class CategoriesPanelComponent {
   private readonly categoryDialog = viewChild<ElementRef<HTMLDialogElement>>('categoryDialog');
   private readonly typeDialog = viewChild<ElementRef<HTMLDialogElement>>('typeDialog');
   private readonly attributesDialog = viewChild<ElementRef<HTMLDialogElement>>('attributesDialog');
-  private readonly deleteDialog = viewChild<ElementRef<HTMLDialogElement>>('deleteDialog');
   private readonly categoriesResource = this.categoriesService.listResource();
   private readonly desktopPageSize = 10;
   private readonly mobilePageSize = 4;
@@ -103,6 +104,9 @@ export class CategoriesPanelComponent {
   readonly typeFormDraft = signal<TypeFormDraft>(this.createEmptyTypeDraft());
   readonly attributesModalContext = signal<AttributesModalContext | null>(null);
   readonly deleteTarget = signal<DeleteTarget | null>(null);
+  readonly isSubmittingCategory = signal(false);
+  readonly isSubmittingType = signal(false);
+  readonly isDeleting = signal(false);
 
   readonly categories = computed(() => this.categoriesResource.value());
   readonly categoriesWithMetrics = computed(() =>
@@ -222,6 +226,7 @@ export class CategoriesPanelComponent {
       ? `Se eliminará la categoría "${target.label}" con todos sus tipos asociados. Esta acción no se puede deshacer.`
       : `Se eliminará el tipo de activo "${target.label}". Esta acción no se puede deshacer.`;
   });
+  readonly deleteTargetKindLabel = computed(() => (this.deleteTarget()?.type === 'category' ? 'Categoría' : 'Tipo de activo'));
 
   setActiveCategoryFilter(categoryId: CategoryFilterId) {
     this.activeCategoryFilterId.set(categoryId);
@@ -299,6 +304,7 @@ export class CategoriesPanelComponent {
     if (!name) return;
 
     try {
+      this.isSubmittingCategory.set(true);
       const payload = { name, icon: inferCategoryIcon(name) };
       const category = draft.id
         ? await firstValueFrom(this.categoriesService.updateCategory(draft.id, payload))
@@ -311,6 +317,8 @@ export class CategoriesPanelComponent {
       this.closeCategoryModal();
     } catch {
       this.notifications.error({ message: 'No se pudo guardar la categoría.' });
+    } finally {
+      this.isSubmittingCategory.set(false);
     }
   }
 
@@ -400,6 +408,7 @@ export class CategoriesPanelComponent {
     }
 
     try {
+      this.isSubmittingType.set(true);
       if (this.typeFormMode() === 'edit' && draft.id) {
         await firstValueFrom(this.categoriesService.updateType(this.typeFormOriginCategoryId() ?? draft.categoryId, draft.id, {
           categoryId: draft.categoryId,
@@ -418,6 +427,8 @@ export class CategoriesPanelComponent {
       this.closeTypeModal();
     } catch {
       this.notifications.error({ message: 'No se pudo guardar el tipo de activo.' });
+    } finally {
+      this.isSubmittingType.set(false);
     }
   }
 
@@ -428,12 +439,10 @@ export class CategoriesPanelComponent {
 
   openDeleteCategoryDialog(category: Category) {
     this.deleteTarget.set({ type: 'category', id: category.id, label: category.name });
-    this.deleteDialog()?.nativeElement.showModal();
   }
 
   openDeleteTypeDialog(entry: TypeListEntry) {
     this.deleteTarget.set({ type: 'assetType', id: entry.type.id, categoryId: entry.categoryId, label: entry.type.name });
-    this.deleteDialog()?.nativeElement.showModal();
   }
 
   async confirmDeleteTarget() {
@@ -441,6 +450,7 @@ export class CategoriesPanelComponent {
     if (!target) return;
 
     try {
+      this.isDeleting.set(true);
       if (target.type === 'category') {
         await firstValueFrom(this.categoriesService.deleteCategory(target.id));
         this.activeCategoryFilterId.set('all');
@@ -451,9 +461,11 @@ export class CategoriesPanelComponent {
       this.categoriesResource.reload();
       this.notifications.success({ message: `"${target.label}" eliminado correctamente.` });
       this.resetPagination();
-      this.deleteDialog()?.nativeElement.close();
+      this.deleteTarget.set(null);
     } catch {
       this.notifications.error({ message: 'No se pudo eliminar el registro.' });
+    } finally {
+      this.isDeleting.set(false);
     }
   }
 
@@ -470,7 +482,11 @@ export class CategoriesPanelComponent {
     this.attributesModalContext.set(null);
   }
 
-  onDeleteDialogClose() {
+  closeDeleteDialog() {
+    if (this.isDeleting()) {
+      return;
+    }
+
     this.deleteTarget.set(null);
   }
 
