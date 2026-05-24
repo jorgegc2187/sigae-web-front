@@ -147,165 +147,211 @@
     </div>
   </div>
 
-  @if (modulePending() || unexpectedError()) {
-    <section class="hidden rounded-xl border border-base-300 bg-base-100 shadow-sm md:block">
-      <div class="flex flex-col items-center gap-4 px-8 py-16 text-center">
-        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
-          <span class="material-symbols-outlined text-[32px]">
-            {{ modulePending() ? 'hourglass_top' : 'cloud_off' }}
-          </span>
-        </div>
-        <div class="space-y-2">
-          <h2 class="text-xl font-bold text-base-content">{{ stateTitle() }}</h2>
-          <p class="max-w-xl text-sm leading-6 text-base-content/60">{{ stateMessage() }}</p>
-        </div>
-        <app-action-button
-          [label]="modulePending() ? 'Entendido' : 'Reintentar'"
-          [variant]="modulePending() ? 'neutral' : 'primary'"
-          [icon]="modulePending() ? 'info' : 'refresh'"
-          className="shadow-sm"
-          (clicked)="reloadLoans()"
-        />
-      </div>
-    </section>
-  } @else {
-    <app-data-listing
-      class="hidden md:block"
-      [isLoading]="isLoading()"
-      [isEmpty]="totalResults() === 0"
-      [resultLabel]="resultLabel()"
-      [currentPage]="queryState().page"
-      [totalPages]="totalPages()"
-      [selectionEnabled]="true"
-      [allSelected]="allVisibleSelected()"
-      [selectedCount]="selectedIds().length"
-      (pageChange)="onPageChange($event)"
-      (toggleSelectAll)="onToggleSelectAll($event)"
-    >
-      <div listing-toolbar class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <app-segmented-filter-tabs
-          [items]="statusTabs()"
-          [activeValue]="queryState().status ?? 'all'"
-          variant="desktop"
-          (valueChange)="onStatusTabSelect($event)"
-        />
+  <div class="hidden space-y-6 md:block">
+    <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div class="flex flex-1 flex-wrap items-end gap-4">
+          <div class="min-w-[260px] flex-1">
+            <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
+            <app-search-input
+              widthClass="w-full"
+              placeholder="Buscar por docente, código o activo..."
+              [value]="queryState().search"
+              (valueChange)="onSearch($event)"
+            />
+          </div>
 
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <app-search-input
-            widthClass="w-full sm:w-[320px]"
-            placeholder="Buscar préstamo..."
-            [value]="queryState().search"
-            (valueChange)="onSearch($event)"
-          />
+          <div class="min-w-[220px] flex-1">
+            <app-select-field
+              label="Estado"
+              appearance="toolbar"
+              placeholder="Todos los estados"
+              [options]="statusOptions()"
+              [value]="queryState().status ?? 'all'"
+              (valueChange)="onStatusTabSelect($event)"
+            />
+          </div>
 
+          <button
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
+            (click)="onSearch(''); onStatusTabSelect('all')"
+          >
+            <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+            Limpiar Filtros
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
           <app-action-button
-            label="Nuevo préstamo"
+            label="Registrar préstamo"
             icon="add"
-            className="shadow-sm"
+            hostClass="w-full xl:w-auto"
             (clicked)="onCreateLoan()"
           />
         </div>
       </div>
+    </section>
 
-      <th listing-head class="px-4 py-4">Docente</th>
-      <th listing-head class="px-4 py-4">Activos</th>
-      <th listing-head class="px-4 py-4">Ubicación</th>
-      <th listing-head class="px-4 py-4">Fecha préstamo</th>
-      <th listing-head class="px-4 py-4">Fecha límite</th>
-      <th listing-head class="px-4 py-4">Estado</th>
-      <th listing-head class="px-4 py-4 text-right">Acciones</th>
-
-      @for (loan of paginatedLoans(); track loan.id) {
-        <tr
-          listing-body
-          [class]="getLoanRowClass(loan.status)"
-        >
-            <td class="px-5 py-4 align-middle">
-              <label class="flex justify-center">
-                <input
-                  type="checkbox"
-                  class="checkbox checkbox-sm border border-base-300"
-                  [checked]="isSelected(loan.id)"
-                  (change)="onToggleLoanSelection(loan.id, $any($event.target).checked)"
-                  [attr.aria-label]="'Seleccionar préstamo de ' + loan.teacher.name"
-                />
-              </label>
-            </td>
-            <td class="px-4 py-4">
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold"
-                  [class]="getTeacherAvatarClass(loan.status)"
-                >
-                  {{ loan.teacher.initials }}
-                </div>
-                <div class="min-w-0">
-                  <p class="truncate font-semibold text-base-content">{{ loan.teacher.name }}</p>
-                  <p class="truncate text-xs text-base-content/55">{{ loan.teacher.specialty }}</p>
-                </div>
-              </div>
-            </td>
-            <td class="px-4 py-4">
-              <button
-                type="button"
-                class="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-full border border-base-300 bg-base-100 px-2 text-[11px] font-medium text-base-content/70 shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                [attr.aria-label]="getAssetsCountAriaLabel(loan)"
-                [attr.popovertarget]="getAssetsPopoverId(loan.id, 'desktop')"
-                [style.anchor-name]="getAssetsAnchorName(loan.id, 'desktop')"
-              >
-                <span class="material-symbols-outlined shrink-0 text-[12px] text-base-content/45">inventory_2</span>
-                {{ getAssetsCountLabel(loan) }}
-                <span class="material-symbols-outlined shrink-0 text-[11px] text-base-content/45">expand_more</span>
-              </button>
-              <div
-                popover="auto"
-                [id]="getAssetsPopoverId(loan.id, 'desktop')"
-                class="dropdown rounded-box border border-base-300 bg-base-100 shadow-md [position-anchor:var(--anchor)]"
-                [style.position-anchor]="getAssetsAnchorName(loan.id, 'desktop')"
-              >
-                <div class="w-64 p-2">
-                  <div class="border-b border-base-200 px-3 py-2">
-                    <p class="text-[11px] font-semibold uppercase tracking-wider text-base-content/45">
-                      Activos del préstamo
-                    </p>
-                  </div>
-                  <div class="py-1">
-                    @for (asset of loan.assets; track asset.id) {
-                      <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
-                        <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/35">
-                          inventory_2
-                        </span>
-                        <span class="leading-snug">{{ asset.name }}</span>
+    @if (modulePending() || unexpectedError()) {
+      <section class="rounded-xl border border-base-300 bg-base-100 shadow-sm">
+        <div class="flex flex-col items-center gap-4 px-8 py-16 text-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
+            <span class="material-symbols-outlined text-[32px]">
+              {{ modulePending() ? 'hourglass_top' : 'cloud_off' }}
+            </span>
+          </div>
+          <div class="space-y-2">
+            <h2 class="text-xl font-bold text-base-content">{{ stateTitle() }}</h2>
+            <p class="max-w-xl text-sm leading-6 text-base-content/60">{{ stateMessage() }}</p>
+          </div>
+          <app-action-button
+            [label]="modulePending() ? 'Entendido' : 'Reintentar'"
+            [variant]="modulePending() ? 'neutral' : 'primary'"
+            [icon]="modulePending() ? 'info' : 'refresh'"
+            className="shadow-sm"
+            (clicked)="reloadLoans()"
+          />
+        </div>
+      </section>
+    } @else {
+      <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[960px] border-collapse text-left">
+            <thead>
+              <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
+                <th class="w-12 px-4 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm border border-base-300"
+                    [checked]="allVisibleSelected()"
+                    (change)="onToggleSelectAll($any($event.target).checked)"
+                    aria-label="Seleccionar todos los préstamos visibles"
+                  />
+                </th>
+                <th class="px-4 py-3">Docente</th>
+                <th class="px-4 py-3">Activos</th>
+                <th class="px-4 py-3">Ubicación</th>
+                <th class="px-4 py-3">Fecha préstamo</th>
+                <th class="px-4 py-3">Fecha límite</th>
+                <th class="px-4 py-3">Estado</th>
+                <th class="px-4 py-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="text-sm">
+              @if (isLoading()) {
+                <tr>
+                  <td colspan="8" class="px-6 py-12 text-center">
+                    <div class="flex flex-col items-center gap-3 text-base-content/50">
+                      <span class="loading loading-spinner loading-md text-primary"></span>
+                      <p class="text-sm font-medium">Cargando préstamos...</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (loan of paginatedLoans(); track loan.id) {
+                  <tr [class]="getLoanRowClass(loan.status)">
+                    <td class="px-4 py-4 text-center">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm border border-base-300"
+                        [checked]="isSelected(loan.id)"
+                        (change)="onToggleLoanSelection(loan.id, $any($event.target).checked)"
+                        [attr.aria-label]="'Seleccionar préstamo de ' + loan.teacher.name"
+                      />
+                    </td>
+                    <td class="px-4 py-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold"
+                          [class]="getTeacherAvatarClass(loan.status)"
+                        >
+                          {{ loan.teacher.initials }}
+                        </div>
+                        <div class="min-w-0">
+                          <p class="truncate font-semibold text-base-content">{{ loan.teacher.name }}</p>
+                          <p class="truncate text-xs text-base-content/55">{{ loan.teacher.specialty }}</p>
+                        </div>
                       </div>
-                    }
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td class="px-4 py-4 text-base-content/65">{{ loan.destination }}</td>
-            <td class="px-4 py-4 text-base-content/65">{{ formatDate(loan.loanDate) }}</td>
-            <td class="px-4 py-4" [class.text-error]="loan.status === 'Vencido'" [class.font-semibold]="loan.status === 'Vencido'">
-              {{ formatDate(loan.dueDate) }}
-            </td>
-            <td class="px-4 py-4">
-              <app-loan-status-badge [status]="loan.status" />
-            </td>
-            <td class="px-4 py-4 text-right">
-              <button type="button" class="btn btn-ghost btn-sm text-primary" (click)="onViewLoan(loan.id)">
-                Ver
-                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </button>
-            </td>
-        </tr>
-      }
+                    </td>
+                    <td class="px-4 py-4">
+                      <button
+                        type="button"
+                        class="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-full border border-base-300 bg-base-100 px-2 text-[11px] font-medium text-base-content/70 shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        [attr.aria-label]="getAssetsCountAriaLabel(loan)"
+                        [attr.popovertarget]="getAssetsPopoverId(loan.id, 'desktop')"
+                        [style.anchor-name]="getAssetsAnchorName(loan.id, 'desktop')"
+                      >
+                        <span class="material-symbols-outlined shrink-0 text-[12px] text-base-content/45">inventory_2</span>
+                        {{ getAssetsCountLabel(loan) }}
+                        <span class="material-symbols-outlined shrink-0 text-[11px] text-base-content/45">expand_more</span>
+                      </button>
+                      <div
+                        popover="auto"
+                        [id]="getAssetsPopoverId(loan.id, 'desktop')"
+                        class="dropdown rounded-box border border-base-300 bg-base-100 shadow-md [position-anchor:var(--anchor)]"
+                        [style.position-anchor]="getAssetsAnchorName(loan.id, 'desktop')"
+                      >
+                        <div class="w-64 p-2">
+                          <div class="border-b border-base-200 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-base-content/45">
+                              Activos del préstamo
+                            </p>
+                          </div>
+                          <div class="py-1">
+                            @for (asset of loan.assets; track asset.id) {
+                              <div class="flex items-start gap-2 px-3 py-2 text-sm text-base-content">
+                                <span class="material-symbols-outlined mt-0.5 text-[16px] text-base-content/35">
+                                  inventory_2
+                                </span>
+                                <span class="leading-snug">{{ asset.name }}</span>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-4 py-4 text-base-content/65">{{ loan.destination }}</td>
+                    <td class="px-4 py-4 text-base-content/65">{{ formatDate(loan.loanDate) }}</td>
+                    <td class="px-4 py-4" [class.text-error]="loan.status === 'Vencido'" [class.font-semibold]="loan.status === 'Vencido'">
+                      {{ formatDate(loan.dueDate) }}
+                    </td>
+                    <td class="px-4 py-4">
+                      <app-loan-status-badge [status]="loan.status" />
+                    </td>
+                    <td class="px-4 py-4 text-right">
+                      <button
+                        type="button"
+                        class="inline-flex items-center justify-end gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                        (click)="onViewLoan(loan.id)"
+                      >
+                        Ver detalle
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="8" class="px-6 py-12 text-center">
+                      <div class="flex flex-col items-center gap-3 text-base-content/55">
+                        <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl">manage_search</span>
+                        <p class="text-sm font-medium">No hay préstamos que coincidan con los filtros aplicados.</p>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
 
-      <div listing-empty class="flex flex-col items-center gap-3 text-center text-base-content/50">
-        <span class="material-symbols-outlined text-[48px]">manage_search</span>
-        <p class="text-base font-semibold text-base-content/70">No se encontraron préstamos</p>
-        <p class="max-w-md text-sm">
-          Ajusta la búsqueda o cambia el estado seleccionado para ver otros resultados.
-        </p>
-      </div>
-    </app-data-listing>
-  }
+        <app-desktop-pagination
+          [currentPage]="queryState().page"
+          [totalPages]="totalPages()"
+          [resultLabel]="resultLabel()"
+          (pageChange)="onPageChange($event)"
+        />
+      </section>
+    }
+  </div>
 </div>

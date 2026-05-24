@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../shared/services/notification.service';
-import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
+import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import {
   SegmentedFilterTabItem,
   SegmentedFilterTabsComponent,
@@ -22,11 +23,12 @@ interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
 @Component({
   selector: 'app-loan-list',
   imports: [
-    DataListingComponent,
+    DesktopPaginationComponent,
     LoanStatusBadgeComponent,
     MobilePaginationComponent,
     SearchInputComponent,
     ActionButtonComponent,
+    SelectFieldComponent,
     SegmentedFilterTabsComponent,
   ],
   templateUrl: './loan-list.component.html',
@@ -145,6 +147,12 @@ export class LoanListComponent {
     { value: 'overdue', label: 'Vencidos', badgeCount: this.overdueCount() },
     { value: 'returned', label: 'Devueltos' },
   ]);
+  readonly statusOptions = computed<SelectFieldOption[]>(() =>
+    this.statusTabs().map((tab) => ({
+      value: tab.value,
+      label: tab.badgeCount === undefined ? tab.label : `${tab.label} (${tab.badgeCount})`,
+    })),
+  );
 
   readonly selectedIds = computed(() => this.queryState().selectedIds);
 
