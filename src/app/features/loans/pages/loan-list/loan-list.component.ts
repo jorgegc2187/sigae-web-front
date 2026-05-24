@@ -16,9 +16,7 @@ import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loa
 import { LoansService } from '../../services/loans.service';
 
 type AssetsPopoverContext = 'desktop' | 'mobile';
-interface LoanListQueryState extends ListQueryState<LoanStatusTab> {
-  selectedIds: string[];
-}
+type LoanListQueryState = ListQueryState<LoanStatusTab>;
 
 @Component({
   selector: 'app-loan-list',
@@ -53,8 +51,8 @@ export class LoanListComponent {
     status: 'all',
     sort: undefined,
     direction: undefined,
-    selectedIds: [],
   });
+  readonly selectedLoanIds = signal<string[]>([]);
   private readonly loansResource = this.loansService.listResource(computed(() => ({
     search: this.queryState().search || undefined,
     status: this.queryState().status === 'all' ? undefined : this.queryState().status,
@@ -154,7 +152,7 @@ export class LoanListComponent {
     })),
   );
 
-  readonly selectedIds = computed(() => this.queryState().selectedIds);
+  readonly selectedIds = computed(() => this.selectedLoanIds());
 
   readonly allVisibleSelected = computed(() => {
     const visibleIds = this.paginatedLoans().map((loan) => loan.id);
@@ -167,6 +165,7 @@ export class LoanListComponent {
       search: value,
       page: 1,
     }));
+    this.selectedLoanIds.set([]);
   }
 
   onStatusTabChange(status: LoanStatusTab) {
@@ -175,6 +174,7 @@ export class LoanListComponent {
       status,
       page: 1,
     }));
+    this.selectedLoanIds.set([]);
   }
 
   onStatusTabSelect(status: string) {
@@ -190,9 +190,8 @@ export class LoanListComponent {
 
   onToggleSelectAll(checked: boolean) {
     const visibleIds = this.paginatedLoans().map((loan) => loan.id);
-
-    this.queryState.update((state) => {
-      const selectedIds = new Set(state.selectedIds);
+    this.selectedLoanIds.update((current) => {
+      const selectedIds = new Set(current);
 
       if (checked) {
         visibleIds.forEach((id) => selectedIds.add(id));
@@ -200,16 +199,13 @@ export class LoanListComponent {
         visibleIds.forEach((id) => selectedIds.delete(id));
       }
 
-      return {
-        ...state,
-        selectedIds: Array.from(selectedIds),
-      };
+      return Array.from(selectedIds);
     });
   }
 
   onToggleLoanSelection(loanId: string, checked: boolean) {
-    this.queryState.update((state) => {
-      const selectedIds = new Set(state.selectedIds);
+    this.selectedLoanIds.update((current) => {
+      const selectedIds = new Set(current);
 
       if (checked) {
         selectedIds.add(loanId);
@@ -217,10 +213,7 @@ export class LoanListComponent {
         selectedIds.delete(loanId);
       }
 
-      return {
-        ...state,
-        selectedIds: Array.from(selectedIds),
-      };
+      return Array.from(selectedIds);
     });
   }
 
