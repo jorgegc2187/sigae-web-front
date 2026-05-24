@@ -84,7 +84,10 @@ export class ReportsHomeComponent {
   });
 
   readonly assetReportResource = this.reportsService.assetsReportResource(this.assetReportFilters);
-  readonly assetRows = computed<AssetReportRow[]>(() => this.assetReportResource.value());
+  readonly assetRows = computed<AssetReportRow[]>(() =>
+    this.assetReportResource.hasValue() ? this.assetReportResource.value() : [],
+  );
+  readonly assetReportError = computed(() => !!this.assetReportResource.error());
 
   readonly filteredAssetRows = computed(() => {
     const categoryId = this.assetCategoryId();
@@ -124,7 +127,10 @@ export class ReportsHomeComponent {
   });
 
   readonly loanReportResource = this.reportsService.loansReportResource(this.loanReportFilters);
-  readonly loanRows = computed<LoanReportRow[]>(() => this.loanReportResource.value());
+  readonly loanRows = computed<LoanReportRow[]>(() =>
+    this.loanReportResource.hasValue() ? this.loanReportResource.value() : [],
+  );
+  readonly loanReportError = computed(() => !!this.loanReportResource.error());
 
   readonly filteredLoanRows = computed(() => {
     const query = this.loanQuery().trim().toLowerCase();
@@ -242,6 +248,14 @@ export class ReportsHomeComponent {
 
   goToLoanPage(page: number): void {
     this.loanCurrentPage.set(page);
+  }
+
+  reloadAssetReport(): void {
+    this.assetReportResource.reload();
+  }
+
+  reloadLoanReport(): void {
+    this.loanReportResource.reload();
   }
 
   exportReport(format: ReportExportFormat): void {

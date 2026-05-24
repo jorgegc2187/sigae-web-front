@@ -106,8 +106,22 @@
     </section>
 
     <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[860px] border-collapse text-left">
+      @if (assetReportError()) {
+        <div class="flex flex-col items-center gap-4 px-6 py-14 text-center">
+          <div class="flex h-14 w-14 items-center justify-center rounded-full bg-error/10 text-error">
+            <span class="material-symbols-outlined text-[28px]">cloud_off</span>
+          </div>
+          <div class="space-y-2">
+            <h2 class="text-lg font-bold text-base-content">No se pudo cargar el reporte de activos</h2>
+            <p class="max-w-xl text-sm leading-6 text-base-content/60">
+              Ocurrió un problema al consultar la API con los filtros aplicados. Intenta nuevamente.
+            </p>
+          </div>
+          <app-action-button label="Reintentar" icon="refresh" (clicked)="reloadAssetReport()" />
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
               <th class="px-4 py-3">Codigo</th>
@@ -149,15 +163,16 @@
               </tr>
             }
           </tbody>
-        </table>
-      </div>
+          </table>
+        </div>
 
-      <app-desktop-pagination
-        [currentPage]="assetCurrentPage()"
-        [totalPages]="assetTotalPages()"
-        [resultLabel]="assetResultLabel()"
-        (pageChange)="goToAssetPage($event)"
-      />
+        <app-desktop-pagination
+          [currentPage]="assetCurrentPage()"
+          [totalPages]="assetTotalPages()"
+          [resultLabel]="assetResultLabel()"
+          (pageChange)="goToAssetPage($event)"
+        />
+      }
     </section>
   } @else {
     <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
@@ -240,8 +255,22 @@
     </section>
 
     <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[860px] border-collapse text-left">
+      @if (loanReportError()) {
+        <div class="flex flex-col items-center gap-4 px-6 py-14 text-center">
+          <div class="flex h-14 w-14 items-center justify-center rounded-full bg-error/10 text-error">
+            <span class="material-symbols-outlined text-[28px]">cloud_off</span>
+          </div>
+          <div class="space-y-2">
+            <h2 class="text-lg font-bold text-base-content">No se pudo cargar el reporte de préstamos</h2>
+            <p class="max-w-xl text-sm leading-6 text-base-content/60">
+              Ocurrió un problema al consultar la API con los filtros aplicados. Intenta nuevamente.
+            </p>
+          </div>
+          <app-action-button label="Reintentar" icon="refresh" (clicked)="reloadLoanReport()" />
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
               <th class="px-4 py-3">ID Prestamo</th>
@@ -290,15 +319,16 @@
               </tr>
             }
           </tbody>
-        </table>
-      </div>
+          </table>
+        </div>
 
-      <app-desktop-pagination
-        [currentPage]="loanCurrentPage()"
-        [totalPages]="loanTotalPages()"
-        [resultLabel]="loanResultLabel()"
-        (pageChange)="goToLoanPage($event)"
-      />
+        <app-desktop-pagination
+          [currentPage]="loanCurrentPage()"
+          [totalPages]="loanTotalPages()"
+          [resultLabel]="loanResultLabel()"
+          (pageChange)="goToLoanPage($event)"
+        />
+      }
     </section>
   }
 </div>
