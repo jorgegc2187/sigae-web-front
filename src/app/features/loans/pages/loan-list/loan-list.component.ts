@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { IsShortRelativeDatePipe } from '../../../../shared/pipes/is-short-relative-date.pipe';
+import { RelativeDateLabelPipe } from '../../../../shared/pipes/relative-date-label.pipe';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { MobilePaginationComponent } from '../../../../shared/ui/mobile-pagination/mobile-pagination.component';
 import { ListQueryState } from '../../../../shared/models/list-query-state.model';
@@ -22,8 +24,10 @@ type LoanListQueryState = ListQueryState<LoanStatusTab>;
   selector: 'app-loan-list',
   imports: [
     DesktopPaginationComponent,
+    IsShortRelativeDatePipe,
     LoanStatusBadgeComponent,
     MobilePaginationComponent,
+    RelativeDateLabelPipe,
     SearchInputComponent,
     ActionButtonComponent,
     SelectFieldComponent,

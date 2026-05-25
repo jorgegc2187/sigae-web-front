@@ -67,6 +67,14 @@
                 <div class="min-w-0">
                   <h3 class="truncate text-[15px] font-bold leading-tight text-base-content">{{ loan.teacher.name }}</h3>
                   <p class="truncate text-xs text-base-content/55">{{ formatDate(loan.loanDate) }}</p>
+                  <p class="truncate text-xs text-base-content/60">
+                    Límite:
+                    <span
+                      [class.font-semibold]="(loan.dueDate | isShortRelativeDate) || loan.status === 'Vencido'"
+                      [class.text-error]="(loan.dueDate | isShortRelativeDate) || loan.status === 'Vencido'">
+                      {{ loan.dueDate | relativeDateLabel }}
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -313,8 +321,12 @@
                     </td>
                     <td class="px-4 py-4 text-base-content/65">{{ loan.destination }}</td>
                     <td class="px-4 py-4 text-base-content/65">{{ formatDate(loan.loanDate) }}</td>
-                    <td class="px-4 py-4" [class.text-error]="loan.status === 'Vencido'" [class.font-semibold]="loan.status === 'Vencido'">
-                      {{ formatDate(loan.dueDate) }}
+                    <td class="px-4 py-4 text-base-content/65">
+                      <span
+                        [class.font-semibold]="(loan.dueDate | isShortRelativeDate) || loan.status === 'Vencido'"
+                        [class.text-error]="(loan.dueDate | isShortRelativeDate) || loan.status === 'Vencido'">
+                        {{ loan.dueDate | relativeDateLabel }}
+                      </span>
                     </td>
                     <td class="px-4 py-4">
                       <app-loan-status-badge [status]="loan.status" />
