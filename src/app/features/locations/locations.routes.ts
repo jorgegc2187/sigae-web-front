@@ -25,4 +25,16 @@ export const LOCATIONS_ROUTES: Routes = [
       pageSubtitle: 'Registrar nueva ubicación',
     },
   },
+  {
+    path: ':id/edit',
+    loadComponent: () =>
+      import('./pages/location-form/location-form.component').then(
+        (m) => m.LocationFormComponent
+      ),
+    title: 'Editar Ubicación - SIGAE',
+    data: {
+      pageTitle: 'Ubicaciones',
+      pageSubtitle: 'Editar ubicación',
+    },
+  },
 ];

@@ -1,30 +1,59 @@
-<div>
-  <div class="flex justify-between items-center mb-8">
-    <h2 class="text-2xl font-bold text-base-content">Ubicaciones</h2>
+<div class="space-y-6">
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="w-full lg:max-w-md">
+        <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
+        <app-search-input
+          placeholder="Buscar ubicación..."
+          [value]="searchQuery()"
+          (valueChange)="onSearch($event)"
+        />
+      </div>
 
-    <div class="flex items-center gap-4">
-      <app-search-input
-        widthClass="w-[320px]"
-        placeholder="Buscar ubicación..."
-        [value]="searchQuery()"
-        (valueChange)="onSearch($event)"
-      />
       <app-action-button
-        label="Nueva Ubicación"
+        label="Nueva ubicación"
         icon="add"
         routerLink="/settings/locations/new"
       />
     </div>
-  </div>
+  </section>
 
-  <!-- Grid Layout -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @for (location of filteredLocations(); track location.id) {
-      <app-location-card
-        [location]="location"
-        (edit)="onEdit($event)"
-        (delete)="onDelete($event)"
-      />
-    }
-  </div>
+  @if (isLoading()) {
+    <div class="rounded-2xl border border-base-300 bg-base-100 px-6 py-8 text-sm text-base-content/60 shadow-sm">
+      Cargando ubicaciones...
+    </div>
+  } @else if (filteredLocations().length === 0) {
+    <div class="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-10 text-center shadow-sm">
+      <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-base-200 text-base-content/40">
+        <span class="material-symbols-outlined text-[24px]">location_off</span>
+      </div>
+      <p class="text-sm font-medium text-base-content/75">No hay ubicaciones para mostrar</p>
+      <p class="mt-1 text-xs text-base-content/50">
+        Ajuste su búsqueda o registre una nueva ubicación.
+      </p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      @for (location of filteredLocations(); track location.id) {
+        <app-location-card
+          [location]="location"
+          (edit)="onEdit($event)"
+          (toggleStatus)="onToggleStatus($event)"
+        />
+      }
+    </div>
+  }
 </div>
+
+<app-confirmation-modal
+  [open]="pendingStatusLocation() !== null"
+  [title]="pendingStatusTitle()"
+  [message]="pendingStatusMessage()"
+  [tone]="pendingStatusTone()"
+  [icon]="pendingStatusIcon()"
+  [confirmLabel]="pendingStatusLabel()"
+  [loading]="isUpdatingStatus()"
+  [loadingLabel]="pendingStatusLabel()"
+  (confirmed)="confirmStatusChange()"
+  (cancelled)="closeStatusConfirmation()"
+/>

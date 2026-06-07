@@ -2,7 +2,6 @@ export interface Manager {
   id: string;
   name: string;
   initials: string;
-  colorClass: string;
 }
 
 export interface Location {
@@ -10,7 +9,7 @@ export interface Location {
   name: string;
   description: string;
   managers: Manager[];
-  additionalManagersCount?: number;
-  managersText?: string;
-  status?: 'Activo' | 'Inactivo';
+  additionalManagersCount: number;
+  managersText: string;
+  status: 'Activo' | 'Inactivo';
 }

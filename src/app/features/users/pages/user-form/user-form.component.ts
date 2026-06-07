@@ -67,7 +67,7 @@ export class UserFormComponent {
     value: role,
     label: role,
   }));
-  private readonly locationsResource = this.locationsService.listResource();
+  private readonly locationsResource = this.locationsService.listResource('ACTIVE');
   readonly locations = computed<LocationOption[]>(() =>
     this.locationsResource.value().map((location) => ({ id: location.id, name: location.name })),
   );

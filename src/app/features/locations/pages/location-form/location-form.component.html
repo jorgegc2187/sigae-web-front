@@ -1,118 +1,125 @@
-<div class="pb-24 max-w-[640px] mx-auto">
+<app-processing-loader
+  [active]="isBusy()"
+  [title]="blockingTitle()"
+  [message]="blockingDescription()"
+/>
 
-  <!-- Breadcrumb + Title -->
+<div class="mx-auto max-w-[720px] pb-24">
   <div class="mb-8">
-    <div class="breadcrumbs text-sm text-base-content/60 mb-2 p-0">
+    <div class="breadcrumbs mb-2 p-0 text-sm text-base-content/60">
       <ul>
-        <li><a routerLink="/settings/locations" class="hover:text-primary transition-colors">Ubicaciones</a></li>
-        <li class="text-base-content font-medium">Registrar Ubicación</li>
+        <li><a routerLink="/settings/locations" class="transition-colors hover:text-primary">Ubicaciones</a></li>
+        <li class="font-medium text-base-content">{{ pageLabel() }}</li>
       </ul>
     </div>
-    <h2 class="text-2xl font-bold text-base-content">Registrar Ubicación</h2>
+    <h2 class="text-2xl font-bold text-base-content">{{ pageLabel() }}</h2>
   </div>
 
-  <!-- Form Card -->
-  <div class="card bg-base-100 card-border shadow-sm">
+  <div class="card border border-base-300 bg-base-100 shadow-sm">
     <div class="card-body p-6">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-8">
+        <section>
+          <div class="mb-4 flex items-center justify-between gap-3 border-b border-base-200 pb-3">
+            <h3 class="flex items-center gap-2 text-base font-semibold text-base-content">
+              <span class="material-symbols-outlined text-[20px] text-primary">location_on</span>
+              Información de la ubicación
+            </h3>
 
-        <!-- Section: Información de la Ubicación -->
-        <h3 class="text-base font-semibold text-base-content mb-4 pb-3 border-b border-base-200 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">location_on</span>
-          Información de la Ubicación
-        </h3>
+            @if (isEditMode()) {
+              <app-status-badge [label]="currentStatus()" [tone]="statusTone()" [compact]="true" />
+            }
+          </div>
 
-        <div class="grid grid-cols-1 gap-5 mb-8">
-          <!-- Nombre -->
-          <app-form-field
-            label="Nombre"
-            fieldId="locationName"
-            [required]="true"
-            [error]="
-              nameControl.invalid && nameControl.touched
-                ? nameControl.hasError('required')
-                  ? 'El nombre es obligatorio.'
-                  : nameControl.hasError('minlength')
-                    ? 'El nombre debe tener al menos 3 caracteres.'
-                    : null
-                : null
-            "
-          >
-            <input
-              id="locationName"
-              type="text"
-              formControlName="name"
-              class="w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none"
-              placeholder="Ej. Laboratorio de Cómputo 1"
-            />
-          </app-form-field>
+          <div class="grid grid-cols-1 gap-5">
+            <app-form-field
+              label="Nombre"
+              fieldId="locationName"
+              [required]="true"
+              [error]="
+                nameControl.invalid && nameControl.touched
+                  ? nameControl.hasError('required')
+                    ? 'El nombre es obligatorio.'
+                    : nameControl.hasError('minlength')
+                      ? 'El nombre debe tener al menos 3 caracteres.'
+                      : null
+                  : null
+              "
+            >
+              <input
+                id="locationName"
+                type="text"
+                formControlName="name"
+                [class]="inputClass"
+                placeholder="Ej. Laboratorio de Cómputo 1"
+              />
+            </app-form-field>
 
-          <!-- Descripción -->
-          <fieldset class="fieldset w-full">
-            <label for="locationDescription" class="fieldset-legend">Descripción</label>
-            <textarea
-              id="locationDescription"
-              formControlName="description"
-              class="min-h-24 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Detalles adicionales sobre la ubicación..."
-              rows="4"
-            ></textarea>
-          </fieldset>
-        </div>
+            <fieldset class="fieldset w-full">
+              <label for="locationDescription" class="fieldset-legend">Descripción</label>
+              <textarea
+                id="locationDescription"
+                formControlName="description"
+                class="min-h-24 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Detalles adicionales sobre la ubicación..."
+                rows="4"
+              ></textarea>
+            </fieldset>
+          </div>
+        </section>
 
-        <!-- Section: Asignación de Encargados -->
-        <h3 class="text-base font-semibold text-base-content mb-4 pb-3 border-b border-base-200 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">group</span>
-          Asignación de Encargados
-        </h3>
+        <section>
+          <h3 class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+            <span class="material-symbols-outlined text-[20px] text-primary">group</span>
+            Asignación de encargados
+          </h3>
 
-        <div class="mb-8">
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Encargados Asignados</legend>
+            <legend class="fieldset-legend">Encargados asignados</legend>
 
-            <!-- Tag + Search Input -->
             <div
               #searchContainer
-              class="w-full min-h-10 p-1.5 bg-base-200 border border-base-300 rounded-lg flex flex-wrap gap-2 items-center cursor-text relative focus-within:border-primary transition-colors"
+              class="relative flex min-h-10 w-full flex-wrap items-center gap-2 rounded-lg border border-base-300 bg-base-100 p-2 transition-colors focus-within:border-primary"
             >
-              <!-- Selected tags -->
               @for (manager of selectedManagers(); track manager.id) {
-                <span class="inline-flex items-center gap-1.5 pl-1 pr-1 py-1 rounded-full bg-base-300 text-sm font-medium text-base-content border border-base-300">
-                  <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-primary-content text-[9px] font-bold shrink-0">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200 px-2 py-1 text-sm font-medium text-base-content">
+                  <span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-content">
                     {{ manager.initials }}
-                  </div>
+                  </span>
                   {{ manager.name }}
-                  <button type="button" class="flex items-center justify-center w-5 h-5 rounded-full hover:bg-base-content/20 text-base-content/60 hover:text-base-content transition-colors ml-0.5" (click)="removeManager(manager.id)">
+                  <button
+                    type="button"
+                    class="flex h-5 w-5 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-content/10 hover:text-base-content"
+                    [attr.aria-label]="'Quitar ' + manager.name"
+                    (click)="removeManager(manager.id)"
+                  >
                     <span class="material-symbols-outlined text-[14px] leading-none">close</span>
                   </button>
                 </span>
               }
 
-              <!-- Search input -->
-              <div class="relative flex-1 min-w-[140px]">
+              <div class="relative min-w-[180px] flex-1">
                 <input
                   type="text"
-                  class="w-full bg-transparent border-none outline-none text-sm py-1 px-1 h-7 placeholder-shown:opacity-50"
-                  placeholder="Buscar usuario..."
+                  class="h-7 w-full border-none bg-transparent px-1 py-1 text-sm text-base-content outline-none placeholder-shown:opacity-50"
+                  placeholder="Buscar encargado..."
                   [value]="userSearchQuery()"
                   (input)="onSearchInput($event)"
                   (focus)="onSearchFocus()"
                 />
 
-                <!-- Dropdown -->
-                @if (dropdownOpen() && filteredUsers().length > 0) {
-                  <ul class="absolute top-full left-0 mt-1 w-64 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
-                    @for (user of filteredUsers(); track user.id) {
+                @if (dropdownOpen() && filteredManagers().length > 0) {
+                  <ul class="absolute left-0 top-full z-50 mt-1 max-h-48 w-72 overflow-y-auto rounded-lg border border-base-300 bg-base-100 shadow-lg">
+                    @for (manager of filteredManagers(); track manager.id) {
                       <li>
                         <button
                           type="button"
-                          class="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-base-200 transition-colors text-left"
-                          (click)="addManager(user)"
+                          class="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-primary/5 hover:text-primary"
+                          (click)="addManager(manager)"
                         >
-                          <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-content text-[10px] font-bold shrink-0">
-                            {{ user.initials }}
-                          </div>
-                          <span>{{ user.name }}</span>
+                          <span class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-content">
+                            {{ manager.initials }}
+                          </span>
+                          <span>{{ manager.name }}</span>
                         </button>
                       </li>
                     }
@@ -120,29 +127,30 @@
                 }
               </div>
 
-              <span class="material-symbols-outlined text-base-content/40 text-[18px] pointer-events-none mr-1">arrow_drop_down</span>
+              <span class="material-symbols-outlined mr-1 pointer-events-none text-[18px] text-base-content/40">arrow_drop_down</span>
             </div>
 
-            <p class="fieldset-label mt-1.5">Seleccione uno o más usuarios responsables de esta ubicación.</p>
+            <p class="fieldset-label mt-1.5">
+              Seleccione usuarios con rol Encargado para asociarlos a esta ubicación.
+            </p>
           </fieldset>
-        </div>
-
+        </section>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Sticky Footer -->
-<div class="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-base-200 bg-base-100 p-4 px-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-6">
+<div class="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-base-200 bg-base-100 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-6">
   <app-action-button
     label="Cancelar"
     variant="neutral"
     routerLink="/settings/locations"
   />
   <app-action-button
-    label="Guardar Ubicación"
+    [label]="submitLabel()"
     icon="save"
-    className="shadow-sm"
+    [loading]="isSubmitting()"
+    [loadingLabel]="loadingLabel()"
     (clicked)="onSubmit()"
   />
 </div>

@@ -32,7 +32,7 @@ export class InventoryFormComponent {
   readonly existingAsset = signal<InventoryAsset | null>(null);
   readonly isEdit = computed(() => Boolean(this.existingAsset()));
   readonly categories = toSignal(this.categoriesService.list(), { initialValue: [] });
-  readonly locations = toSignal(this.locationsService.list(), { initialValue: [] });
+  readonly locations = toSignal(this.locationsService.list('ACTIVE'), { initialValue: [] });
   readonly suppliers = toSignal(this.suppliersService.list(), { initialValue: [] });
   readonly selectedCategoryId = signal('');
 

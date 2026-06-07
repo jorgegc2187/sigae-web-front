@@ -156,7 +156,7 @@ export class LoanFormComponent implements OnDestroy {
     ),
     { initialValue: { kind: 'loading', items: [] } as LoadState<TeacherDto> },
   );
-  private readonly locationRows = toSignal(this.locationsService.list(), { initialValue: [] });
+  private readonly locationRows = toSignal(this.locationsService.list('ACTIVE'), { initialValue: [] });
   private readonly assetState = toSignal(
     this.assetsService.list().pipe(
       map((assets) => ({ kind: 'ready', items: assets }) as LoadState<InventoryAsset>),
