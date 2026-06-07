@@ -12,6 +12,7 @@ import { SearchInputComponent } from '../../../../shared/ui/search-input/search-
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { CategoriesService } from '../../../categories/services/categories.service';
 import { AssetsService } from '../../services/assets.service';
+import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
 
 @Component({
   selector: 'app-inventory-list',
@@ -62,6 +63,7 @@ export class InventoryListComponent {
     const end = Math.min(start + this.pageSize - 1, total);
     return `Mostrando ${start} a ${end} de ${total} familias de activos`;
   });
+  readonly hasSelectedGroups = computed(() => this.selectedGroupIds().length > 0);
 
   updateQuery(value: string): void {
     this.query.set(value);
@@ -107,6 +109,17 @@ export class InventoryListComponent {
 
   openQrScanner(): void {
     this.isQrScannerOpen.set(true);
+  }
+
+  printSelectedLabels(): void {
+    const selectedGroupIds = this.selectedGroupIds();
+    if (selectedGroupIds.length === 0) {
+      return;
+    }
+
+    openInventoryLabelPrint(this.router, {
+      groupIds: selectedGroupIds.join(','),
+    });
   }
 
   closeQrScanner(): void {

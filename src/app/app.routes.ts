@@ -17,6 +17,15 @@ export const routes: Routes = [
       import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
   {
+    path: 'print/inventory-labels',
+    canActivate: [authGuard],
+    title: 'Imprimir tarjetas de activos - SIGAE',
+    loadComponent: () =>
+      import('./features/inventory/pages/inventory-label-print/inventory-label-print.component').then(
+        (m) => m.InventoryLabelPrintComponent,
+      ),
+  },
+  {
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],

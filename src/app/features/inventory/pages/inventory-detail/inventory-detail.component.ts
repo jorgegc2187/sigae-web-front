@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
 import { AssetCondition } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
+import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
 
 @Component({
   selector: 'app-inventory-detail',
@@ -16,6 +17,7 @@ import { AssetsService } from '../../services/assets.service';
 export class InventoryDetailComponent {
   private readonly assetsService = inject(AssetsService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   private readonly assetResource = toSignal(
     this.route.paramMap.pipe(
@@ -35,6 +37,17 @@ export class InventoryDetailComponent {
   readonly asset = computed(() => this.assetResource());
   readonly traceability = computed(() => this.traceabilityResource());
   readonly attributeEntries = computed(() => Object.entries(this.asset()?.attributes ?? {}));
+
+  printLabel(): void {
+    const asset = this.asset();
+    if (!asset) {
+      return;
+    }
+
+    openInventoryLabelPrint(this.router, {
+      assetIds: asset.id,
+    });
+  }
 
   conditionTone(condition: AssetCondition): 'success' | 'warning' | 'error' | 'neutral' | 'info' {
     if (condition === 'Bueno') return 'success';

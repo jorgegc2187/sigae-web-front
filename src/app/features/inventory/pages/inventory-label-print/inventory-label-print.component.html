@@ -1,0 +1,108 @@
+<div class="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+  <div class="print-toolbar flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-base-content/45">Vista imprimible</p>
+      <h1 class="text-xl font-bold text-base-content">Tarjetas de activos</h1>
+      <p class="text-sm text-base-content/60">
+        Revisa la composición antes de imprimir. La hoja se abrirá con solo las tarjetas, sin el shell del sistema.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <app-action-button label="Volver al inventario" variant="neutral" icon="arrow_back" (clicked)="goBack()" />
+      <app-action-button
+        label="Imprimir ahora"
+        icon="print"
+        [disabled]="!hasLabels() || isLoading()"
+        (clicked)="printNow()"
+      />
+    </div>
+  </div>
+
+  <app-processing-loader
+    [active]="isLoading()"
+    mode="inline"
+    title="Preparando tarjetas"
+    message="Estamos reuniendo los activos, el branding institucional y generando los códigos QR."
+  />
+
+  @if (!isLoading() && hasError()) {
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-10 text-center shadow-sm">
+      <span class="material-symbols-outlined text-4xl text-base-content/35">print_error</span>
+      <h2 class="mt-3 text-lg font-bold text-base-content">No se pudieron preparar las tarjetas</h2>
+      <p class="mt-2 text-sm text-base-content/60">{{ loadError() }}</p>
+      <div class="mt-5 flex justify-center">
+        <app-action-button label="Volver al inventario" variant="neutral" routerLink="/inventory" />
+      </div>
+    </section>
+  } @else if (!isLoading() && hasLabels()) {
+    <section class="label-grid">
+      @for (label of labels(); track label.asset.id) {
+        <article class="inventory-label-card overflow-hidden rounded-xl border border-slate-400 shadow-sm">
+          <header class="grid grid-cols-[96px_1fr] items-stretch border-b border-slate-400">
+            <div class="flex items-center justify-center border-r border-slate-400 bg-slate-50 p-3">
+              @if (logoUrl()) {
+                <img [src]="logoUrl()" [alt]="'Logo de ' + institutionName()" class="max-h-16 max-w-full object-contain" />
+              } @else {
+                <div class="flex h-16 w-16 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-2xl font-bold text-slate-600">
+                  {{ institutionName().slice(0, 1).toUpperCase() }}
+                </div>
+              }
+            </div>
+
+            <div class="flex flex-col justify-center px-4 py-3 text-center">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Inventario institucional</p>
+              <h2 class="text-lg font-bold uppercase leading-tight text-slate-900">{{ institutionName() }}</h2>
+              <p class="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-slate-600">{{ institutionAddressLine() }}</p>
+            </div>
+          </header>
+
+          <div class="grid grid-cols-[1fr_112px]">
+            <div class="divide-y divide-slate-300">
+              <div class="grid grid-cols-[132px_1fr]">
+                <div class="border-r border-slate-300 bg-slate-50 px-3 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                  Descripción
+                </div>
+                <div class="px-3 py-3 text-sm font-semibold text-slate-900">
+                  {{ label.asset.name }}
+                </div>
+              </div>
+
+              <div class="grid grid-cols-[132px_1fr]">
+                <div class="border-r border-slate-300 bg-slate-50 px-3 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                  Dependencia
+                </div>
+                <div class="px-3 py-3 text-sm font-semibold text-slate-900">
+                  {{ label.asset.locationName }}
+                </div>
+              </div>
+
+              <div class="grid grid-cols-[132px_1fr]">
+                <div class="border-r border-slate-300 bg-slate-50 px-3 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                  Código
+                </div>
+                <div class="px-3 py-3 font-mono text-sm font-bold tracking-wide text-slate-900">
+                  {{ label.asset.code }}
+                </div>
+              </div>
+
+              <div class="grid grid-cols-[132px_1fr]">
+                <div class="border-r border-slate-300 bg-slate-50 px-3 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                  Fecha
+                </div>
+                <div class="px-3 py-3 text-sm font-semibold text-slate-900">
+                  {{ label.asset.acquisitionDate ? (label.asset.acquisitionDate | date: 'dd/MM/yyyy') : 'Sin fecha' }}
+                </div>
+              </div>
+            </div>
+
+            <aside class="flex flex-col items-center justify-center gap-2 border-l border-slate-300 px-3 py-4">
+              <img [src]="label.qrDataUrl" [alt]="'QR del activo ' + label.asset.code" class="h-24 w-24 object-contain" />
+              <p class="text-center text-[10px] font-bold uppercase tracking-[0.16em] text-slate-600">QR código</p>
+            </aside>
+          </div>
+        </article>
+      }
+    </section>
+  }
+</div>

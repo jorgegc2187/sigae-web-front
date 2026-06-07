@@ -1,6 +1,6 @@
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { map } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
 import {
   AssetCondition,
@@ -52,6 +52,10 @@ export class AssetsService {
     }, { defaultValue: null });
   }
 
+  getGroupById(groupId: string) {
+    return this.http.get<InventoryAssetGroup>(`${this.baseUrl}/grouped/${groupId}`);
+  }
+
   list() {
     return this.http.get<AssetResponse[]>(this.baseUrl).pipe(
       map((assets) => assets.map((asset) => this.toInventoryAsset(asset))),
@@ -62,6 +66,15 @@ export class AssetsService {
     return this.http.get<AssetResponse>(`${this.baseUrl}/${id}`).pipe(
       map((asset) => this.toInventoryAsset(asset)),
     );
+  }
+
+  getManyByIds(ids: string[]) {
+    const uniqueIds = Array.from(new Set(ids.map((id) => id.trim()).filter(Boolean)));
+    if (uniqueIds.length === 0) {
+      return forkJoin([]);
+    }
+
+    return forkJoin(uniqueIds.map((id) => this.getById(id)));
   }
 
   lookupByScanValue(value: string) {

@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
@@ -8,6 +8,7 @@ import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/s
 import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
 import { AssetCondition } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
+import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
 
 @Component({
   selector: 'app-inventory-group-detail',
@@ -25,6 +26,7 @@ import { AssetsService } from '../../services/assets.service';
 })
 export class InventoryGroupDetailComponent {
   private readonly assetsService = inject(AssetsService);
+  private readonly router = inject(Router);
 
   readonly groupId = input.required<string>();
   readonly searchQuery = signal('');
@@ -92,6 +94,12 @@ export class InventoryGroupDetailComponent {
 
   goToPage(page: number): void {
     this.currentPage.set(page);
+  }
+
+  printUnitLabel(assetId: string): void {
+    openInventoryLabelPrint(this.router, {
+      assetIds: assetId,
+    });
   }
 
   conditionTone(condition: AssetCondition): 'success' | 'warning' | 'error' | 'neutral' | 'info' {
