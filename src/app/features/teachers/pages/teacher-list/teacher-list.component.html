@@ -1,51 +1,62 @@
-<div>
-  <!-- Page Actions -->
-  <div class="mb-8 flex items-center justify-between">
-    <div>
-      <h2 class="text-2xl font-bold text-base-content">Docentes</h2>
-      <p class="text-sm text-base-content/60 mt-1">Gestión del personal docente y su historial de préstamos.</p>
-    </div>
-    
-    <div class="flex items-center gap-4">
-      <app-search-input
-        widthClass="w-[340px]"
-        placeholder="Buscar por nombre o DNI..."
-        [value]="searchQuery()"
-        (valueChange)="onSearch($event)"
-      />
-      <app-action-button
-        label="Agregar Docente"
-        icon="add"
-      />
-    </div>
-  </div>
+<div class="space-y-6">
+  <section class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="w-full lg:max-w-md">
+        <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
+        <app-search-input
+          placeholder="Buscar docente..."
+          [value]="searchQuery()"
+          (valueChange)="onSearch($event)"
+        />
+      </div>
 
-  <!-- Cards Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @for (teacher of filteredTeachers(); track teacher.id) {
-      <app-teacher-card
-        [teacher]="teacher"
-        (viewHistory)="onViewHistory($event)"
-      />
-    }
-  </div>
-
-  <!-- Pagination -->
-  <div class="mt-10 flex items-center justify-between border-t border-base-200 pt-6">
-    <p class="text-sm text-base-content/60">Mostrando <span class="font-semibold text-base-content">{{ filteredTeachers().length }}</span> de <span class="font-semibold text-base-content">{{ teachers().length }}</span> docentes</p>
-    
-    <div class="join">
-      <button class="join-item btn btn-sm bg-base-100 border border-base-300" disabled>
-        <span class="material-symbols-outlined text-sm">arrow_back_ios</span>
-      </button>
-      <button class="join-item btn btn-sm btn-primary">1</button>
-      <button class="join-item btn btn-sm bg-base-100 border border-base-300 hover:bg-base-200">2</button>
-      <button class="join-item btn btn-sm bg-base-100 border border-base-300 hover:bg-base-200">3</button>
-      <button class="join-item btn btn-sm btn-disabled border-none bg-transparent">...</button>
-      <button class="join-item btn btn-sm bg-base-100 border border-base-300 hover:bg-base-200">14</button>
-      <button class="join-item btn btn-sm bg-base-100 border border-base-300 hover:bg-base-200">
-        <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-      </button>
+      @if (canManageTeachers()) {
+        <app-action-button
+          label="Nuevo docente"
+          icon="add"
+          routerLink="/teachers/new"
+        />
+      }
     </div>
-  </div>
+  </section>
+
+  @if (isLoading()) {
+    <div class="rounded-2xl border border-base-300 bg-base-100 px-6 py-8 text-sm text-base-content/60 shadow-sm">
+      Cargando docentes...
+    </div>
+  } @else if (filteredTeachers().length === 0) {
+    <div class="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-10 text-center shadow-sm">
+      <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-base-200 text-base-content/40">
+        <span class="material-symbols-outlined text-[24px]">school</span>
+      </div>
+      <p class="text-sm font-medium text-base-content/75">No hay docentes para mostrar</p>
+      <p class="mt-1 text-xs text-base-content/50">
+        Ajuste su búsqueda o registre un nuevo docente.
+      </p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      @for (teacher of filteredTeachers(); track teacher.id) {
+        <app-teacher-card
+          [teacher]="teacher"
+          [canManage]="canManageTeachers()"
+          (edit)="onEdit($event)"
+          (toggleStatus)="onToggleStatus($event)"
+        />
+      }
+    </div>
+  }
 </div>
+
+<app-confirmation-modal
+  [open]="pendingStatusTeacher() !== null"
+  [title]="pendingStatusTitle()"
+  [message]="pendingStatusMessage()"
+  [tone]="pendingStatusTone()"
+  [icon]="pendingStatusIcon()"
+  [confirmLabel]="pendingStatusLabel()"
+  [loading]="isUpdatingStatus()"
+  [loadingLabel]="pendingStatusLabel()"
+  (confirmed)="confirmStatusChange()"
+  (cancelled)="closeStatusConfirmation()"
+/>

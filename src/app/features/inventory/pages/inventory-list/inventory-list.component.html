@@ -34,14 +34,17 @@
       </div>
 
       <div class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
-        <app-action-button
-          label="Imprimir tarjetas"
-          icon="print"
-          variant="outline"
-          hostClass="w-full xl:w-auto"
-          [disabled]="!hasSelectedGroups()"
-          (clicked)="printSelectedLabels()"
-        />
+        @if (hasSelectedGroups()) {
+          <div class="animate-in fade-in slide-in-from-top-1 duration-200 ease-out">
+            <app-action-button
+              label="Imprimir tarjetas"
+              icon="print"
+              variant="outline"
+              hostClass="w-full xl:w-auto"
+              (clicked)="printSelectedLabels()"
+            />
+          </div>
+        }
         <app-action-button
           label="Escanear QR"
           icon="qr_code_scanner"

@@ -1,0 +1,140 @@
+<div class="mx-auto max-w-[800px] pb-24">
+  <div class="mb-8 flex items-center justify-between">
+    <div>
+      <div class="breadcrumbs mb-2 p-0 text-sm text-base-content/60">
+        <ul>
+          <li>
+            <a routerLink="/teachers" class="transition-colors hover:text-primary">Docentes</a>
+          </li>
+          <li class="font-medium text-base-content">{{ breadcrumbLabel() }}</li>
+        </ul>
+      </div>
+      <h2 class="text-2xl font-bold text-base-content">{{ formTitle() }}</h2>
+    </div>
+  </div>
+
+  <section class="card card-border bg-base-100 shadow-sm">
+    <div class="card-body p-6">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <h3 class="mb-6 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
+          <span class="material-symbols-outlined text-[20px] text-primary">badge</span>
+          Información del docente
+        </h3>
+
+        <div class="mb-8 grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+          <app-form-field
+            label="DNI"
+            fieldId="teacherDni"
+            [required]="true"
+            [error]="dniError()"
+          >
+            <input
+              id="teacherDni"
+              type="text"
+              formControlName="dni"
+              [class]="inputClass"
+              placeholder="12345678"
+              maxlength="8"
+              inputmode="numeric"
+            />
+          </app-form-field>
+
+          <app-select-field
+            label="Estado"
+            fieldId="teacherStatus"
+            [required]="true"
+            [error]="statusError()"
+            [options]="statusOptions"
+            placeholder="Seleccione un estado"
+            formControlName="status"
+          />
+
+          <app-form-field
+            label="Nombre completo"
+            fieldId="teacherFullName"
+            [required]="true"
+            [error]="fullNameError()"
+            class="md:col-span-2"
+          >
+            <input
+              id="teacherFullName"
+              type="text"
+              formControlName="fullName"
+              [class]="inputClass"
+              placeholder="Ej. María Pérez Soto"
+            />
+          </app-form-field>
+
+          <app-form-field
+            label="Especialidad"
+            fieldId="teacherSpecialty"
+            [error]="specialtyError()"
+          >
+            <input
+              id="teacherSpecialty"
+              type="text"
+              formControlName="specialty"
+              [class]="inputClass"
+              placeholder="Ej. Matemática"
+            />
+          </app-form-field>
+
+          <app-form-field
+            label="Teléfono"
+            fieldId="teacherPhone"
+            [error]="phoneError()"
+          >
+            <input
+              id="teacherPhone"
+              type="text"
+              formControlName="phone"
+              [class]="inputClass"
+              placeholder="Ej. 999888777"
+            />
+          </app-form-field>
+
+          <app-form-field
+            label="Correo electrónico"
+            fieldId="teacherEmail"
+            [error]="emailError()"
+            class="md:col-span-2"
+          >
+            <input
+              id="teacherEmail"
+              type="email"
+              formControlName="email"
+              [class]="inputClass"
+              placeholder="docente@institucion.edu.pe"
+              autocomplete="email"
+            />
+          </app-form-field>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<div class="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-base-200 bg-base-100 p-4 px-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-6">
+  <app-action-button
+    label="Cancelar"
+    variant="neutral"
+    routerLink="/teachers"
+    [disabled]="isBusy()"
+  />
+
+  <app-action-button
+    [label]="submitLabel()"
+    icon="save"
+    type="submit"
+    [loading]="isSubmitting()"
+    [loadingLabel]="loadingLabel()"
+    [disabled]="isBusy()"
+    (clicked)="onSubmit()"
+  />
+</div>
+
+<app-processing-loader
+  [active]="isBusy()"
+  [title]="blockingTitle()"
+  [message]="blockingDescription()"
+/>

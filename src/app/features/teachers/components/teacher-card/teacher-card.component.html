@@ -1,45 +1,64 @@
-<div class="card h-full bg-base-100 card-border shadow-sm hover:shadow-md transition-shadow">
-  <div class="card-body p-5">
-    <div class="flex items-start justify-between mb-2">
-      <div
-        class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-lg select-none"
-      >
-        {{ teacher().initials }}
-      </div>
-      <button class="btn btn-ghost btn-sm btn-square text-base-content/50 hover:text-base-content">
-        <span class="material-symbols-outlined">more_vert</span>
-      </button>
-    </div>
+<div
+  class="card h-full overflow-hidden border border-base-300 bg-base-100 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+>
+  <div class="h-2 w-full" [class]="topBarClass()"></div>
 
-    <div class="mb-4">
-      <h3 class="card-title text-base">{{ teacher().name }}</h3>
-      <p class="text-xs text-base-content/60 mt-0.5">DNI: {{ teacher().dni }}</p>
-      <p class="text-sm font-medium text-base-content/70 mt-2 italic">{{ teacher().specialty }}</p>
-    </div>
-
-    <div class="space-y-2 mb-6">
-      <div class="flex items-center gap-2 text-xs text-base-content/60">
-        <span class="material-symbols-outlined text-[16px]">mail</span>
-        {{ teacher().email }}
-      </div>
-      <div class="flex items-center gap-2 text-xs text-base-content/60">
-        <span class="material-symbols-outlined text-[16px]">phone</span>
-        {{ teacher().phone }}
-      </div>
-    </div>
-
-    <div class="mt-auto pt-4 border-t border-base-200">
-      <button
-        type="button"
-        class="text-sm font-semibold text-primary hover:underline flex items-center gap-1 group w-fit"
-        (click)="onViewHistory()"
-      >
-        Ver historial de préstamos
-        <span
-          class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform"
-          >chevron_right</span
+  <div class="card-body flex-grow p-6">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-start gap-4">
+        <div
+          class="flex h-12 w-12 shrink-0 select-none items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-content"
         >
-      </button>
+          {{ teacher().initials }}
+        </div>
+
+        <div class="space-y-1">
+          <h3 class="card-title text-lg leading-tight">{{ teacher().name }}</h3>
+          <p class="text-xs text-base-content/60">DNI: {{ teacher().dni }}</p>
+          <p class="text-sm font-medium italic text-base-content/70">{{ teacher().specialty }}</p>
+        </div>
+      </div>
+
+      <app-status-badge [label]="teacher().status" [tone]="statusTone()" [compact]="true" />
+    </div>
+
+    <div class="divider my-4"></div>
+
+    <div class="space-y-3 text-sm">
+      <div class="flex items-center gap-2 text-base-content/60">
+        <span class="material-symbols-outlined text-[18px] text-base-content/45">mail</span>
+        <span class="truncate">{{ teacher().email ?? 'Sin correo registrado' }}</span>
+      </div>
+
+      <div class="flex items-center gap-2 text-base-content/60">
+        <span class="material-symbols-outlined text-[18px] text-base-content/45">phone</span>
+        <span>{{ teacher().phone ?? 'Sin teléfono registrado' }}</span>
+      </div>
     </div>
   </div>
+
+  @if (canManage()) {
+    <div class="flex justify-end gap-1 border-t border-base-200 bg-base-200/50 px-6 py-4">
+      <button
+        type="button"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-base-content/50 transition-colors hover:bg-primary/10 hover:text-primary"
+        aria-label="Editar docente"
+        (click)="onEdit()"
+      >
+        <span class="material-symbols-outlined text-[20px]">edit</span>
+      </button>
+      <button
+        type="button"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-base-content/50 transition-colors"
+        [class.hover:bg-error/10]="teacher().status === 'Activo'"
+        [class.hover:text-error]="teacher().status === 'Activo'"
+        [class.hover:bg-primary/10]="teacher().status !== 'Activo'"
+        [class.hover:text-primary]="teacher().status !== 'Activo'"
+        [attr.aria-label]="statusActionLabel()"
+        (click)="onToggleStatus()"
+      >
+        <span class="material-symbols-outlined text-[20px]">{{ statusActionIcon() }}</span>
+      </button>
+    </div>
+  }
 </div>

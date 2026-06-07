@@ -186,13 +186,15 @@ export class LoanFormComponent implements OnDestroy {
   });
 
   readonly availableTeachers = computed<TeacherOption[]>(() =>
-    this.teacherState().items.map((teacher) => ({
-      id: teacher.id,
-      name: teacher.fullName,
-      initials: this.buildInitials(teacher.fullName),
-      dni: teacher.dni,
-      specialty: teacher.specialty ?? 'Docente',
-    })),
+    this.teacherState().items
+      .filter((teacher) => this.teachersService.toUiStatus(teacher.status ?? 'Activo') === 'Activo')
+      .map((teacher) => ({
+        id: teacher.id,
+        name: teacher.fullName,
+        initials: this.buildInitials(teacher.fullName),
+        dni: teacher.dni,
+        specialty: teacher.specialty ?? 'Docente',
+      })),
   );
 
   readonly destinations = computed<DestinationOption[]>(() =>

@@ -1,26 +1,47 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import {
+  ConfirmationModalComponent,
+  ConfirmationModalTone,
+} from '../../../../shared/ui/confirmation-modal/confirmation-modal.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { TeacherCardComponent } from '../../components/teacher-card/teacher-card.component';
 import { Teacher } from '../../models/teacher.model';
+import { TeachersService } from '../../services/teachers.service';
 
 @Component({
   selector: 'app-teacher-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TeacherCardComponent, SearchInputComponent, ActionButtonComponent],
+  imports: [
+    RouterLink,
+    TeacherCardComponent,
+    SearchInputComponent,
+    ActionButtonComponent,
+    ConfirmationModalComponent,
+  ],
   templateUrl: './teacher-list.component.html',
 })
 export class TeacherListComponent {
-  readonly searchQuery = signal('');
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly notifications = inject(NotificationService);
+  private readonly teachersService = inject(TeachersService);
+  private readonly teachersResource = this.teachersService.listResource();
 
-  readonly teachers = signal<Teacher[]>([
-    { id: '1', name: 'Alejandro Cárdenas', initials: 'AC', dni: '45678912', specialty: 'Matemáticas y Física', email: 'a.cardenas@colegio.edu.pe', phone: '+51 987 654 321' },
-    { id: '2', name: 'Maria Rodriguez', initials: 'MR', dni: '70123456', specialty: 'Comunicación e Idiomas', email: 'm.rodriguez@colegio.edu.pe', phone: '+51 912 345 678' },
-    { id: '3', name: 'Jorge Sánchez', initials: 'JS', dni: '12345678', specialty: 'Ciencia, Tecnología y Ambiente', email: 'j.sanchez@colegio.edu.pe', phone: '+51 955 443 322' },
-    { id: '4', name: 'Elena Paredes', initials: 'EP', dni: '09876543', specialty: 'Ciencias Sociales', email: 'e.paredes@colegio.edu.pe', phone: '+51 944 332 211' },
-    { id: '5', name: 'Roberto Mendoza', initials: 'RM', dni: '21436587', specialty: 'Educación Física', email: 'r.mendoza@colegio.edu.pe', phone: '+51 966 778 899' },
-    { id: '6', name: 'Sofia Torres', initials: 'ST', dni: '87654321', specialty: 'Arte y Cultura', email: 's.torres@colegio.edu.pe', phone: '+51 922 110 099' },
-  ]);
+  readonly searchQuery = signal('');
+  readonly pendingStatusTeacher = signal<Teacher | null>(null);
+  readonly isUpdatingStatus = signal(false);
+  readonly canManageTeachers = computed(() =>
+    this.authService.hasAnyRole(['Administrador']),
+  );
+  readonly teachers = computed(() =>
+    this.teachersResource.value().map((teacher) => this.teachersService.toTeacher(teacher)),
+  );
+  readonly isLoading = computed(() => this.teachersResource.isLoading());
 
   readonly filteredTeachers = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -36,11 +57,112 @@ export class TeacherListComponent {
     );
   });
 
+  readonly pendingStatusTitle = computed(() => {
+    const teacher = this.pendingStatusTeacher();
+    if (!teacher) {
+      return '';
+    }
+
+    return teacher.status === 'Activo' ? 'Desactivar docente' : 'Activar docente';
+  });
+
+  readonly pendingStatusMessage = computed(() => {
+    const teacher = this.pendingStatusTeacher();
+    if (!teacher) {
+      return '';
+    }
+
+    return teacher.status === 'Activo'
+      ? `El docente ${teacher.name} dejará de estar disponible para nuevos préstamos, pero se conservará en el historial del sistema.`
+      : `El docente ${teacher.name} volverá a estar disponible para nuevas operaciones.`;
+  });
+
+  readonly pendingStatusLabel = computed(() => {
+    const teacher = this.pendingStatusTeacher();
+    if (!teacher) {
+      return 'Confirmar';
+    }
+
+    return teacher.status === 'Activo' ? 'Desactivar docente' : 'Activar docente';
+  });
+
+  readonly pendingStatusTone = computed<ConfirmationModalTone>(() =>
+    this.pendingStatusTeacher()?.status === 'Activo' ? 'warning' : 'info',
+  );
+
+  readonly pendingStatusIcon = computed(() =>
+    this.pendingStatusTeacher()?.status === 'Activo' ? 'person_off' : 'person_check',
+  );
+
   onSearch(value: string) {
     this.searchQuery.set(value);
   }
 
-  onViewHistory(teacherId: string) {
-    console.log('Ver historial:', teacherId);
+  onEdit(id: string) {
+    if (!this.canManageTeachers()) {
+      return;
+    }
+
+    void this.router.navigate(['/teachers', id, 'edit']);
+  }
+
+  onToggleStatus(id: string) {
+    if (!this.canManageTeachers()) {
+      return;
+    }
+
+    const teacher = this.teachers().find((item) => item.id === id);
+    if (!teacher) {
+      return;
+    }
+
+    this.pendingStatusTeacher.set(teacher);
+  }
+
+  closeStatusConfirmation() {
+    if (this.isUpdatingStatus()) {
+      return;
+    }
+
+    this.pendingStatusTeacher.set(null);
+  }
+
+  async confirmStatusChange() {
+    const teacher = this.pendingStatusTeacher();
+    if (!teacher || this.isUpdatingStatus()) {
+      return;
+    }
+
+    try {
+      this.isUpdatingStatus.set(true);
+      await firstValueFrom(this.teachersService.updateStatus(teacher.id, {
+        status: this.teachersService.toApiStatus(teacher.status === 'Activo' ? 'Inactivo' : 'Activo'),
+      }));
+      this.teachersResource.reload();
+      this.pendingStatusTeacher.set(null);
+      this.notifications.success({
+        message:
+          teacher.status === 'Activo'
+            ? `Docente ${teacher.name} desactivado correctamente.`
+            : `Docente ${teacher.name} activado correctamente.`,
+      });
+    } catch (error: unknown) {
+      this.notifications.error({
+        message: this.getBackendMessage(
+          error,
+          teacher.status === 'Activo'
+            ? 'No se pudo desactivar el docente.'
+            : 'No se pudo activar el docente.',
+        ),
+      });
+    } finally {
+      this.isUpdatingStatus.set(false);
+    }
+  }
+
+  private getBackendMessage(error: unknown, fallback: string): string {
+    return typeof (error as { error?: { message?: unknown } })?.error?.message === 'string'
+      ? (error as { error: { message: string } }).error.message
+      : fallback;
   }
 }
