@@ -47,7 +47,7 @@
               }
             ],
             "styles": ["src/styles.css"],
-            "allowedCommonJsDependencies": ["qrcode"]
+            "allowedCommonJsDependencies": ["qrcode", "@stomp/stompjs"]
           },
           "configurations": {
             "production": {

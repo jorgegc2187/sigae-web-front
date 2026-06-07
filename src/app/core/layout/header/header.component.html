@@ -19,14 +19,89 @@
   </div>
   
   <div class="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-5">
-    <button class="w-9 h-9 relative flex items-center justify-center text-base-content/60 hover:text-primary hover:bg-base-200 rounded-lg transition-colors cursor-pointer">
-      <span class="material-symbols-outlined">notifications</span>
-      <span class="absolute top-1 right-1 w-4 h-4 bg-error text-error-content text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-base-100">5</span>
-    </button>
+    <div class="relative">
+      <button
+        type="button"
+        class="relative flex h-9 w-9 items-center justify-center rounded-lg text-base-content/60 transition-colors hover:bg-base-200 hover:text-primary"
+        aria-label="Abrir notificaciones"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="notificationsOpen()"
+        (click)="toggleNotifications()"
+      >
+        <span class="material-symbols-outlined">notifications</span>
+        @if (totalNotifications() > 0) {
+          <span class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-base-100 bg-error px-1 text-[10px] font-bold leading-none text-error-content">
+            {{ notificationBadgeLabel() }}
+          </span>
+        }
+      </button>
 
-    <div class="hidden h-8 w-px bg-base-300 md:block"></div>
+      @if (notificationsOpen()) {
+        <div class="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[22rem] overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-2xl shadow-base-content/10">
+          <div class="flex items-center justify-between border-b border-base-300 px-4 py-3">
+            <p class="text-sm font-semibold text-base-content">Notificaciones</p>
+            <button
+              type="button"
+              class="flex h-8 w-8 items-center justify-center rounded-lg text-base-content/45 transition-colors hover:bg-base-200 hover:text-base-content"
+              aria-label="Cerrar notificaciones"
+              (click)="closeNotifications()"
+            >
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
 
-    <button class="hidden text-sm text-base-content/60 hover:text-primary transition-colors cursor-pointer lg:block">Soporte</button>
+          @if (notificationsInitialLoadPending()) {
+            <div class="flex items-center gap-3 px-4 py-6 text-sm text-base-content/60">
+              <span class="loading loading-spinner loading-sm text-primary"></span>
+              Cargando alertas activas...
+            </div>
+          } @else if (notificationsError() && !notificationsHasSnapshot()) {
+            <div class="space-y-3 px-4 py-5">
+              <p class="text-sm text-base-content/70">No se pudieron cargar las notificaciones activas.</p>
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-lg border border-base-300 px-3 py-2 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200"
+                (click)="reloadNotifications()"
+              >
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
+                Reintentar
+              </button>
+            </div>
+          } @else if (notifications().length === 0) {
+            <div class="px-4 py-8 text-center">
+              <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-base-200 text-base-content/40">
+                <span class="material-symbols-outlined text-[24px]">notifications_none</span>
+              </div>
+              <p class="text-sm font-medium text-base-content/75">No hay alertas activas</p>
+              <p class="mt-1 text-xs text-base-content/50">La campana mostrará vencimientos y alertas de seguridad.</p>
+            </div>
+          } @else {
+            <div class="max-h-[24rem] overflow-y-auto">
+              @for (item of notifications(); track item.id) {
+                <button
+                  type="button"
+                  class="flex w-full items-start gap-3 border-b border-base-200 px-4 py-3 text-left transition-colors hover:bg-base-200/70"
+                  (click)="onNotificationSelect(item)"
+                >
+                  <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" [class]="notificationToneClass(item)">
+                    <span class="material-symbols-outlined text-[19px]">{{ notificationIcon(item) }}</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-start justify-between gap-3">
+                      <p class="text-sm font-semibold leading-5 text-base-content">{{ item.title }}</p>
+                      <span class="shrink-0 text-[11px] text-base-content/45">
+                        {{ item.occurredAt | date: 'dd MMM, HH:mm' : 'UTC' : 'es-PE' }}
+                      </span>
+                    </div>
+                    <p class="mt-1 text-sm leading-5 text-base-content/65">{{ item.message }}</p>
+                  </div>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
 
     <div class="flex items-center gap-3 cursor-pointer group">
       <div class="hidden text-right sm:block">

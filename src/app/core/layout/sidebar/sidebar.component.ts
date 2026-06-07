@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { BrandingService } from '../../services/branding.service';
+import { ShellNotificationsService } from '../notifications/shell-notifications.service';
 
 interface SidebarNavItem {
   label: string;
@@ -26,6 +27,7 @@ export class SidebarComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly brandingService = inject(BrandingService);
+  private readonly shellNotificationsService = inject(ShellNotificationsService);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -47,7 +49,7 @@ export class SidebarComponent {
     [
       { label: 'Dashboard', icon: 'grid_view', route: '/dashboard', exact: true },
       { label: 'Inventario', icon: 'inventory_2', route: '/inventory' },
-      { label: 'Préstamos', icon: 'swap_horiz', route: '/loans', badgeCount: 3 },
+      { label: 'Préstamos', icon: 'swap_horiz', route: '/loans', badgeCount: this.shellNotificationsService.loanAttentionCount() || undefined },
       { label: 'Reportes', icon: 'bar_chart', route: '/reports' },
       { label: 'Categorías y Tipos', icon: 'category', route: '/settings/categories', adminOnly: true, showDividerBefore: true },
       { label: 'Ubicaciones', icon: 'location_on', route: '/settings/locations', adminOnly: true },
