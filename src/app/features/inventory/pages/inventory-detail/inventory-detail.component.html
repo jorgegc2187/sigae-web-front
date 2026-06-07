@@ -36,12 +36,14 @@
           <p class="mt-1 font-semibold text-base-content">{{ asset.supplierName || 'Sin proveedor' }}</p>
         </div>
         <div class="rounded-xl bg-base-200/60 p-4">
-          <p class="text-xs font-bold uppercase tracking-wide text-base-content/45">Serie</p>
-          <p class="mt-1 font-semibold text-base-content">{{ asset.serial }}</p>
+          <p class="text-xs font-bold uppercase tracking-wide text-base-content/45">Fecha de adquisición</p>
+          <p class="mt-1 font-semibold text-base-content">{{ asset.acquisitionDate || 'Sin fecha registrada' }}</p>
         </div>
         <div class="rounded-xl bg-base-200/60 p-4">
-          <p class="text-xs font-bold uppercase tracking-wide text-base-content/45">Barcode</p>
-          <p class="mt-1 font-semibold text-base-content">{{ asset.barcode || 'Sin barcode' }}</p>
+          <p class="text-xs font-bold uppercase tracking-wide text-base-content/45">Disponibilidad</p>
+          <p class="mt-1 font-semibold text-base-content">
+            {{ asset.availableForLoan ? 'Disponible para préstamo' : 'No disponible para préstamo' }}
+          </p>
         </div>
       </div>
     </section>

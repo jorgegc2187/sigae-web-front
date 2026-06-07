@@ -1,87 +1,212 @@
-<form class="pb-24" [formGroup]="form" (ngSubmit)="submit()">
-  <div class="mx-auto max-w-5xl space-y-6">
-    <a routerLink="/inventory" class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-      <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-      Volver al inventario
-    </a>
-
-    <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
-      <div class="mb-6">
-        <h2 class="text-xl font-bold text-base-content">
-          {{ isEdit() ? 'Editar activo' : 'Nuevo activo' }}
-        </h2>
-        <p class="text-sm text-base-content/60">Complete los datos operativos del activo.</p>
-      </div>
-
-      <div class="grid gap-4 md:grid-cols-2">
-        <app-form-field label="Código" [error]="form.get('code')?.invalid && form.get('code')?.touched ? 'El código es requerido.' : null">
-          <input class="input input-bordered w-full bg-base-100" formControlName="code" placeholder="CMP-2026-001" />
-        </app-form-field>
-
-        <app-form-field label="Nombre" [error]="form.get('name')?.invalid && form.get('name')?.touched ? 'El nombre es requerido.' : null">
-          <input class="input input-bordered w-full bg-base-100" formControlName="name" placeholder="Laptop Lenovo ThinkPad" />
-        </app-form-field>
-
-        <app-select-field
-          label="Categoría"
-          placeholder="Seleccione una categoría"
-          [options]="categoryOptions()"
-          formControlName="categoryId"
-          (valueChange)="updateCategory($event)"
-        />
-
-        <app-select-field
-          label="Tipo de activo"
-          placeholder="Seleccione un tipo"
-          [options]="typeOptions()"
-          formControlName="typeId"
-        />
-
-        <app-select-field
-          label="Ubicación"
-          placeholder="Seleccione una ubicación"
-          [options]="locationOptions()"
-          formControlName="locationId"
-        />
-
-        <app-select-field
-          label="Proveedor"
-          placeholder="Sin proveedor"
-          [options]="supplierOptions()"
-          formControlName="supplierId"
-        />
-
-        <app-select-field
-          label="Estado"
-          [options]="conditionOptions"
-          formControlName="condition"
-        />
-
-        <app-form-field label="Serie" [error]="form.get('serial')?.invalid && form.get('serial')?.touched ? 'La serie es requerida.' : null">
-          <input class="input input-bordered w-full bg-base-100" formControlName="serial" placeholder="SN-0001" />
-        </app-form-field>
-
-        <app-form-field label="Barcode">
-          <input class="input input-bordered w-full bg-base-100" formControlName="barcode" placeholder="BC-CMP-2026-001" />
-        </app-form-field>
-
-        <app-form-field label="Fecha de adquisición">
-          <input class="input input-bordered w-full bg-base-100" formControlName="acquisitionDate" type="date" />
-        </app-form-field>
-      </div>
-
-      <div class="mt-4">
-        <app-form-field label="Observaciones">
-          <textarea class="textarea textarea-bordered min-h-28 w-full resize-y bg-base-100" formControlName="observations"></textarea>
-        </app-form-field>
-      </div>
-    </section>
+<form class="space-y-6 pb-24" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="breadcrumbs p-0 text-sm text-base-content/60">
+    <ul>
+      <li><a routerLink="/inventory" class="transition-colors hover:text-primary">Inventario</a></li>
+      <li class="font-medium text-base-content">{{ breadcrumbLabel() }}</li>
+    </ul>
   </div>
 
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+    <div class="space-y-6 xl:col-span-7">
+      <section class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body p-5">
+          <h3
+            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
+          >
+            <span class="material-symbols-outlined text-[20px] text-primary">inventory_2</span>
+            Información del activo
+          </h3>
+
+          <div class="space-y-5">
+            <div class="rounded-2xl border border-primary/15 bg-primary/5 p-4">
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary">qr_code_2</span>
+                <div class="space-y-1">
+                  <p class="text-sm font-semibold text-base-content">Código operativo único</p>
+                  <p class="text-sm leading-relaxed text-base-content/65">{{ generatedCodeLabel() }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <app-form-field
+                label="Nombre del activo"
+                fieldId="assetName"
+                [required]="true"
+                [error]="nameError()"
+                class="md:col-span-2"
+              >
+                <input
+                  id="assetName"
+                  type="text"
+                  formControlName="name"
+                  [class]="inputClass"
+                  placeholder="Ej. Laptop Lenovo ThinkPad"
+                />
+              </app-form-field>
+
+              <app-select-field
+                label="Categoría"
+                fieldId="assetCategory"
+                [required]="true"
+                [error]="categoryError()"
+                placeholder="Seleccione una categoría"
+                [options]="categoryOptions()"
+                formControlName="categoryId"
+                (valueChange)="updateCategory($event)"
+              />
+
+              <app-select-field
+                label="Tipo de activo"
+                fieldId="assetType"
+                [required]="true"
+                [error]="typeError()"
+                placeholder="Seleccione un tipo"
+                [options]="typeOptions()"
+                formControlName="typeId"
+              />
+
+              <app-select-field
+                label="Ubicación"
+                fieldId="assetLocation"
+                [required]="true"
+                [error]="locationError()"
+                placeholder="Seleccione una ubicación"
+                [options]="locationOptions()"
+                formControlName="locationId"
+              />
+
+              <app-select-field
+                label="Proveedor"
+                fieldId="assetSupplier"
+                placeholder="Sin proveedor"
+                [options]="supplierOptions()"
+                formControlName="supplierId"
+              />
+
+              <app-select-field
+                label="Estado"
+                fieldId="assetCondition"
+                [required]="true"
+                [error]="conditionError()"
+                [options]="conditionOptions"
+                formControlName="condition"
+              />
+
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">Fecha de adquisición</legend>
+                <app-date-picker
+                  formControlName="acquisitionDate"
+                  placeholder="Seleccionar fecha"
+                />
+              </fieldset>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body p-5">
+          <h3
+            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
+          >
+            <span class="material-symbols-outlined text-[20px] text-primary">tune</span>
+            Atributos dinámicos
+          </h3>
+
+          @if (currentTypeAttributes().length === 0) {
+            <div class="rounded-xl border border-dashed border-base-300 bg-base-100 px-4 py-6 text-sm text-base-content/55">
+              El tipo seleccionado no requiere atributos adicionales.
+            </div>
+          } @else {
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              @for (attribute of dynamicAttributes(); track attribute.id) {
+                <app-form-field
+                  [label]="attribute.name"
+                  [fieldId]="'assetAttribute-' + attribute.id"
+                  [required]="attribute.isRequired"
+                  [hint]="attribute.description || null"
+                  [error]="getAttributeError(attribute)"
+                >
+                  <input
+                    [id]="'assetAttribute-' + attribute.id"
+                    type="text"
+                    [class]="inputClass"
+                    [value]="attribute.value"
+                    [placeholder]="attribute.description || ('Ingrese ' + attribute.name.toLowerCase())"
+                    (input)="updateAttributeValue(attribute.id, $any($event.target).value)"
+                  />
+                </app-form-field>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <div class="space-y-6 xl:col-span-5">
+      <section class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body p-5">
+          <h3
+            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
+          >
+            <span class="material-symbols-outlined text-[20px] text-primary">description</span>
+            Observaciones
+          </h3>
+
+          <fieldset class="fieldset w-full">
+            <label for="assetObservations" class="fieldset-legend">Observaciones (Opcional)</label>
+            <textarea
+              id="assetObservations"
+              formControlName="observations"
+              rows="6"
+              class="min-h-28 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Detalles adicionales sobre el activo..."
+            ></textarea>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body p-5">
+          <h3
+            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
+          >
+            <span class="material-symbols-outlined text-[20px] text-primary">info</span>
+            Consideraciones
+          </h3>
+
+          <ul class="space-y-3 text-sm leading-relaxed text-base-content/65">
+            <li>El sistema generará automáticamente el código único del activo al registrarlo.</li>
+            <li>Ese mismo código será usado para QR, impresión de tarjeta y búsqueda por escaneo.</li>
+            <li>Si el activo tiene serie u otro identificador adicional, puede registrarse como atributo dinámico del tipo correspondiente.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </div>
   <footer class="fixed bottom-0 left-0 right-0 z-30 border-t border-base-300 bg-base-100/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-8">
-    <div class="mx-auto flex max-w-5xl justify-end gap-3">
-      <app-action-button label="Cancelar" variant="neutral" routerLink="/inventory" />
-      <app-action-button label="Guardar activo" icon="save" type="submit" />
+    <div class="mx-auto flex max-w-6xl justify-end gap-3">
+      <app-action-button
+        label="Cancelar"
+        variant="neutral"
+        routerLink="/inventory"
+        [disabled]="isBusy()"
+      />
+      <app-action-button
+        [label]="submitLabel()"
+        icon="save"
+        type="submit"
+        [loading]="isSubmitting()"
+        [loadingLabel]="loadingLabel()"
+        [disabled]="isBusy()"
+      />
     </div>
   </footer>
 </form>
+
+<app-processing-loader
+  [active]="isBusy()"
+  [title]="blockingTitle()"
+  [message]="blockingDescription()"
+/>

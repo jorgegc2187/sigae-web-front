@@ -140,13 +140,14 @@ export class AssetsService {
       supplierId: asset.supplierId ?? undefined,
       supplierName: asset.supplierName ?? undefined,
       condition,
-      serial: asset.serialNumber ?? 'Sin serie',
-      barcode: asset.barcode ?? '',
+      serial: asset.serialNumber,
+      barcode: asset.barcode,
       acquisitionDate: asset.acquisitionDate ?? '',
       observations: asset.notes ?? '',
       attributes: Object.fromEntries(
         asset.attributeValues.map((attribute) => [attribute.attributeName, attribute.value]),
       ),
+      attributeValues: asset.attributeValues,
       availableForLoan,
       activeLoanId,
     };

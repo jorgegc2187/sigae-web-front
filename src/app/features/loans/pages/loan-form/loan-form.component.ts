@@ -347,7 +347,7 @@ export class LoanFormComponent implements OnDestroy {
         !query ||
         asset.name.toLowerCase().includes(query) ||
         asset.code.toLowerCase().includes(query) ||
-        asset.serial.toLowerCase().includes(query);
+        (asset.serial ?? '').toLowerCase().includes(query);
 
       return matchesCategory && matchesLocation && matchesQuery;
     });

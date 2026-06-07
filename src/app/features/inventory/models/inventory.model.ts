@@ -15,11 +15,12 @@ export interface InventoryAsset {
   supplierId?: string;
   supplierName?: string;
   condition: AssetCondition;
-  serial: string;
-  barcode: string;
+  serial: string | null;
+  barcode: string | null;
   acquisitionDate: string;
   observations?: string;
   attributes: Record<string, string>;
+  attributeValues: AssetAttributeValueResponse[];
   availableForLoan: boolean;
   activeLoanId?: string;
 }
@@ -80,7 +81,7 @@ export interface AssetResponse {
 }
 
 export interface AssetRequest {
-  code: string;
+  code: string | null;
   name: string;
   assetTypeId: string;
   locationId: string;
