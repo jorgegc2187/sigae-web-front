@@ -313,13 +313,6 @@ export class UserListComponent {
     });
   }
 
-  onViewActivity(user: User) {
-    this.closeActionsMenu();
-    this.notifications.info({
-      message: `Consulta de actividad para ${user.name} pendiente de conectar.`,
-    });
-  }
-
   onToggleMfaRequirement(user: User) {
     this.openUserConfirmation(user, user.mfaRequired ? 'removeMfaRequirement' : 'requireMfa');
   }
