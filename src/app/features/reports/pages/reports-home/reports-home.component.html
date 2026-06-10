@@ -140,7 +140,12 @@
                 <td class="px-4 py-3 text-base-content/70">{{ asset.category }}</td>
                 <td class="px-4 py-3 text-base-content/70">{{ asset.location }}</td>
                 <td class="px-4 py-3">
-                  <app-status-badge [label]="asset.condition" [tone]="assetConditionTone(asset.condition)" />
+                  <span
+                    class="inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold"
+                    [class]="getAssetStatusClass(asset.condition)"
+                  >
+                    {{ asset.condition }}
+                  </span>
                 </td>
                 <td class="px-4 py-3 text-right">
                   <a

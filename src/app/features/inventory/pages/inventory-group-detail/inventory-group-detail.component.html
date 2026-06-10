@@ -1,51 +1,39 @@
 @if (group(); as group) {
   <div class="space-y-6">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div class="space-y-2">
-        <nav class="flex text-sm text-base-content/45">
-          <ol class="flex items-center gap-2">
-            <li><a routerLink="/inventory" class="transition-colors hover:text-primary">Inventario</a></li>
-            <li>/</li>
-            <li class="font-medium text-base-content/70">{{ group.displayName }}</li>
-          </ol>
-        </nav>
+    <div class="space-y-4">
+      <nav class="flex text-sm text-base-content/45">
+        <ol class="flex items-center gap-2">
+          <li><a routerLink="/inventory" class="transition-colors hover:text-primary">Inventario</a></li>
+          <li>/</li>
+          <li class="font-medium text-base-content/70">{{ group.displayName }}</li>
+        </ol>
+      </nav>
 
-        <div class="space-y-1">
-          <h2 class="text-2xl font-bold text-base-content">{{ group.displayName }} - Unidades</h2>
-          <p class="text-sm text-base-content/55">
-            {{ group.totalUnits }} {{ group.totalUnits === 1 ? 'unidad registrada' : 'unidades registradas' }}
-            en la categoría {{ group.categoryName }}.
-          </p>
-        </div>
+      <div class="space-y-1">
+        <h2 class="text-2xl font-bold text-base-content">{{ group.displayName }} - Unidades</h2>
+        <p class="text-sm text-base-content/55">
+          {{ group.totalUnits }} {{ group.totalUnits === 1 ? 'unidad registrada' : 'unidades registradas' }}
+          en la categoría {{ group.categoryName }}.
+        </p>
       </div>
-
-      <app-action-button
-        label="Agregar unidades iguales"
-        icon="add"
-        hostClass="w-full lg:w-auto"
-        routerLink="/inventory/new"
-      />
     </div>
 
-    <app-data-listing
-      [isLoading]="isLoading()"
-      [isEmpty]="isEmpty()"
-      [resultLabel]="resultLabel()"
-      [currentPage]="currentPage()"
-      [totalPages]="totalPages()"
-      (pageChange)="goToPage($event)"
-    >
-      <div listing-toolbar class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:flex-1">
-          <app-search-input
-            widthClass="w-full lg:max-w-2xl"
-            placeholder="Buscar por código SIGAE o ubicación..."
-            [value]="searchQuery()"
-            (valueChange)="updateQuery($event)"
-          />
+    <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div class="flex flex-1 flex-wrap items-end gap-4">
+          <div class="min-w-[260px] flex-1">
+            <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
+            <app-search-input
+              widthClass="w-full"
+              placeholder="Buscar por código SIGAE o ubicación..."
+              [value]="searchQuery()"
+              (valueChange)="updateQuery($event)"
+            />
+          </div>
 
-          <div class="w-full lg:w-64">
+          <div class="min-w-[220px] flex-1">
             <app-select-field
+              label="Estado"
               appearance="toolbar"
               placeholder="Todos los estados"
               [options]="statusOptions"
@@ -53,76 +41,145 @@
               (valueChange)="updateStatusFilter($event)"
             />
           </div>
+
+          <button
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
+            (click)="clearFilters()"
+          >
+            <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+            Limpiar Filtros
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
+          @if (hasSelectedUnits()) {
+            <div class="animate-in fade-in slide-in-from-top-1 duration-200 ease-out">
+              <app-action-button
+                label="Imprimir tarjetas"
+                icon="print"
+                variant="outline"
+                hostClass="w-full xl:w-auto"
+                (clicked)="printSelectedLabels()"
+              />
+            </div>
+          }
+          <app-action-button
+            label="Agregar unidades iguales"
+            icon="add"
+            hostClass="w-full xl:w-auto"
+            routerLink="/inventory/new"
+          />
         </div>
       </div>
+    </section>
 
-      <th listing-head class="w-[22%] px-5 py-4">Código SIGAE</th>
-      <th listing-head class="w-[33%] px-5 py-4">Ubicación específica</th>
-      <th listing-head class="w-[18%] px-5 py-4">Estado</th>
-      <th listing-head class="w-[17%] px-5 py-4">Última inspección</th>
-      <th listing-head class="w-[10%] px-5 py-4 text-right">Acciones</th>
-
-      @for (unit of paginatedUnits(); track unit.id) {
-        <tr listing-body class="group/row transition-colors hover:bg-base-200/35">
-          <td class="px-5 py-4 font-mono text-xs font-semibold text-base-content/80">{{ unit.code }}</td>
-          <td class="px-5 py-4 text-base-content/70">{{ unit.locationName }}</td>
-          <td class="px-5 py-4">
-            <app-status-badge
-              [label]="unit.condition === 'Bueno' ? 'Operativo' : unit.condition"
-              [tone]="conditionTone(unit.condition)"
-              [compact]="true"
-            />
-          </td>
-          <td class="px-5 py-4 text-base-content/60">
-            {{ unit.lastInspectionDate | date: 'dd/MM/yyyy' }}
-          </td>
-          <td class="px-5 py-4 text-right">
-            <div class="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
-              <a
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
-                [routerLink]="['/inventory', unit.id]"
-                aria-label="Ver detalle de unidad"
-                title="Ver detalle"
-              >
-                <span class="material-symbols-outlined text-[18px]">visibility</span>
-              </a>
-              <a
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
-                [routerLink]="['/inventory', unit.id, 'edit']"
-                aria-label="Editar unidad"
-                title="Editar"
-              >
-                <span class="material-symbols-outlined text-[18px]">edit</span>
-              </a>
-              <a
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
-                [routerLink]="['/inventory', unit.id]"
-                fragment="traceability"
-                aria-label="Ver historial de unidad"
-                title="Historial"
-              >
-                <span class="material-symbols-outlined text-[18px]">history</span>
-              </a>
-              <button
-                type="button"
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
-                aria-label="Imprimir tarjeta de unidad"
-                title="Imprimir tarjeta"
-                (click)="printUnitLabel(unit.id)"
-              >
-                <span class="material-symbols-outlined text-[18px]">print</span>
-              </button>
-            </div>
-          </td>
-        </tr>
-      }
-
-      <div listing-empty class="flex flex-col items-center gap-3 text-center text-base-content/45">
-        <span class="material-symbols-outlined text-[48px]">inventory</span>
-        <p class="font-semibold text-base-content/70">No hay unidades que coincidan con los filtros</p>
-        <p class="text-sm">Prueba con otro término de búsqueda o cambia el estado seleccionado.</p>
+    <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[920px] border-collapse text-left">
+          <thead>
+            <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              <th class="w-12 px-4 py-3 text-center">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm border border-base-300"
+                  [checked]="areAllVisibleSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                  aria-label="Seleccionar todas las unidades visibles"
+                />
+              </th>
+              <th class="px-4 py-3">Código SIGAE</th>
+              <th class="px-4 py-3">Ubicación específica</th>
+              <th class="px-4 py-3">Estado</th>
+              <th class="px-4 py-3">Última inspección</th>
+              <th class="px-4 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            @for (unit of paginatedUnits(); track unit.id) {
+              <tr class="group border-b border-base-300 last:border-b-0 hover:bg-base-200/20">
+                <td class="px-4 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm border border-base-300"
+                    [checked]="isUnitSelected(unit.id)"
+                    (change)="toggleUnitSelection(unit.id, $any($event.target).checked)"
+                    aria-label="Seleccionar unidad"
+                  />
+                </td>
+                <td class="px-4 py-3 font-mono text-xs font-semibold text-base-content/80">{{ unit.code }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ unit.locationName }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold"
+                    [class]="getAssetStatusClass(unit.condition)"
+                  >
+                    {{ unit.condition }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-base-content/60">
+                  {{ unit.lastInspectionDate | date: 'dd/MM/yyyy' }}
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    <a
+                      class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
+                      [routerLink]="['/inventory', unit.id]"
+                      aria-label="Ver detalle de unidad"
+                      title="Ver detalle"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    </a>
+                    <a
+                      class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
+                      [routerLink]="['/inventory', unit.id, 'edit']"
+                      aria-label="Editar unidad"
+                      title="Editar"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </a>
+                    <a
+                      class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
+                      [routerLink]="['/inventory', unit.id]"
+                      fragment="traceability"
+                      aria-label="Ver historial de unidad"
+                      title="Historial"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">history</span>
+                    </a>
+                    <button
+                      type="button"
+                      class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
+                      aria-label="Imprimir tarjeta de unidad"
+                      title="Imprimir tarjeta"
+                      (click)="printUnitLabel(unit.id)"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">print</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center gap-3 text-base-content/55">
+                    <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl">inventory</span>
+                    <p class="text-sm font-medium">No hay unidades que coincidan con los filtros aplicados.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
-    </app-data-listing>
+
+      <app-desktop-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [resultLabel]="resultLabel()"
+        (pageChange)="goToPage($event)"
+      />
+    </section>
   </div>
 } @else if (hasError()) {
   <div class="rounded-2xl border border-base-300 bg-base-100 p-10 text-center shadow-sm">

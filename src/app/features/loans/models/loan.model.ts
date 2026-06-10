@@ -1,6 +1,6 @@
 export type LoanStatus = 'Activo' | 'Vencido' | 'Devuelto';
 export type LoanStatusTab = 'all' | 'active' | 'overdue' | 'returned';
-export type LoanAssetStatus = 'Operativo' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
+export type LoanAssetStatus = 'Bueno' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
 export type LoanReturnCondition = 'Bueno' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
 
 export interface LoanTeacher {

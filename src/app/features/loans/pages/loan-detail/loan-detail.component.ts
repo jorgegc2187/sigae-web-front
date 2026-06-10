@@ -173,7 +173,7 @@ export class LoanDetailComponent {
 
   getAssetStatusClass(status: LoanAssetStatus): string {
     const map: Record<LoanAssetStatus, string> = {
-      Operativo: 'border-success/20 bg-success/10 text-success',
+      Bueno: 'border-success/20 bg-success/10 text-success',
       Regular: 'border-warning/20 bg-warning/10 text-warning',
       Malo: 'border-error/20 bg-error/10 text-error',
       Mantenimiento: 'border-info/20 bg-info/10 text-info',

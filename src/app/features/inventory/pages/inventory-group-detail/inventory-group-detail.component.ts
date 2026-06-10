@@ -2,10 +2,9 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { DataListingComponent } from '../../../../shared/ui/data-listing/data-listing.component';
+import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
-import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
 import { AssetCondition } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
 import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
@@ -16,10 +15,9 @@ import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util'
     RouterLink,
     DatePipe,
     ActionButtonComponent,
-    DataListingComponent,
+    DesktopPaginationComponent,
     SearchInputComponent,
     SelectFieldComponent,
-    StatusBadgeComponent,
   ],
   templateUrl: './inventory-group-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,9 +29,10 @@ export class InventoryGroupDetailComponent {
   readonly groupId = input.required<string>();
   readonly searchQuery = signal('');
   readonly selectedStatus = signal<'all' | AssetCondition>('all');
+  readonly selectedUnitIds = signal<string[]>([]);
   readonly statusOptions: SelectFieldOption[] = [
     { value: 'all', label: 'Todos los estados' },
-    { value: 'Bueno', label: 'Operativo' },
+    { value: 'Bueno', label: 'Bueno' },
     { value: 'Regular', label: 'Regular' },
     { value: 'Malo', label: 'Malo' },
     { value: 'Mantenimiento', label: 'Mantenimiento' },
@@ -79,21 +78,61 @@ export class InventoryGroupDetailComponent {
 
     const start = (this.currentPage() - 1) * this.pageSize + 1;
     const end = Math.min(start + this.pageSize - 1, total);
-    return `Mostrando ${start}-${end} de ${total} unidades`;
+    return `Mostrando ${start} a ${end} de ${total} unidades`;
   });
+  readonly hasSelectedUnits = computed(() => this.selectedUnitIds().length > 0);
 
   updateQuery(value: string): void {
     this.searchQuery.set(value);
     this.currentPage.set(1);
+    this.selectedUnitIds.set([]);
   }
 
   updateStatusFilter(status: string): void {
     this.selectedStatus.set(status as 'all' | AssetCondition);
     this.currentPage.set(1);
+    this.selectedUnitIds.set([]);
+  }
+
+  clearFilters(): void {
+    this.searchQuery.set('');
+    this.selectedStatus.set('all');
+    this.currentPage.set(1);
+    this.selectedUnitIds.set([]);
   }
 
   goToPage(page: number): void {
     this.currentPage.set(page);
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    this.selectedUnitIds.set(checked ? this.paginatedUnits().map((unit) => unit.id) : []);
+  }
+
+  toggleUnitSelection(unitId: string, checked: boolean): void {
+    this.selectedUnitIds.update((current) =>
+      checked ? [...new Set([...current, unitId])] : current.filter((id) => id !== unitId),
+    );
+  }
+
+  isUnitSelected(unitId: string): boolean {
+    return this.selectedUnitIds().includes(unitId);
+  }
+
+  areAllVisibleSelected(): boolean {
+    const visibleUnitIds = this.paginatedUnits().map((unit) => unit.id);
+    return visibleUnitIds.length > 0 && visibleUnitIds.every((unitId) => this.selectedUnitIds().includes(unitId));
+  }
+
+  printSelectedLabels(): void {
+    const selectedUnitIds = this.selectedUnitIds();
+    if (selectedUnitIds.length === 0) {
+      return;
+    }
+
+    openInventoryLabelPrint(this.router, {
+      assetIds: selectedUnitIds.join(','),
+    });
   }
 
   printUnitLabel(assetId: string): void {
@@ -102,11 +141,15 @@ export class InventoryGroupDetailComponent {
     });
   }
 
-  conditionTone(condition: AssetCondition): 'success' | 'warning' | 'error' | 'neutral' | 'info' {
-    if (condition === 'Bueno') return 'success';
-    if (condition === 'Regular') return 'warning';
-    if (condition === 'Mantenimiento') return 'info';
-    if (condition === 'Malo') return 'error';
-    return 'neutral';
+  getAssetStatusClass(condition: AssetCondition): string {
+    const map: Record<AssetCondition, string> = {
+      Bueno: 'border-success/20 bg-success/10 text-success',
+      Regular: 'border-warning/20 bg-warning/10 text-warning',
+      Malo: 'border-error/20 bg-error/10 text-error',
+      Mantenimiento: 'border-info/20 bg-info/10 text-info',
+      'Dado de baja': 'border-base-300 bg-base-200 text-base-content/60',
+    };
+
+    return map[condition];
   }
 }

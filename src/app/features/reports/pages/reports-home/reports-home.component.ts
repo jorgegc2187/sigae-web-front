@@ -292,12 +292,12 @@ export class ReportsHomeComponent {
     this.pendingExport.set(null);
   }
 
-  assetConditionTone(condition: string): StatusBadgeTone {
-    if (condition === 'Bueno') return 'success';
-    if (condition === 'Regular') return 'warning';
-    if (condition === 'Mantenimiento') return 'info';
-    if (condition === 'Malo') return 'error';
-    return 'neutral';
+  getAssetStatusClass(condition: string): string {
+    if (condition === 'Bueno') return 'border-success/20 bg-success/10 text-success';
+    if (condition === 'Regular') return 'border-warning/20 bg-warning/10 text-warning';
+    if (condition === 'Mantenimiento') return 'border-info/20 bg-info/10 text-info';
+    if (condition === 'Malo') return 'border-error/20 bg-error/10 text-error';
+    return 'border-base-300 bg-base-200 text-base-content/60';
   }
 
   loanStatusTone(status: string): StatusBadgeTone {
