@@ -70,6 +70,24 @@
                 <p class="text-sm font-medium text-base-content">{{ loanDetail.teacher.specialty }}</p>
               </div>
             </div>
+
+            <div class="mt-6">
+              <p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-base-content/50">Firma digital</p>
+              <div class="flex h-24 items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-100 p-3">
+                @if (loanDetail.signatureDataUrl) {
+                  <img
+                    [src]="loanDetail.signatureDataUrl"
+                    alt="Firma registrada del préstamo"
+                    class="h-full w-full object-contain"
+                  />
+                } @else {
+                  <div class="text-center text-sm text-base-content/45">
+                    <span class="material-symbols-outlined mb-1 block text-[28px]">draw</span>
+                    Sin firma registrada
+                  </div>
+                }
+              </div>
+            </div>
           </div>
         </section>
 
@@ -106,24 +124,6 @@
                   <p class="text-sm leading-7 text-base-content/75">{{ loanDetail.notes }}</p>
                 } @else {
                   <p class="text-sm italic text-base-content/50">Sin observaciones registradas.</p>
-                }
-              </div>
-            </div>
-
-            <div class="mt-6">
-              <p class="mb-2 text-[11px] font-bold uppercase tracking-wider text-base-content/50">Firma digital</p>
-              <div class="flex h-24 items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-100 p-3">
-                @if (loanDetail.signatureDataUrl) {
-                  <img
-                    [src]="loanDetail.signatureDataUrl"
-                    alt="Firma registrada del préstamo"
-                    class="h-full w-full object-contain"
-                  />
-                } @else {
-                  <div class="text-center text-sm text-base-content/45">
-                    <span class="material-symbols-outlined mb-1 block text-[28px]">draw</span>
-                    Sin firma registrada
-                  </div>
                 }
               </div>
             </div>
