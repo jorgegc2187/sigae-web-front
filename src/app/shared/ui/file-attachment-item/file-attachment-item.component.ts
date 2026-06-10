@@ -19,9 +19,11 @@ export class FileAttachmentItemComponent {
   readonly layout = input<FileAttachmentItemLayout>('compact');
   readonly showTypeBadge = input(false, { transform: booleanAttribute });
   readonly showActionsOnHover = input(true, { transform: booleanAttribute });
+  readonly removable = input(false, { transform: booleanAttribute });
 
   readonly previewRequested = output<void>();
   readonly downloadRequested = output<void>();
+  readonly removeRequested = output<void>();
 
   readonly metadata = computed(() =>
     resolveFileAttachmentMetadata(this.fileName(), this.mimeType(), this.sizeBytes()),
@@ -61,5 +63,13 @@ export class FileAttachmentItemComponent {
 
   onDownloadRequested(): void {
     this.downloadRequested.emit();
+  }
+
+  onRemoveRequested(): void {
+    if (!this.removable()) {
+      return;
+    }
+
+    this.removeRequested.emit();
   }
 }

@@ -1,0 +1,79 @@
+<dialog
+  #dialog
+  class="modal"
+  aria-labelledby="inventory-attachment-preview-title"
+  (click)="onBackdropClick($event)"
+  (cancel)="$event.preventDefault(); onClose()"
+>
+  <div class="modal-box max-w-5xl overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl">
+    <div class="flex items-start justify-between gap-4 border-b border-base-200 px-6 py-5">
+      <div class="min-w-0 space-y-1">
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Vista previa</p>
+        <h2 id="inventory-attachment-preview-title" class="truncate text-xl font-bold text-base-content">
+          {{ attachment()?.fileName ?? 'Adjunto' }}
+        </h2>
+        @if (attachment(); as selectedAttachment) {
+          <p class="text-sm text-base-content/55">{{ selectedAttachment.mimeType }}</p>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm btn-circle text-base-content/55 hover:bg-base-200 hover:text-base-content"
+        aria-label="Cerrar vista previa"
+        [disabled]="isLoading()"
+        (click)="onClose()"
+      >
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <div class="min-h-[24rem] bg-base-200/35 px-6 py-5">
+      @if (isLoading()) {
+        <div class="flex min-h-[24rem] flex-col items-center justify-center text-center">
+          <span class="loading loading-spinner loading-lg text-primary"></span>
+          <p class="mt-4 text-sm font-medium text-base-content">Cargando adjunto...</p>
+        </div>
+      } @else if (hasError()) {
+        <div class="flex min-h-[24rem] flex-col items-center justify-center text-center">
+          <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-error/10 text-error">
+            <span class="material-symbols-outlined text-[28px]">cloud_off</span>
+          </div>
+          <h3 class="text-lg font-bold text-base-content">No se pudo cargar la vista previa</h3>
+          <p class="mt-2 max-w-md text-sm text-base-content/60">
+            Puedes intentar descargar el archivo para revisarlo localmente.
+          </p>
+        </div>
+      } @else if (isImagePreview() && objectUrl(); as previewUrl) {
+        <div class="flex min-h-[24rem] items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-100 p-4">
+          <img [src]="previewUrl" [alt]="'Vista previa de ' + (attachment()?.fileName ?? 'adjunto')" class="max-h-[65vh] max-w-full rounded-lg object-contain" />
+        </div>
+      } @else if (isPdfPreview() && safeObjectUrl(); as previewUrl) {
+        <div class="overflow-hidden rounded-xl border border-base-300 bg-base-100">
+          <iframe [src]="previewUrl" title="Vista previa de PDF" class="h-[65vh] w-full"></iframe>
+        </div>
+      } @else {
+        <div class="flex min-h-[24rem] flex-col items-center justify-center text-center">
+          <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <span class="material-symbols-outlined text-[28px]">description</span>
+          </div>
+          <h3 class="text-lg font-bold text-base-content">Vista previa no disponible</h3>
+          <p class="mt-2 max-w-md text-sm leading-6 text-base-content/60">
+            Este tipo de archivo no se puede previsualizar directamente en el navegador. Descargalo para revisarlo.
+          </p>
+        </div>
+      }
+    </div>
+
+    <div class="flex flex-col-reverse gap-3 border-t border-base-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+      <app-action-button label="Cerrar" variant="neutral" [disabled]="isLoading()" (clicked)="onClose()" />
+      <app-action-button
+        label="Descargar"
+        icon="download"
+        variant="primary"
+        [disabled]="isLoading() || !attachment()"
+        (clicked)="downloadCurrentAttachment()"
+      />
+    </div>
+  </div>
+</dialog>

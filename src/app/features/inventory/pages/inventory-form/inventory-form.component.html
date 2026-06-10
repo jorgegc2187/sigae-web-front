@@ -6,29 +6,20 @@
     </ul>
   </div>
 
-  <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
-    <div class="space-y-6 xl:col-span-7">
-      <section class="card card-border bg-base-100 shadow-sm">
-        <div class="card-body p-5">
-          <h3
-            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
-          >
-            <span class="material-symbols-outlined text-[20px] text-primary">inventory_2</span>
-            Información del activo
-          </h3>
-
-          <div class="space-y-5">
-            <div class="rounded-2xl border border-primary/15 bg-primary/5 p-4">
-              <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-primary">qr_code_2</span>
-                <div class="space-y-1">
-                  <p class="text-sm font-semibold text-base-content">Código operativo único</p>
-                  <p class="text-sm leading-relaxed text-base-content/65">{{ generatedCodeLabel() }}</p>
-                </div>
-              </div>
+  <div class="mx-auto max-w-5xl space-y-6">
+      <section class="card overflow-hidden rounded-xl border border-base-300/70 bg-base-100 shadow-sm">
+        <div class="card-body p-5 md:p-6">
+          <div class="mb-5 flex items-center gap-3 border-b border-base-200 pb-4">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span class="material-symbols-outlined text-[22px]">inventory_2</span>
             </div>
+            <div>
+              <h3 class="text-base font-semibold text-base-content">Información general</h3>
+              <p class="text-sm text-base-content/55">Datos base, clasificación y estado actual del activo.</p>
+            </div>
+          </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <app-form-field
                 label="Nombre del activo"
                 fieldId="assetName"
@@ -77,14 +68,6 @@
               />
 
               <app-select-field
-                label="Proveedor"
-                fieldId="assetSupplier"
-                placeholder="Sin proveedor"
-                [options]="supplierOptions()"
-                formControlName="supplierId"
-              />
-
-              <app-select-field
                 label="Estado"
                 fieldId="assetCondition"
                 [required]="true"
@@ -92,27 +75,49 @@
                 [options]="conditionOptions"
                 formControlName="condition"
               />
-
-              <fieldset class="fieldset">
-                <legend class="fieldset-legend">Fecha de adquisición</legend>
-                <app-date-picker
-                  formControlName="acquisitionDate"
-                  placeholder="Seleccionar fecha"
-                />
-              </fieldset>
-            </div>
           </div>
         </div>
       </section>
 
-      <section class="card card-border bg-base-100 shadow-sm">
-        <div class="card-body p-5">
-          <h3
-            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
-          >
-            <span class="material-symbols-outlined text-[20px] text-primary">tune</span>
-            Atributos dinámicos
-          </h3>
+      <section class="card overflow-hidden rounded-xl border border-base-300/70 bg-base-100 shadow-sm">
+        <div class="card-body p-5 md:p-6">
+          <div class="mb-5 flex items-center gap-3 border-b border-base-200 pb-4">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-base-content">Datos de adquisición</h3>
+              <p class="text-sm text-base-content/55">Proveedor y fecha de compra o incorporación.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <app-select-field
+              label="Proveedor"
+              fieldId="assetSupplier"
+              placeholder="Sin proveedor"
+              [options]="supplierOptions()"
+              formControlName="supplierId"
+            />
+
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">Fecha de adquisición</legend>
+              <app-date-picker formControlName="acquisitionDate" placeholder="Seleccionar fecha" />
+            </fieldset>
+          </div>
+        </div>
+      </section>
+      <section class="card overflow-hidden rounded-xl border border-base-300/70 bg-base-100 shadow-sm">
+        <div class="card-body p-5 md:p-6">
+          <div class="mb-5 flex items-center gap-3 border-b border-base-200 pb-4">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span class="material-symbols-outlined text-[22px]">tune</span>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-base-content">Atributos específicos</h3>
+              <p class="text-sm text-base-content/55">Campos dinámicos según el tipo de activo seleccionado.</p>
+            </div>
+          </div>
 
           @if (currentTypeAttributes().length === 0) {
             <div class="rounded-xl border border-dashed border-base-300 bg-base-100 px-4 py-6 text-sm text-base-content/55">
@@ -142,49 +147,131 @@
           }
         </div>
       </section>
-    </div>
 
-    <div class="space-y-6 xl:col-span-5">
-      <section class="card card-border bg-base-100 shadow-sm">
-        <div class="card-body p-5">
-          <h3
-            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
-          >
-            <span class="material-symbols-outlined text-[20px] text-primary">description</span>
-            Observaciones
-          </h3>
+      <section class="card overflow-hidden rounded-xl border border-base-300/70 bg-base-100 shadow-sm">
+        <div class="card-body p-5 md:p-6">
+          <div class="mb-5 flex items-center gap-3 border-b border-base-200 pb-4">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span class="material-symbols-outlined text-[22px]">attach_file</span>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-base-content">Observaciones y adjuntos</h3>
+              <p class="text-sm text-base-content/55">Notas, imágenes y documentos relacionados al activo.</p>
+            </div>
+          </div>
 
-          <fieldset class="fieldset w-full">
-            <label for="assetObservations" class="fieldset-legend">Observaciones (Opcional)</label>
-            <textarea
-              id="assetObservations"
-              formControlName="observations"
-              rows="6"
-              class="min-h-28 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Detalles adicionales sobre el activo..."
-            ></textarea>
-          </fieldset>
+          <div class="space-y-5">
+            <fieldset class="fieldset w-full">
+              <label for="assetObservations" class="fieldset-legend">Observaciones (Opcional)</label>
+              <textarea
+                id="assetObservations"
+                formControlName="observations"
+                rows="5"
+                class="min-h-28 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Detalles adicionales sobre el activo, su estado o la compra..."
+              ></textarea>
+            </fieldset>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-3">
+                <label class="text-sm font-medium text-base-content">Adjuntos del activo</label>
+                <span class="text-xs text-base-content/45">Máximo sugerido por archivo: {{ attachmentLimitLabel }}</span>
+              </div>
+
+              <button
+                type="button"
+                [class]="
+                  isAttachmentDropActive()
+                    ? 'group hidden w-full cursor-pointer rounded-xl border-2 border-dashed border-primary bg-primary/5 p-6 text-center transition-colors md:block'
+                    : 'group hidden w-full cursor-pointer rounded-xl border-2 border-dashed border-base-300 bg-base-200/20 p-6 text-center transition-colors hover:bg-base-200/35 md:block'
+                "
+                (click)="openAttachmentPicker()"
+                (dragover)="onAttachmentDragOver($event)"
+                (dragleave)="onAttachmentDragLeave($event)"
+                (drop)="onAttachmentDrop($event)"
+              >
+                <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-base-100 shadow-sm transition-transform duration-200 group-hover:scale-110">
+                  <span class="material-symbols-outlined text-[24px] text-primary">cloud_upload</span>
+                </div>
+                <p class="text-sm font-medium text-base-content/85">Haga clic para subir o arrastre y suelte archivos</p>
+                <p class="mt-1 text-xs text-base-content/45">(PDF, DOC, DOCX, JPG, PNG, WEBP)</p>
+              </button>
+
+              <button
+                type="button"
+                class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-base-300 bg-base-200/20 p-6 text-center transition-colors hover:bg-base-200/35 md:hidden"
+                (click)="openAttachmentPicker()"
+              >
+                <span class="material-symbols-outlined text-[32px] text-primary">cloud_upload</span>
+                <span class="text-xs text-base-content/65">Toca para adjuntar imágenes o documentos</span>
+              </button>
+
+              <input
+                #attachmentPickerInput
+                type="file"
+                class="hidden"
+                accept=".pdf,.doc,.docx,.heic,.heif,image/*"
+                multiple
+                (change)="onAttachmentSelection($event)"
+              />
+
+              @if (hasAttachments()) {
+                <div class="space-y-4">
+                  @if (persistedAttachments().length > 0) {
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-base-content/45">
+                        <span class="material-symbols-outlined text-[16px]">inventory</span>
+                        Adjuntos guardados
+                      </div>
+                      <div class="grid gap-3 md:grid-cols-2">
+                        @for (attachment of persistedAttachments(); track attachment.id) {
+                          <app-file-attachment-item
+                            [fileName]="attachment.fileName"
+                            [mimeType]="attachment.mimeType"
+                            [sizeBytes]="attachment.sizeBytes"
+                            [previewable]="true"
+                            layout="compact"
+                            [showActionsOnHover]="true"
+                            [removable]="true"
+                            (previewRequested)="openPersistedAttachmentPreview(attachment)"
+                            (downloadRequested)="downloadPersistedAttachment(attachment)"
+                            (removeRequested)="removePersistedAttachment(attachment.id)"
+                          />
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (newAttachments().length > 0) {
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-base-content/45">
+                        <span class="material-symbols-outlined text-[16px]">schedule</span>
+                        Pendientes por subir
+                      </div>
+                      <div class="grid gap-3 md:grid-cols-2">
+                        @for (attachment of newAttachments(); track attachment.id) {
+                          <app-file-attachment-item
+                            [fileName]="attachment.name"
+                            [mimeType]="attachment.mimeType"
+                            [sizeBytes]="attachment.size"
+                            [previewable]="false"
+                            layout="compact"
+                            [showActionsOnHover]="true"
+                            [removable]="true"
+                            (removeRequested)="removeNewAttachment(attachment.id)"
+                          />
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
         </div>
       </section>
-
-      <section class="card card-border bg-base-100 shadow-sm">
-        <div class="card-body p-5">
-          <h3
-            class="mb-4 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content"
-          >
-            <span class="material-symbols-outlined text-[20px] text-primary">info</span>
-            Consideraciones
-          </h3>
-
-          <ul class="space-y-3 text-sm leading-relaxed text-base-content/65">
-            <li>El sistema generará automáticamente el código único del activo al registrarlo.</li>
-            <li>Ese mismo código será usado para QR, impresión de tarjeta y búsqueda por escaneo.</li>
-            <li>Si el activo tiene serie u otro identificador adicional, puede registrarse como atributo dinámico del tipo correspondiente.</li>
-          </ul>
-        </div>
-      </section>
-    </div>
   </div>
+
   <footer class="fixed bottom-0 left-0 right-0 z-30 border-t border-base-300 bg-base-100/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:left-[var(--shell-sidebar-width)] md:px-8">
     <div class="mx-auto flex max-w-6xl justify-end gap-3">
       <app-action-button
@@ -209,4 +296,10 @@
   [active]="isBusy()"
   [title]="blockingTitle()"
   [message]="blockingDescription()"
+/>
+
+<app-inventory-attachment-preview-modal
+  [open]="isAttachmentPreviewOpen()"
+  [attachment]="previewAttachment()"
+  (closed)="closeAttachmentPreview()"
 />

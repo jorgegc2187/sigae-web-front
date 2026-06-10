@@ -21,6 +21,7 @@ export interface InventoryAsset {
   observations?: string;
   attributes: Record<string, string>;
   attributeValues: AssetAttributeValueResponse[];
+  attachments: AssetAttachmentSummary[];
   availableForLoan: boolean;
   activeLoanId?: string;
 }
@@ -58,6 +59,14 @@ export interface AssetAttributeValueResponse {
   value: string;
 }
 
+export interface AssetAttachmentSummary {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  downloadUrl: string;
+}
+
 export interface AssetResponse {
   id: string;
   code: string;
@@ -76,6 +85,7 @@ export interface AssetResponse {
   acquisitionDate: string | null;
   notes: string | null;
   attributeValues: AssetAttributeValueResponse[];
+  attachments: AssetAttachmentSummary[];
   availableForLoan?: boolean | null;
   activeLoanId?: string | null;
 }
@@ -95,4 +105,5 @@ export interface AssetRequest {
     attributeDefinitionId: string;
     value: string;
   }>;
+  removedAttachmentIds: string[];
 }

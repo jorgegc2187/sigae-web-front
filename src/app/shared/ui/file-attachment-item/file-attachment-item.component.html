@@ -45,5 +45,17 @@
     >
       <span class="material-symbols-outlined text-[18px]">download</span>
     </button>
+
+    @if (removable()) {
+      <button
+        type="button"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-error transition-colors hover:bg-error/10 focus:outline-none focus:ring-2 focus:ring-error/20"
+        (click)="onRemoveRequested()"
+        [attr.aria-label]="'Quitar ' + fileName()"
+        title="Quitar"
+      >
+        <span class="material-symbols-outlined text-[18px]">delete</span>
+      </button>
+    }
   </div>
 </article>

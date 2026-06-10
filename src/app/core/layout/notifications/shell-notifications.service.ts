@@ -29,6 +29,7 @@ export class ShellNotificationsService {
   private subscriptions: StompSubscription[] = [];
   private currentConnectionKey: string | null = null;
   private reloadQueued = false;
+  private reloadScheduled = false;
 
   readonly items = computed<LiveNotificationItem[]>(() => this.snapshotState().items);
   readonly totalActiveCount = computed(() => this.snapshotState().totalActiveCount);
@@ -60,7 +61,9 @@ export class ShellNotificationsService {
       }
 
       this.ensureConnected(token, currentUser.role);
-      void this.reload();
+      if (!this.hasLoadedOnceState()) {
+        this.queueReload();
+      }
     });
   }
 
@@ -121,7 +124,7 @@ export class ShellNotificationsService {
         this.hasConnectedOnceState.set(true);
         this.errorState.set(false);
         this.subscribeToTopics(stompClient, role === 'Administrador');
-        void this.reload();
+        this.queueReload();
       },
       onDisconnect: () => {
         this.connectedState.set(false);
@@ -163,7 +166,19 @@ export class ShellNotificationsService {
       // Si el payload cambia, aún queremos refrescar el snapshot.
     }
 
-    void this.reload();
+    this.queueReload();
+  }
+
+  private queueReload(): void {
+    if (this.reloadScheduled) {
+      return;
+    }
+
+    this.reloadScheduled = true;
+    setTimeout(() => {
+      this.reloadScheduled = false;
+      void this.reload();
+    }, 250);
   }
 
   private resolveBrokerUrl(): string {

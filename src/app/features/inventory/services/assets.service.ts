@@ -85,16 +85,27 @@ export class AssetsService {
     );
   }
 
-  create(payload: AssetRequest) {
-    return this.http.post<AssetResponse>(this.baseUrl, payload).pipe(
+  create(payload: AssetRequest, attachments: File[] = []) {
+    return this.http.post<AssetResponse>(this.baseUrl, this.buildAssetFormData(payload, attachments)).pipe(
       map((asset) => this.toInventoryAsset(asset)),
     );
   }
 
-  update(id: string, payload: AssetRequest) {
-    return this.http.patch<AssetResponse>(`${this.baseUrl}/${id}`, payload).pipe(
+  update(id: string, payload: AssetRequest, attachments: File[] = []) {
+    return this.http.patch<AssetResponse>(`${this.baseUrl}/${id}`, this.buildAssetFormData(payload, attachments)).pipe(
       map((asset) => this.toInventoryAsset(asset)),
     );
+  }
+
+  downloadAttachment(downloadUrl: string) {
+    const url = downloadUrl.startsWith('http')
+      ? downloadUrl
+      : `${this.appConfig.apiUrl.replace(/\/api$/, '')}${downloadUrl}`;
+
+    return this.http.get(url, {
+      observe: 'response',
+      responseType: 'blob',
+    });
   }
 
   traceability(id: string) {
@@ -148,9 +159,22 @@ export class AssetsService {
         asset.attributeValues.map((attribute) => [attribute.attributeName, attribute.value]),
       ),
       attributeValues: asset.attributeValues,
+      attachments: asset.attachments ?? [],
       availableForLoan,
       activeLoanId,
     };
+  }
+
+  private buildAssetFormData(payload: AssetRequest, attachments: File[] = []): FormData {
+    const formData = new FormData();
+    formData.append(
+      'payload',
+      new Blob([JSON.stringify(payload)], { type: 'application/json' }),
+    );
+    for (const attachment of attachments) {
+      formData.append('attachments', attachment, attachment.name);
+    }
+    return formData;
   }
 
   private toTraceabilityType(eventType: AssetTraceabilityResponse['eventType']): AssetTraceabilityEntry['type'] {

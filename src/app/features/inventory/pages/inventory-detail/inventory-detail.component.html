@@ -61,24 +61,62 @@
         </div>
       </section>
 
-      <section id="traceability" class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm scroll-mt-24">
-        <h3 class="font-bold text-base-content">Trazabilidad</h3>
-        <div class="mt-4 space-y-3">
-          @for (event of traceability(); track event.id) {
-            <div class="rounded-xl border border-base-200 bg-base-100 p-4">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <p class="font-semibold text-base-content">{{ event.type }}</p>
-                  <p class="text-sm text-base-content/60">{{ event.description }}</p>
-                </div>
-                <span class="text-xs font-semibold text-base-content/45">{{ event.date }}</span>
-              </div>
-              <p class="mt-2 text-xs text-base-content/45">{{ event.user }}</p>
+      <div class="space-y-6">
+        <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="font-bold text-base-content">Adjuntos</h3>
+            <span class="rounded-full bg-base-200 px-3 py-1 text-xs font-bold text-base-content">
+              {{ asset.attachments.length }} {{ asset.attachments.length === 1 ? 'adjunto' : 'adjuntos' }}
+            </span>
+          </div>
+
+          @if (asset.attachments.length > 0) {
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              @for (attachment of asset.attachments; track attachment.id) {
+                <app-file-attachment-item
+                  [fileName]="attachment.fileName"
+                  [mimeType]="attachment.mimeType"
+                  [sizeBytes]="attachment.sizeBytes"
+                  [previewable]="true"
+                  layout="compact"
+                  [showActionsOnHover]="true"
+                  (previewRequested)="openAttachmentPreview(attachment)"
+                  (downloadRequested)="downloadAttachment(attachment.downloadUrl, attachment.fileName)"
+                />
+              }
+            </div>
+          } @else {
+            <div class="mt-4 rounded-xl border border-dashed border-base-300 bg-base-100 px-4 py-6 text-sm text-base-content/55">
+              No hay adjuntos registrados para este activo.
             </div>
           }
-        </div>
-      </section>
+        </section>
+
+        <section id="traceability" class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm scroll-mt-24">
+          <h3 class="font-bold text-base-content">Trazabilidad</h3>
+          <div class="mt-4 space-y-3">
+            @for (event of traceability(); track event.id) {
+              <div class="rounded-xl border border-base-200 bg-base-100 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="font-semibold text-base-content">{{ event.type }}</p>
+                    <p class="text-sm text-base-content/60">{{ event.description }}</p>
+                  </div>
+                  <span class="text-xs font-semibold text-base-content/45">{{ event.date }}</span>
+                </div>
+                <p class="mt-2 text-xs text-base-content/45">{{ event.user }}</p>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
     </div>
+
+    <app-inventory-attachment-preview-modal
+      [open]="isAttachmentPreviewOpen()"
+      [attachment]="previewAttachment()"
+      (closed)="closeAttachmentPreview()"
+    />
   </div>
 } @else {
   <div class="rounded-2xl border border-base-300 bg-base-100 p-10 text-center shadow-sm">

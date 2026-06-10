@@ -1,6 +1,6 @@
 <div class="space-y-8">
   @if (isLoading()) {
-    <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+    <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
       <div class="flex flex-col items-center px-6 py-14 text-center">
         <span class="loading loading-spinner loading-lg text-primary"></span>
         <h1 class="mt-4 text-xl font-bold text-base-content">Cargando préstamo</h1>
@@ -43,7 +43,7 @@
 
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
       <div class="space-y-6 xl:col-span-4">
-        <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+        <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
           <div class="p-5">
             <h2 class="mb-5 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
               <span class="material-symbols-outlined text-[20px] text-primary">person</span>
@@ -91,7 +91,7 @@
           </div>
         </section>
 
-        <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+        <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
           <div class="p-5">
             <h2 class="mb-5 flex items-center gap-2 border-b border-base-200 pb-3 text-base font-semibold text-base-content">
               <span class="material-symbols-outlined text-[20px] text-primary">event_note</span>
@@ -132,7 +132,7 @@
       </div>
 
       <div class="space-y-6 xl:col-span-8">
-        <section class="overflow-hidden rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+        <section class="overflow-hidden rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
           <div class="flex items-center justify-between gap-3 border-b border-base-200 px-5 py-4">
             <h2 class="flex items-center gap-2 text-base font-semibold text-base-content">
               <span class="material-symbols-outlined text-[20px] text-primary">devices</span>
@@ -186,7 +186,7 @@
           </div>
         </section>
 
-        <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+        <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
           <div class="flex items-center justify-between gap-3 border-b border-base-200 px-5 py-4">
             <h2 class="flex items-center gap-2 text-base font-semibold text-base-content">
               <span class="material-symbols-outlined text-[20px] text-primary">attachment</span>
@@ -221,7 +221,7 @@
           }
         </section>
 
-        <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+        <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
           <div class="flex items-center justify-between gap-3 border-b border-base-200 px-5 py-4">
             <h2 class="flex items-center gap-2 text-base font-semibold text-base-content">
               <span class="material-symbols-outlined text-[20px] text-primary">history</span>
@@ -268,7 +268,7 @@
       (closed)="closeAttachmentPreview()"
     />
   } @else if (modulePending()) {
-    <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+    <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
       <div class="flex flex-col items-center px-6 py-14 text-center">
         <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
           <span class="material-symbols-outlined text-[32px]">hourglass_top</span>
@@ -286,7 +286,7 @@
       </div>
     </section>
   } @else if (unexpectedError()) {
-    <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+    <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
       <div class="flex flex-col items-center px-6 py-14 text-center">
         <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
           <span class="material-symbols-outlined text-[32px]">cloud_off</span>
@@ -304,7 +304,7 @@
       </div>
     </section>
   } @else {
-    <section class="rounded-2xl border border-base-300/60 bg-base-100 shadow-sm">
+    <section class="rounded-xl border border-base-300/60 bg-base-100 shadow-sm">
       <div class="flex flex-col items-center px-6 py-14 text-center">
         <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-base-200 text-base-content/45">
           <span class="material-symbols-outlined text-[32px]">search_off</span>
