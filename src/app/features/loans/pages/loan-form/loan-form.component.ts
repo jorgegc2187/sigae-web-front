@@ -29,6 +29,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
 import { AssetsService } from '../../../inventory/services/assets.service';
 import { AssetCondition, InventoryAsset } from '../../../inventory/models/inventory.model';
 import { LocationsService } from '../../../locations/services/locations.service';
+import { formatFileAttachmentSize, getFileAttachmentExtension, getFileAttachmentIcon, getFileAttachmentTypeLabel } from '../../../../shared/utils/file-attachment.util';
 import { TeacherDto, TeachersService } from '../../../teachers/services/teachers.service';
 import { LoansService } from '../../services/loans.service';
 
@@ -836,45 +837,15 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   getAttachmentTypeLabel(attachment: LoanAttachmentDraft): string {
-    const extension = this.getFileExtension(attachment.name);
-
-    if (attachment.mimeType.startsWith('image/')) {
-      return 'Imagen';
-    }
-
-    if (extension === 'pdf') {
-      return 'PDF';
-    }
-
-    if (extension === 'docx') {
-      return 'DOCX';
-    }
-
-    return 'DOC';
+    return getFileAttachmentTypeLabel(attachment.name, attachment.mimeType);
   }
 
   getAttachmentIcon(attachment: LoanAttachmentDraft): string {
-    if (attachment.mimeType.startsWith('image/')) {
-      return 'image';
-    }
-
-    if (this.getFileExtension(attachment.name) === 'pdf') {
-      return 'picture_as_pdf';
-    }
-
-    return 'description';
+    return getFileAttachmentIcon(attachment.name, attachment.mimeType);
   }
 
   formatAttachmentSize(size: number): string {
-    if (size < 1024) {
-      return `${size} B`;
-    }
-
-    if (size < 1024 * 1024) {
-      return `${(size / 1024).toFixed(1)} KB`;
-    }
-
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    return formatFileAttachmentSize(size);
   }
 
   getAttachmentSourceLabel(source: LoanAttachmentSource): string {
@@ -1082,8 +1053,7 @@ export class LoanFormComponent implements OnDestroy {
   }
 
   private getFileExtension(fileName: string): string {
-    const segments = fileName.toLowerCase().split('.');
-    return segments.at(-1) ?? '';
+    return getFileAttachmentExtension(fileName);
   }
 
   private isSupportedDocument(mimeType: string, extension: string): boolean {

@@ -4,6 +4,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { FileAttachmentItemComponent } from '../../../../shared/ui/file-attachment-item/file-attachment-item.component';
+import { formatFileAttachmentSize, getFileAttachmentIcon, getFileAttachmentTypeLabel } from '../../../../shared/utils/file-attachment.util';
 import { LoanActivity, LoanAssetStatus, LoanAttachmentSummary, LoanDetail, LoanReturnPayload } from '../../models/loan.model';
 import { LoanAttachmentPreviewModalComponent } from '../../components/loan-attachment-preview-modal/loan-attachment-preview-modal.component';
 import { LoanReturnModalComponent } from '../../components/loan-return-modal/loan-return-modal.component';
@@ -21,7 +23,7 @@ const INITIAL_LOAN_DETAIL_STATE: LoanDetailState = { kind: 'loading' };
 
 @Component({
   selector: 'app-loan-detail',
-  imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent, LoanReturnModalComponent, LoanAttachmentPreviewModalComponent],
+  imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent, LoanReturnModalComponent, LoanAttachmentPreviewModalComponent, FileAttachmentItemComponent],
   templateUrl: './loan-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -182,46 +184,15 @@ export class LoanDetailComponent {
   }
 
   getAttachmentTypeLabel(attachment: LoanAttachmentSummary): string {
-    if (attachment.mimeType.startsWith('image/')) {
-      return 'Imagen';
-    }
-
-    const extension = this.getFileExtension(attachment.fileName);
-    if (extension === 'pdf') {
-      return 'PDF';
-    }
-    if (extension === 'docx') {
-      return 'DOCX';
-    }
-    if (extension === 'doc') {
-      return 'DOC';
-    }
-
-    return extension ? extension.toUpperCase() : 'Archivo';
+    return getFileAttachmentTypeLabel(attachment.fileName, attachment.mimeType);
   }
 
   getAttachmentIcon(attachment: LoanAttachmentSummary): string {
-    if (attachment.mimeType.startsWith('image/')) {
-      return 'image';
-    }
-
-    if (this.getFileExtension(attachment.fileName) === 'pdf') {
-      return 'picture_as_pdf';
-    }
-
-    return 'description';
+    return getFileAttachmentIcon(attachment.fileName, attachment.mimeType);
   }
 
   formatAttachmentSize(size: number): string {
-    if (size < 1024) {
-      return `${size} B`;
-    }
-
-    if (size < 1024 * 1024) {
-      return `${(size / 1024).toFixed(1)} KB`;
-    }
-
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    return formatFileAttachmentSize(size);
   }
 
   getActivityIcon(activity: LoanActivity): string {
@@ -334,10 +305,5 @@ export class LoanDetailComponent {
 
   private pluralize(count: number, singular: string, plural: string): string {
     return `${count} ${count === 1 ? singular : plural}`;
-  }
-
-  private getFileExtension(filename: string): string {
-    const parts = filename.toLowerCase().split('.');
-    return parts.length > 1 ? parts.pop() ?? '' : '';
   }
 }

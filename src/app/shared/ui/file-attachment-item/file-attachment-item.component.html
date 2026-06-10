@@ -1,0 +1,49 @@
+<article [class]="articleClass()">
+  <div class="flex min-w-0 flex-1 items-center gap-3">
+    <div [class]="iconShellClass()">
+      <span [class]="iconClass()">{{ metadata().icon }}</span>
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex min-w-0 items-center gap-2">
+        <p class="truncate text-sm font-semibold text-base-content transition-colors group-hover:text-primary">
+          {{ fileName() }}
+        </p>
+
+        @if (showTypeBadge()) {
+          <span class="shrink-0 rounded-full bg-base-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-base-content/60">
+            {{ metadata().typeLabel }}
+          </span>
+        }
+      </div>
+
+      <p class="mt-1 text-xs text-base-content/55">
+        {{ metadata().sizeLabel }}
+      </p>
+    </div>
+  </div>
+
+  <div [class]="actionContainerClass()">
+    @if (previewable()) {
+      <button
+        type="button"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/20"
+        (click)="onPreviewRequested()"
+        [attr.aria-label]="'Ver ' + fileName()"
+        title="Ver"
+      >
+        <span class="material-symbols-outlined text-[18px]">visibility</span>
+      </button>
+    }
+
+    <button
+      type="button"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/20"
+      (click)="onDownloadRequested()"
+      [attr.aria-label]="'Descargar ' + fileName()"
+      title="Descargar"
+    >
+      <span class="material-symbols-outlined text-[18px]">download</span>
+    </button>
+  </div>
+</article>

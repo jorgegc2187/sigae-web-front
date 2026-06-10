@@ -156,7 +156,7 @@
               <tbody class="divide-y divide-base-200 text-sm text-base-content/75">
                 @for (asset of loanDetail.assets; track asset.id) {
                   <tr class="h-14 transition-colors hover:bg-base-200/35">
-                    <td class="px-6 py-3 font-mono font-semibold text-primary">{{ asset.code }}</td>
+                    <td class="px-6 py-3 font-mono font-semibold text-base-content">{{ asset.code }}</td>
                     <td class="px-6 py-3">
                       <div class="space-y-2">
                         <p class="font-medium text-base-content">{{ asset.name }}</p>
@@ -198,47 +198,19 @@
           </div>
 
           @if (loanDetail.attachments.length > 0) {
-            <div class="space-y-3 p-5">
+            <div class="grid gap-3 p-5 md:grid-cols-2 2xl:grid-cols-3">
               @for (attachment of loanDetail.attachments; track attachment.id) {
-                <article class="group flex flex-col gap-4 rounded-xl border border-base-300 bg-base-100 p-4 transition-colors hover:bg-base-200/35 sm:flex-row sm:items-center sm:justify-between">
-                  <div class="flex min-w-0 items-center gap-4">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <span class="material-symbols-outlined text-[24px]">{{ getAttachmentIcon(attachment) }}</span>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="flex min-w-0 flex-wrap items-center gap-2">
-                        <p class="truncate text-sm font-semibold text-base-content group-hover:text-primary">
-                          {{ attachment.fileName }}
-                        </p>
-                        <span class="rounded-full bg-base-200 px-2.5 py-0.5 text-[11px] font-bold text-base-content/60">
-                          {{ getAttachmentTypeLabel(attachment) }}
-                        </span>
-                      </div>
-                      <p class="mt-1 text-xs text-base-content/55">
-                        {{ attachment.mimeType }} · {{ formatAttachmentSize(attachment.sizeBytes) }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center gap-3 sm:justify-end">
-                    <button
-                      type="button"
-                      class="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
-                      (click)="openAttachmentPreview(attachment)"
-                    >
-                      <span class="material-symbols-outlined text-[18px]">visibility</span>
-                      Ver
-                    </button>
-                    <button
-                      type="button"
-                      class="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
-                      (click)="downloadAttachment(attachment.downloadUrl, attachment.fileName)"
-                    >
-                      <span class="material-symbols-outlined text-[18px]">download</span>
-                      Descargar
-                    </button>
-                  </div>
-                </article>
+                <app-file-attachment-item
+                  [fileName]="attachment.fileName"
+                  [mimeType]="attachment.mimeType"
+                  [sizeBytes]="attachment.sizeBytes"
+                  [previewable]="true"
+                  layout="compact"
+                  [showTypeBadge]="false"
+                  [showActionsOnHover]="true"
+                  (previewRequested)="openAttachmentPreview(attachment)"
+                  (downloadRequested)="downloadAttachment(attachment.downloadUrl, attachment.fileName)"
+                />
               }
             </div>
           } @else {
