@@ -4,7 +4,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { LoanActivity, LoanAssetStatus, LoanDetail, LoanReturnPayload, LoanStatus } from '../../models/loan.model';
+import { LoanActivity, LoanAssetStatus, LoanAttachmentSummary, LoanDetail, LoanReturnPayload } from '../../models/loan.model';
+import { LoanAttachmentPreviewModalComponent } from '../../components/loan-attachment-preview-modal/loan-attachment-preview-modal.component';
 import { LoanReturnModalComponent } from '../../components/loan-return-modal/loan-return-modal.component';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
 import { LoansService } from '../../services/loans.service';
@@ -20,7 +21,7 @@ const INITIAL_LOAN_DETAIL_STATE: LoanDetailState = { kind: 'loading' };
 
 @Component({
   selector: 'app-loan-detail',
-  imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent, LoanReturnModalComponent],
+  imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent, LoanReturnModalComponent, LoanAttachmentPreviewModalComponent],
   templateUrl: './loan-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -77,6 +78,8 @@ export class LoanDetailComponent {
   readonly unexpectedError = computed(() => this.detailState().kind === 'error');
   readonly isReturning = signal(false);
   readonly isReturnModalOpen = signal(false);
+  readonly isAttachmentPreviewOpen = signal(false);
+  readonly previewAttachment = signal<LoanAttachmentSummary | null>(null);
 
   readonly pageTitle = computed(() => {
     const loan = this.loan();
@@ -85,7 +88,12 @@ export class LoanDetailComponent {
 
   readonly destinationBadgeLabel = computed(() => {
     const loan = this.loan();
-    return loan ? `${loan.assets.length} activos` : '0 activos';
+    return this.pluralize(loan?.assets.length ?? 0, 'activo', 'activos');
+  });
+
+  readonly attachmentBadgeLabel = computed(() => {
+    const loan = this.loan();
+    return this.pluralize(loan?.attachments.length ?? 0, 'adjunto', 'adjuntos');
   });
 
   readonly departmentLabel = computed(() => {
@@ -106,21 +114,6 @@ export class LoanDetailComponent {
     };
 
     return map[loan.teacher.specialty] ?? 'Académico';
-  });
-
-  readonly statusPanelClass = computed(() => {
-    const currentLoan = this.loan();
-    if (!currentLoan) {
-      return 'border-base-300 bg-base-100';
-    }
-
-    const map: Record<LoanStatus, string> = {
-      Activo: 'border-success/20 bg-success/5',
-      Vencido: 'border-error/20 bg-error/5',
-      Devuelto: 'border-base-300 bg-base-100',
-    };
-
-    return map[currentLoan.status];
   });
 
   readonly statusMessage = computed(() => {
@@ -178,15 +171,82 @@ export class LoanDetailComponent {
 
   getAssetStatusClass(status: LoanAssetStatus): string {
     const map: Record<LoanAssetStatus, string> = {
-      Operativo: 'text-estado-bueno bg-estado-bueno-bg',
-      Regular: 'text-estado-regular bg-estado-regular-bg',
-      Malo: 'text-error bg-error/10',
-      Mantenimiento: 'text-warning bg-warning/10',
-      'Dado de baja': 'text-base-content/60 bg-base-300',
-      'En préstamo': 'text-primary bg-primary/10',
+      Operativo: 'border-success/20 bg-success/10 text-success',
+      Regular: 'border-warning/20 bg-warning/10 text-warning',
+      Malo: 'border-error/20 bg-error/10 text-error',
+      Mantenimiento: 'border-info/20 bg-info/10 text-info',
+      'Dado de baja': 'border-base-300 bg-base-200 text-base-content/60',
     };
 
     return map[status];
+  }
+
+  getAttachmentTypeLabel(attachment: LoanAttachmentSummary): string {
+    if (attachment.mimeType.startsWith('image/')) {
+      return 'Imagen';
+    }
+
+    const extension = this.getFileExtension(attachment.fileName);
+    if (extension === 'pdf') {
+      return 'PDF';
+    }
+    if (extension === 'docx') {
+      return 'DOCX';
+    }
+    if (extension === 'doc') {
+      return 'DOC';
+    }
+
+    return extension ? extension.toUpperCase() : 'Archivo';
+  }
+
+  getAttachmentIcon(attachment: LoanAttachmentSummary): string {
+    if (attachment.mimeType.startsWith('image/')) {
+      return 'image';
+    }
+
+    if (this.getFileExtension(attachment.fileName) === 'pdf') {
+      return 'picture_as_pdf';
+    }
+
+    return 'description';
+  }
+
+  formatAttachmentSize(size: number): string {
+    if (size < 1024) {
+      return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  getActivityIcon(activity: LoanActivity): string {
+    if (activity.title.toLowerCase().includes('incidencia')) {
+      return 'report';
+    }
+    if (activity.title.toLowerCase().includes('devuelto')) {
+      return 'check_circle';
+    }
+    if (activity.title.toLowerCase().includes('registrado')) {
+      return 'add_box';
+    }
+
+    return 'history';
+  }
+
+  getActivityIconClass(activity: LoanActivity): string {
+    if (activity.title.toLowerCase().includes('incidencia')) {
+      return 'text-error';
+    }
+    if (activity.title.toLowerCase().includes('devuelto')) {
+      return 'text-primary';
+    }
+
+    return 'text-base-content/45';
   }
 
   trackActivity(_: number, activity: LoanActivity): string {
@@ -247,6 +307,16 @@ export class LoanDetailComponent {
     }
   }
 
+  openAttachmentPreview(attachment: LoanAttachmentSummary): void {
+    this.previewAttachment.set(attachment);
+    this.isAttachmentPreviewOpen.set(true);
+  }
+
+  closeAttachmentPreview(): void {
+    this.isAttachmentPreviewOpen.set(false);
+    this.previewAttachment.set(null);
+  }
+
   private resolveDetailError(error: unknown) {
     if (!this.loansService.isLoansEndpointError(error)) {
       return of({ kind: 'error' } as LoanDetailState);
@@ -260,5 +330,14 @@ export class LoanDetailComponent {
       ),
       catchError(() => of({ kind: 'error' } as LoanDetailState)),
     );
+  }
+
+  private pluralize(count: number, singular: string, plural: string): string {
+    return `${count} ${count === 1 ? singular : plural}`;
+  }
+
+  private getFileExtension(filename: string): string {
+    const parts = filename.toLowerCase().split('.');
+    return parts.length > 1 ? parts.pop() ?? '' : '';
   }
 }
