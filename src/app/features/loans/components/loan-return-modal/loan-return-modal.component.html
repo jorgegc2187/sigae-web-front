@@ -1,0 +1,137 @@
+<dialog
+  #dialog
+  class="modal"
+  aria-labelledby="loan-return-title"
+  (click)="onBackdropClick($event)"
+  (cancel)="$event.preventDefault(); onCancel()"
+>
+  <div class="modal-box max-w-4xl overflow-visible rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl">
+    <div class="flex items-start justify-between gap-4 border-b border-base-200 px-6 py-5">
+      <div class="space-y-1">
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Revisión de activos</p>
+        <h2 id="loan-return-title" class="text-xl font-bold text-base-content">Finalizar préstamo</h2>
+        <p class="text-sm leading-6 text-base-content/60">
+          Marca si algún activo presenta una incidencia antes de registrar la devolución.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm btn-circle text-base-content/55 hover:bg-base-200 hover:text-base-content"
+        aria-label="Cerrar modal de devolución"
+        [disabled]="loading()"
+        (click)="onCancel()"
+      >
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    @if (loan(); as loanDetail) {
+      <div class="max-h-[65vh] space-y-4 overflow-y-auto px-6 py-5">
+        <div class="rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-base-content/70">
+          <span class="font-semibold text-base-content">{{ loanDetail.code }}</span>
+          · {{ loanDetail.teacher.name }} · {{ loanDetail.assets.length }} activo(s)
+        </div>
+
+        @for (asset of loanDetail.assets; track asset.id) {
+          @let review = reviewFor(asset.id);
+          <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div class="min-w-0 space-y-1">
+                <p class="font-mono text-sm font-semibold text-primary">{{ asset.code }}</p>
+                <h3 class="text-base font-bold text-base-content">{{ asset.name }}</h3>
+                <p class="text-sm text-base-content/60">{{ asset.category }} · Estado actual: {{ asset.status }}</p>
+              </div>
+
+              <div class="inline-flex rounded-xl border border-base-300 bg-base-200/60 p-1">
+                <button
+                  type="button"
+                  class="rounded-lg px-3 py-2 text-sm font-semibold transition-colors"
+                  [class.bg-base-100]="!review.hasIncident"
+                  [class.text-base-content]="!review.hasIncident"
+                  [class.shadow-sm]="!review.hasIncident"
+                  [class.text-base-content/60]="review.hasIncident"
+                  [disabled]="loading()"
+                  (click)="toggleIncident(asset.id, false)"
+                >
+                  Sin incidencia
+                </button>
+                <button
+                  type="button"
+                  class="rounded-lg px-3 py-2 text-sm font-semibold transition-colors"
+                  [class.bg-error]="review.hasIncident"
+                  [class.text-error-content]="review.hasIncident"
+                  [class.shadow-sm]="review.hasIncident"
+                  [class.text-base-content/60]="!review.hasIncident"
+                  [disabled]="loading()"
+                  (click)="toggleIncident(asset.id, true)"
+                >
+                  Con incidencia
+                </button>
+              </div>
+            </div>
+
+            @if (review.hasIncident) {
+              <div class="mt-4 grid gap-4 lg:grid-cols-[1fr_16rem]">
+                <fieldset class="fieldset w-full">
+                  <label [for]="'incident-description-' + asset.id" class="fieldset-legend">
+                    Descripción de la incidencia
+                  </label>
+                  <textarea
+                    [id]="'incident-description-' + asset.id"
+                    rows="3"
+                    class="min-h-24 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Ej. Pantalla con fisura, pieza suelta, cable deteriorado..."
+                    [value]="review.incidentDescription"
+                    [disabled]="loading()"
+                    (input)="updateDescription(asset.id, $any($event.target).value)"
+                  ></textarea>
+                  @if (!review.incidentDescription.trim()) {
+                    <p class="fieldset-label mt-1 text-error">Describe la incidencia para continuar.</p>
+                  }
+                </fieldset>
+
+                <app-select-field
+                  label="Condición final"
+                  fieldId="condition-after-return-{{ asset.id }}"
+                  placeholder="Seleccione condición"
+                  [options]="conditionOptions"
+                  [value]="review.conditionAfterReturn"
+                  [disabled]="loading()"
+                  (valueChange)="updateCondition(asset.id, $event)"
+                />
+              </div>
+            }
+          </article>
+        }
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 border-t border-base-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-base-content/55">
+          @if (incidentCount() > 0) {
+            {{ incidentCount() }} incidencia(s) serán registradas en trazabilidad.
+          } @else {
+            Se registrará la devolución sin incidencias.
+          }
+        </p>
+
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <app-action-button
+            label="Cancelar"
+            variant="neutral"
+            [disabled]="loading()"
+            (clicked)="onCancel()"
+          />
+          <app-action-button
+            label="Registrar devolución"
+            icon="assignment_return"
+            [loading]="loading()"
+            loadingLabel="Registrando..."
+            [disabled]="hasValidationErrors()"
+            (clicked)="onConfirm()"
+          />
+        </div>
+      </div>
+    }
+  </div>
+</dialog>

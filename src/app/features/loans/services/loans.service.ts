@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams, httpResource } from '@angula
 import { Injectable, Signal, inject } from '@angular/core';
 import { catchError, map, of, throwError } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app.tokens';
-import { CreateLoanPayload, LoanDetail, LoanSummary } from '../models/loan.model';
+import { CreateLoanPayload, LoanDetail, LoanReturnPayload, LoanSummary } from '../models/loan.model';
 
 interface ApiErrorResponse {
   message?: string;
@@ -44,8 +44,8 @@ export class LoansService {
     return this.http.post<LoanDetail>(this.baseUrl, formData);
   }
 
-  returnLoan(id: string) {
-    return this.http.post<LoanDetail>(`${this.baseUrl}/${id}/return`, {});
+  returnLoan(id: string, payload?: LoanReturnPayload) {
+    return this.http.post<LoanDetail>(`${this.baseUrl}/${id}/return`, payload ?? {});
   }
 
   downloadAttachment(downloadUrl: string) {

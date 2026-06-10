@@ -242,6 +242,14 @@
         </section>
       </div>
     </div>
+
+    <app-loan-return-modal
+      [open]="isReturnModalOpen()"
+      [loan]="loanDetail"
+      [loading]="isReturning()"
+      (cancelled)="closeReturnModal()"
+      (confirmed)="confirmReturnLoan($event)"
+    />
   } @else if (modulePending()) {
     <section class="card card-border bg-base-100 shadow-sm">
       <div class="card-body items-center px-6 py-14 text-center">

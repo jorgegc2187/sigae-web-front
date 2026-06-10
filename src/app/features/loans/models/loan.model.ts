@@ -1,6 +1,7 @@
 export type LoanStatus = 'Activo' | 'Vencido' | 'Devuelto';
 export type LoanStatusTab = 'all' | 'active' | 'overdue' | 'returned';
-export type LoanAssetStatus = 'Operativo' | 'Regular' | 'En préstamo';
+export type LoanAssetStatus = 'Operativo' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja' | 'En préstamo';
+export type LoanReturnCondition = 'Bueno' | 'Regular' | 'Malo' | 'Mantenimiento' | 'Dado de baja';
 
 export interface LoanTeacher {
   name: string;
@@ -61,6 +62,17 @@ export interface CreateLoanPayload {
   notes: string | null;
   assetIds: string[];
   attachmentSources: string[];
+}
+
+export interface LoanReturnAssetReviewPayload {
+  assetId: string;
+  hasIncident: boolean;
+  incidentDescription: string | null;
+  conditionAfterReturn: LoanReturnCondition | null;
+}
+
+export interface LoanReturnPayload {
+  assetReviews: LoanReturnAssetReviewPayload[];
 }
 
 export type Loan = LoanDetail;

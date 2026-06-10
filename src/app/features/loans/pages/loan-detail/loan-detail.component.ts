@@ -4,7 +4,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { LoanActivity, LoanAssetStatus, LoanDetail, LoanStatus } from '../../models/loan.model';
+import { LoanActivity, LoanAssetStatus, LoanDetail, LoanReturnPayload, LoanStatus } from '../../models/loan.model';
+import { LoanReturnModalComponent } from '../../components/loan-return-modal/loan-return-modal.component';
 import { LoanStatusBadgeComponent } from '../../components/loan-status-badge/loan-status-badge.component';
 import { LoansService } from '../../services/loans.service';
 
@@ -19,7 +20,7 @@ const INITIAL_LOAN_DETAIL_STATE: LoanDetailState = { kind: 'loading' };
 
 @Component({
   selector: 'app-loan-detail',
-  imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent],
+  imports: [RouterLink, LoanStatusBadgeComponent, ActionButtonComponent, LoanReturnModalComponent],
   templateUrl: './loan-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -75,6 +76,7 @@ export class LoanDetailComponent {
   readonly modulePending = computed(() => this.detailState().kind === 'module-unavailable');
   readonly unexpectedError = computed(() => this.detailState().kind === 'error');
   readonly isReturning = signal(false);
+  readonly isReturnModalOpen = signal(false);
 
   readonly pageTitle = computed(() => {
     const loan = this.loan();
@@ -178,6 +180,9 @@ export class LoanDetailComponent {
     const map: Record<LoanAssetStatus, string> = {
       Operativo: 'text-estado-bueno bg-estado-bueno-bg',
       Regular: 'text-estado-regular bg-estado-regular-bg',
+      Malo: 'text-error bg-error/10',
+      Mantenimiento: 'text-warning bg-warning/10',
+      'Dado de baja': 'text-base-content/60 bg-base-300',
       'En préstamo': 'text-primary bg-primary/10',
     };
 
@@ -188,21 +193,34 @@ export class LoanDetailComponent {
     return activity.id;
   }
 
-  async onReturnLoan(): Promise<void> {
+  onReturnLoan(): void {
     const loan = this.loan();
     if (!loan || loan.status === 'Devuelto' || this.isReturning()) {
       return;
     }
 
-    const confirmed = window.confirm(`¿Confirmar devolución del préstamo ${loan.code}?`);
-    if (!confirmed) {
+    this.isReturnModalOpen.set(true);
+  }
+
+  closeReturnModal(): void {
+    if (this.isReturning()) {
+      return;
+    }
+
+    this.isReturnModalOpen.set(false);
+  }
+
+  async confirmReturnLoan(payload: LoanReturnPayload): Promise<void> {
+    const loan = this.loan();
+    if (!loan || loan.status === 'Devuelto' || this.isReturning()) {
       return;
     }
 
     this.isReturning.set(true);
     try {
-      const updatedLoan = await firstValueFrom(this.loansService.returnLoan(loan.id));
+      const updatedLoan = await firstValueFrom(this.loansService.returnLoan(loan.id, payload));
       this.returnedLoan.set(updatedLoan);
+      this.isReturnModalOpen.set(false);
       this.notifications.success({ message: 'Préstamo finalizado correctamente.' });
     } catch {
       this.notifications.error({ message: 'No se pudo finalizar el préstamo.' });
