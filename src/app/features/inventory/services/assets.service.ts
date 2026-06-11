@@ -5,6 +5,7 @@ import { APP_CONFIG } from '../../../core/config/app.tokens';
 import {
   AssetCondition,
   AssetRequestCondition,
+  AssetStatusChangeRequest,
   InventoryAssetGroup,
   AssetRequest,
   AssetResponse,
@@ -20,6 +21,13 @@ interface AssetTraceabilityResponse {
   newValue: string | null;
   reason: string | null;
   userName: string;
+  attachments: Array<{
+    id: string;
+    fileName: string;
+    mimeType: string;
+    sizeBytes: number;
+    downloadUrl: string;
+  }>;
   occurredAt: string;
 }
 
@@ -100,6 +108,15 @@ export class AssetsService {
     );
   }
 
+  changeStatus(id: string, payload: AssetStatusChangeRequest, attachments: File[] = []) {
+    return this.http.post<AssetResponse>(
+      `${this.baseUrl}/${id}/status-change`,
+      this.buildAssetFormData(payload, attachments),
+    ).pipe(
+      map((asset) => this.toInventoryAsset(asset)),
+    );
+  }
+
   downloadAttachment(downloadUrl: string) {
     const url = downloadUrl.startsWith('http')
       ? downloadUrl
@@ -122,6 +139,7 @@ export class AssetsService {
         newValue: entry.newValue,
         reason: entry.reason,
         user: entry.userName,
+        attachments: entry.attachments ?? [],
       }))),
     );
   }
@@ -171,7 +189,7 @@ export class AssetsService {
     };
   }
 
-  private buildAssetFormData(payload: AssetRequest, attachments: File[] = []): FormData {
+  private buildAssetFormData(payload: AssetRequest | AssetStatusChangeRequest, attachments: File[] = []): FormData {
     const formData = new FormData();
     formData.append(
       'payload',

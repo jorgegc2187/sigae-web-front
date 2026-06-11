@@ -1,0 +1,157 @@
+<dialog
+  #dialog
+  class="modal"
+  aria-labelledby="asset-status-change-title"
+  (click)="onBackdropClick($event)"
+  (cancel)="$event.preventDefault(); onCancel()"
+>
+  <div class="modal-box max-w-2xl overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl">
+    <div class="flex items-start justify-between gap-4 border-b border-base-200 px-6 py-5">
+      <div class="flex min-w-0 items-start gap-4">
+        <div
+          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-error/10 text-error"
+          [class.!bg-warning/10]="intent()?.action === 'maintenance'"
+          [class.!text-warning]="intent()?.action === 'maintenance'"
+          [class.!bg-success/10]="intent()?.action === 'reactivate'"
+          [class.!text-success]="intent()?.action === 'reactivate'"
+        >
+          <span class="material-symbols-outlined text-[24px]">{{ intent()?.icon ?? 'sync' }}</span>
+        </div>
+
+        <div class="min-w-0 space-y-1">
+          <h2 id="asset-status-change-title" class="text-xl font-bold text-base-content">
+            {{ intent()?.title ?? 'Cambiar estado del activo' }}
+          </h2>
+          <p class="text-sm leading-6 text-base-content/60">
+            {{ intent()?.message ?? '' }}
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm btn-circle text-base-content/55 hover:bg-base-200 hover:text-base-content"
+        aria-label="Cerrar modal de cambio de estado"
+        [disabled]="loading()"
+        (click)="onCancel()"
+      >
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    @if (asset(); as selectedAsset) {
+      <div class="max-h-[70vh] overflow-y-auto bg-base-200/20 px-6 py-5">
+        <div class="space-y-5">
+          <article class="flex items-start gap-4 rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-base-300 bg-base-200/50 text-base-content/45">
+              <span class="material-symbols-outlined text-[30px]">inventory_2</span>
+            </div>
+
+            <div class="min-w-0 flex-1 space-y-1">
+              <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-base-content/45">
+                Activo seleccionado
+              </p>
+              <h3 class="text-base font-bold text-base-content">{{ selectedAsset.name }}</h3>
+              <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/60">
+                <span class="font-mono">{{ selectedAsset.code }}</span>
+                <span class="h-1 w-1 rounded-full bg-base-content/25"></span>
+                <span>{{ selectedAsset.condition }}</span>
+              </div>
+            </div>
+          </article>
+
+          <div class="space-y-2">
+            <label for="asset-status-reason" class="text-sm font-medium text-base-content/80">
+              Motivo del cambio <span class="text-error">*</span>
+            </label>
+            <textarea
+              id="asset-status-reason"
+              rows="4"
+              class="min-h-28 w-full resize-y rounded-xl border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Explique por qué este activo debe cambiar de estado."
+              [value]="reason()"
+              [disabled]="loading()"
+              (input)="reason.set($any($event.target).value)"
+            ></textarea>
+            @if (isReasonInvalid()) {
+              <p class="text-xs text-error">El motivo es obligatorio para continuar.</p>
+            }
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <label class="text-sm font-medium text-base-content/80">Evidencia adjunta</label>
+              <span class="text-xs text-base-content/50">Opcional · JPG, PNG o PDF hasta {{ maxAttachmentSizeLabel }}</span>
+            </div>
+
+            <input
+              #attachmentPickerInput
+              type="file"
+              class="hidden"
+              accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+              multiple
+              (change)="onAttachmentSelection($event)"
+            />
+
+            <button
+              type="button"
+              class="w-full rounded-xl border-2 border-dashed border-base-300 bg-base-100 px-6 py-7 text-center transition-colors hover:border-primary/35 hover:bg-primary/5"
+              [class.border-primary]="isDropActive()"
+              [class.bg-primary/5]="isDropActive()"
+              [disabled]="loading()"
+              (click)="openAttachmentPicker()"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
+            >
+              <div class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <span class="material-symbols-outlined text-[22px]">upload_file</span>
+              </div>
+              <p class="text-sm font-medium text-base-content">Haz clic o arrastra archivos aquí</p>
+              <p class="mt-1 text-xs text-base-content/55">Fotos del daño o reportes técnicos</p>
+            </button>
+
+            @if (attachmentError()) {
+              <p class="text-xs leading-5 text-error">{{ attachmentError() }}</p>
+            }
+
+            @if (attachments().length > 0) {
+              <div class="grid gap-3 sm:grid-cols-2">
+                @for (attachment of attachments(); track attachment.id) {
+                  <app-file-attachment-item
+                    [fileName]="attachment.fileName"
+                    [mimeType]="attachment.mimeType"
+                    [sizeBytes]="attachment.sizeBytes"
+                    [downloadable]="false"
+                    [showTypeBadge]="true"
+                    [showActionsOnHover]="false"
+                    [removable]="true"
+                    (removeRequested)="removeAttachment(attachment.id)"
+                  />
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col-reverse gap-3 border-t border-base-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-end">
+        <app-action-button
+          label="Cancelar"
+          variant="neutral"
+          [disabled]="loading()"
+          (clicked)="onCancel()"
+        />
+        <app-action-button
+          [label]="intent()?.confirmLabel ?? 'Confirmar'"
+          [icon]="intent()?.icon ?? 'check'"
+          [loading]="loading()"
+          loadingLabel="Guardando..."
+          [disabled]="hasValidationErrors()"
+          [className]="intent()?.confirmClassName ?? ''"
+          (clicked)="onConfirm()"
+        />
+      </div>
+    }
+  </div>
+</dialog>

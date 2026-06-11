@@ -1,0 +1,328 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dar de baja activo - I.E Simon Rodriguez</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'on-secondary-container': '#54647a',
+              'on-secondary-fixed-variant': '#38485d',
+              'inverse-surface': '#2d3133',
+              secondary: '#505f76',
+              'inverse-primary': '#b4c5ff',
+              'on-surface': '#191c1e',
+              'on-tertiary-container': '#ffede6',
+              'surface-tint': '#0053db',
+              'tertiary-container': '#bc4800',
+              'on-tertiary-fixed-variant': '#7d2d00',
+              'surface-variant': '#e0e3e5',
+              'outline-variant': '#c3c6d7',
+              'error-container': '#ffdad6',
+              'on-surface-variant': '#434655',
+              'on-secondary-fixed': '#0b1c30',
+              'tertiary-fixed-dim': '#ffb596',
+              'on-error-container': '#93000a',
+              'surface-container-lowest': '#ffffff',
+              surface: '#f7f9fb',
+              'primary-fixed': '#dbe1ff',
+              'on-tertiary-fixed': '#360f00',
+              'secondary-fixed': '#d3e4fe',
+              'surface-container-high': '#e6e8ea',
+              'surface-dim': '#d8dadc',
+              'surface-container': '#eceef0',
+              'on-secondary': '#ffffff',
+              'on-primary-fixed': '#00174b',
+              'surface-bright': '#f7f9fb',
+              'secondary-container': '#d0e1fb',
+              'primary-container': '#2563eb',
+              'on-primary-fixed-variant': '#003ea8',
+              'on-primary': '#ffffff',
+              error: '#ba1a1a',
+              'on-primary-container': '#eeefff',
+              'on-error': '#ffffff',
+              'secondary-fixed-dim': '#b7c8e1',
+              'primary-fixed-dim': '#b4c5ff',
+              'tertiary-fixed': '#ffdbcd',
+              primary: '#004ac6',
+              background: '#f7f9fb',
+              tertiary: '#943700',
+              'surface-container-highest': '#e0e3e5',
+              'inverse-on-surface': '#eff1f3',
+              'surface-container-low': '#f2f4f6',
+              'on-background': '#191c1e',
+              outline: '#737686',
+              'on-tertiary': '#ffffff',
+            },
+            borderRadius: {
+              DEFAULT: '0.25rem',
+              lg: '0.5rem',
+              xl: '0.75rem',
+              full: '9999px',
+            },
+            spacing: {
+              'stack-lg': '1.5rem',
+              'margin-mobile': '1rem',
+              gutter: '1.5rem',
+              'stack-sm': '0.5rem',
+              'margin-desktop': '2rem',
+              'container-max': '1440px',
+              'stack-md': '1rem',
+            },
+            fontFamily: {
+              'label-md': ['Inter'],
+              'headline-sm': ['Hanken Grotesk'],
+              'body-sm': ['Inter'],
+              'headline-md': ['Hanken Grotesk'],
+              'body-md': ['Inter'],
+              'label-bold': ['Inter'],
+              'body-lg': ['Inter'],
+              'display-lg': ['Hanken Grotesk'],
+            },
+            fontSize: {
+              'label-md': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+              'headline-sm': ['16px', { lineHeight: '24px', fontWeight: '600' }],
+              'body-sm': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+              'headline-md': ['20px', { lineHeight: '28px', fontWeight: '600' }],
+              'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+              'label-bold': [
+                '12px',
+                { lineHeight: '16px', letterSpacing: '0.05em', fontWeight: '600' },
+              ],
+              'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+              'display-lg': [
+                '30px',
+                { lineHeight: '38px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+      .material-symbols-outlined.fill {
+        font-variation-settings: 'FILL' 1;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface font-body-md text-on-surface antialiased h-screen overflow-hidden flex items-center justify-center relative"
+  >
+    <!-- Faux Background Content (Dimmed) -->
+    <div class="absolute inset-0 z-0 flex pointer-events-none opacity-20 filter blur-[2px]">
+      <!-- Faux Sidebar -->
+      <div
+        class="w-[260px] h-screen bg-surface-container-lowest border-r border-outline-variant flex flex-col p-4 gap-2 shadow-sm"
+      >
+        <div class="flex items-center gap-3 p-4 mb-6">
+          <div
+            class="w-10 h-10 rounded bg-primary-container text-primary flex items-center justify-center font-headline-md"
+          >
+            IE
+          </div>
+          <div>
+            <h1 class="font-headline-sm text-headline-sm font-bold text-on-surface">
+              I.E Simon Rodriguez
+            </h1>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Gestión de Activos</p>
+          </div>
+        </div>
+        <!-- Dummy Nav Items -->
+        <div class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant">
+          <span class="material-symbols-outlined">dashboard</span> Dashboard
+        </div>
+        <div
+          class="flex items-center gap-3 p-3 rounded-lg bg-primary text-on-primary font-semibold"
+        >
+          <span class="material-symbols-outlined">inventory_2</span> Inventario
+        </div>
+      </div>
+      <!-- Faux Main Content -->
+      <div class="flex-1 flex flex-col">
+        <div
+          class="h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-8 w-full"
+        >
+          <div class="font-headline-md text-headline-md text-primary">Detalle de Activo</div>
+        </div>
+        <div class="p-8">
+          <div
+            class="w-full h-64 bg-surface-container-lowest rounded-lg border border-outline-variant mb-6"
+          ></div>
+          <div
+            class="w-2/3 h-32 bg-surface-container-lowest rounded-lg border border-outline-variant"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal Backdrop -->
+    <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm z-40 transition-opacity"></div>
+    <!-- Modal Container -->
+    <div
+      aria-labelledby="modal-title"
+      aria-modal="true"
+      class="relative z-50 w-full max-w-2xl bg-surface-container-lowest rounded-xl shadow-[0px_20px_25px_-5px_rgba(37,99,235,0.1)] border border-outline-variant flex flex-col max-h-[921px] overflow-hidden"
+      role="dialog"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-start justify-between p-stack-lg border-b border-surface-container-high"
+      >
+        <div class="flex gap-4 items-start">
+          <div
+            class="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center shrink-0"
+          >
+            <span class="material-symbols-outlined fill text-2xl">delete</span>
+          </div>
+          <div>
+            <h2 class="font-headline-md text-headline-md text-on-surface mb-1" id="modal-title">
+              Dar de baja activo
+            </h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              El activo <strong>Archivador Metálico 4 Gavetas</strong> quedará marcado como dado de
+              baja y removido del inventario activo.
+            </p>
+          </div>
+        </div>
+        <button
+          aria-label="Close modal"
+          class="text-on-surface-variant hover:bg-surface-container rounded-full p-2 transition-colors"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <!-- Body -->
+      <div class="p-stack-lg overflow-y-auto bg-surface-bright flex flex-col gap-stack-lg">
+        <!-- Asset Details Card -->
+        <div
+          class="bg-surface-container-lowest rounded-lg border border-outline-variant p-4 shadow-sm flex items-start gap-4"
+        >
+          <div
+            class="w-16 h-16 rounded bg-surface-container flex items-center justify-center shrink-0 border border-surface-variant"
+          >
+            <span class="material-symbols-outlined text-on-surface-variant text-3xl"
+              >inventory_2</span
+            >
+          </div>
+          <div class="flex-1">
+            <div
+              class="font-label-bold text-label-bold text-secondary uppercase tracking-wider mb-1"
+            >
+              Activo Seleccionado
+            </div>
+            <div class="font-headline-sm text-headline-sm text-on-surface mb-1">
+              Archivador Metálico 4 Gavetas
+            </div>
+            <div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+              <span>MOB-2021-005</span>
+              <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+              <div class="flex items-center gap-1 text-primary-container">
+                <span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                Bueno
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Form Area -->
+        <div class="flex flex-col gap-stack-md">
+          <!-- Reason -->
+          <div class="flex flex-col gap-2">
+            <label class="font-label-md text-label-md text-on-surface" for="reason"
+              >Motivo de la baja <span class="text-error">*</span></label
+            >
+            <textarea
+              class="w-full rounded-lg border-outline-variant bg-surface-container-lowest px-4 py-3 font-body-md text-body-md text-on-surface focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 placeholder:text-on-surface-variant/50 transition-all resize-none"
+              id="reason"
+              placeholder="Explique detalladamente por qué este activo debe ser dado de baja (ej. daño irreparable, obsolescencia, pérdida)..."
+              rows="3"
+            ></textarea>
+          </div>
+          <!-- Attachments (Evidence) -->
+          <div class="flex flex-col gap-2 mt-2">
+            <div class="flex justify-between items-center">
+              <label class="font-label-md text-label-md text-on-surface">Evidencia Adjunta</label>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Opcional</span>
+            </div>
+            <div
+              class="border-2 border-dashed border-outline-variant rounded-lg p-6 bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-pointer text-center group"
+            >
+              <div
+                class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform"
+              >
+                <span class="material-symbols-outlined">upload_file</span>
+              </div>
+              <p class="font-body-md text-body-md text-on-surface font-medium mb-1">
+                Haga clic o arrastre archivos aquí
+              </p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Fotos del daño, reportes técnicos (JPG, PNG, PDF max 5MB)
+              </p>
+            </div>
+            <!-- Placeholder for attached files (hidden initially, shown for UI demonstration) -->
+            <div class="flex flex-col gap-2 mt-3">
+              <div
+                class="flex items-center justify-between p-3 rounded-lg border border-outline-variant bg-surface-container-lowest"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary-container">image</span>
+                  <div>
+                    <p class="font-body-sm text-body-sm font-medium text-on-surface">
+                      foto_dano_gaveta.jpg
+                    </p>
+                    <p class="font-label-md text-label-md text-on-surface-variant">1.2 MB</p>
+                  </div>
+                </div>
+                <button
+                  aria-label="Remove attachment"
+                  class="text-on-surface-variant hover:text-error transition-colors p-1"
+                >
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Footer Actions -->
+      <div
+        class="flex items-center justify-end p-stack-lg gap-4 bg-surface-container-lowest border-t border-surface-container-high"
+      >
+        <button
+          class="px-6 py-2.5 rounded-lg border border-outline-variant font-label-md text-label-md text-secondary hover:bg-surface-container transition-colors focus:ring-2 focus:ring-primary-container/20"
+        >
+          Cancelar
+        </button>
+        <button
+          class="px-6 py-2.5 rounded-lg bg-error text-on-error font-label-md text-label-md font-semibold hover:bg-on-error-container transition-colors focus:ring-2 focus:ring-error/20 flex items-center gap-2 shadow-sm"
+        >
+          <span class="material-symbols-outlined text-sm">delete</span>
+          Dar de baja
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

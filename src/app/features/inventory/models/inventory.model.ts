@@ -35,6 +35,7 @@ export interface AssetTraceabilityEntry {
   newValue?: string | null;
   reason?: string | null;
   user: string;
+  attachments: AssetAttachmentSummary[];
 }
 
 export interface InventoryAssetGroupUnit {
@@ -110,4 +111,9 @@ export interface AssetRequest {
     value: string;
   }>;
   removedAttachmentIds: string[];
+}
+
+export interface AssetStatusChangeRequest {
+  nextCondition: AssetRequestCondition;
+  reason: string;
 }

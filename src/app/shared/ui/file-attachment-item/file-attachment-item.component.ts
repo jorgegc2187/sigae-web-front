@@ -16,6 +16,7 @@ export class FileAttachmentItemComponent {
   readonly mimeType = input.required<string>();
   readonly sizeBytes = input.required<number>();
   readonly previewable = input(false, { transform: booleanAttribute });
+  readonly downloadable = input(true, { transform: booleanAttribute });
   readonly layout = input<FileAttachmentItemLayout>('compact');
   readonly showTypeBadge = input(false, { transform: booleanAttribute });
   readonly showActionsOnHover = input(true, { transform: booleanAttribute });

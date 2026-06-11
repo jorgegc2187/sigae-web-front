@@ -4,11 +4,11 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
-import { ConfirmationModalComponent, ConfirmationModalTone } from '../../../../shared/ui/confirmation-modal/confirmation-modal.component';
 import { FileAttachmentItemComponent } from '../../../../shared/ui/file-attachment-item/file-attachment-item.component';
 import { ProcessingLoaderComponent } from '../../../../shared/ui/processing-loader/processing-loader.component';
+import { AssetStatusChangeModalComponent, AssetStatusChangeModalIntent } from '../../components/asset-status-change-modal/asset-status-change-modal.component';
 import { InventoryAttachmentPreviewModalComponent } from '../../components/inventory-attachment-preview-modal/inventory-attachment-preview-modal.component';
-import { AssetAttachmentSummary, AssetCondition, AssetRequest, AssetTraceabilityEntry, InventoryAsset } from '../../models/inventory.model';
+import { AssetAttachmentSummary, AssetCondition, AssetStatusChangeRequest, AssetTraceabilityEntry, InventoryAsset } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
 import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
 
@@ -26,8 +26,8 @@ type InventoryDetailField = {
     RouterLink,
     ActionButtonComponent,
     FileAttachmentItemComponent,
+    AssetStatusChangeModalComponent,
     InventoryAttachmentPreviewModalComponent,
-    ConfirmationModalComponent,
     ProcessingLoaderComponent,
   ],
   templateUrl: './inventory-detail.component.html',
@@ -100,7 +100,7 @@ export class InventoryDetailComponent {
       reasonLabel: this.normalizeText(event.reason),
     })),
   );
-  readonly statusActionConfig = computed(() => {
+  readonly statusActionConfig = computed<AssetStatusChangeModalIntent | null>(() => {
     const asset = this.asset();
     const action = this.pendingStatusAction();
     if (!asset || !action) {
@@ -109,39 +109,36 @@ export class InventoryDetailComponent {
 
     if (action === 'maintenance') {
       return {
+        action,
         nextCondition: 'Mantenimiento' as AssetCondition,
         title: 'Enviar activo a mantenimiento',
         message: `El activo ${asset.name} pasará a mantenimiento y dejará de estar disponible para préstamo.`,
         confirmLabel: 'Enviar a mantenimiento',
-        loadingLabel: 'Actualizando estado...',
-        tone: 'warning' as ConfirmationModalTone,
         icon: 'build',
-        successMessage: 'Activo enviado a mantenimiento correctamente.',
+        confirmClassName: '!border-warning !bg-warning !text-warning-content hover:!bg-warning/90',
       };
     }
 
     if (action === 'decommission') {
       return {
+        action,
         nextCondition: 'Dado de baja' as AssetCondition,
         title: 'Dar de baja activo',
         message: `El activo ${asset.name} quedará marcado como dado de baja.`,
         confirmLabel: 'Dar de baja',
-        loadingLabel: 'Actualizando estado...',
-        tone: 'danger' as ConfirmationModalTone,
         icon: 'delete_forever',
-        successMessage: 'Activo dado de baja correctamente.',
+        confirmClassName: '!border-error !bg-error !text-error-content hover:!bg-error/90',
       };
     }
 
     return {
+      action,
       nextCondition: 'Bueno' as AssetCondition,
       title: 'Reactivar activo',
       message: `El activo ${asset.name} volverá al estado Bueno.`,
       confirmLabel: 'Reactivar',
-      loadingLabel: 'Actualizando estado...',
-      tone: 'info' as ConfirmationModalTone,
       icon: 'restart_alt',
-      successMessage: 'Activo reactivado correctamente.',
+      confirmClassName: '!border-success !bg-success !text-success-content hover:!bg-success/90',
     };
   });
   readonly canSendToMaintenance = computed(() => {
@@ -219,7 +216,7 @@ export class InventoryDetailComponent {
     this.pendingStatusAction.set(null);
   }
 
-  async confirmStatusChange(): Promise<void> {
+  async confirmStatusChange(event: { payload: AssetStatusChangeRequest; attachments: File[] }): Promise<void> {
     const asset = this.asset();
     const config = this.statusActionConfig();
     if (!asset || !config) {
@@ -229,9 +226,15 @@ export class InventoryDetailComponent {
     this.isUpdatingStatus.set(true);
 
     try {
-      const payload = this.buildStatusUpdatePayload(asset, config.nextCondition);
-      await firstValueFrom(this.assetsService.update(asset.id, payload));
-      this.notifications.success({ message: config.successMessage });
+      await firstValueFrom(this.assetsService.changeStatus(asset.id, event.payload, event.attachments));
+      this.notifications.success({
+        message:
+          config.action === 'maintenance'
+            ? 'Activo enviado a mantenimiento correctamente.'
+            : config.action === 'decommission'
+              ? 'Activo dado de baja correctamente.'
+              : 'Activo reactivado correctamente.',
+      });
       await this.refreshCurrentAsset(asset.id);
       this.isStatusModalOpen.set(false);
       this.pendingStatusAction.set(null);
@@ -298,26 +301,6 @@ export class InventoryDetailComponent {
 
     this.asset.set(asset);
     this.traceability.set(traceability);
-  }
-
-  private buildStatusUpdatePayload(asset: InventoryAsset, condition: AssetCondition): AssetRequest {
-    return {
-      code: asset.code,
-      name: asset.name,
-      assetTypeId: asset.typeId,
-      locationId: asset.locationId,
-      supplierId: asset.supplierId ?? null,
-      condition: this.assetsService.toApiCondition(condition),
-      serialNumber: asset.serial,
-      barcode: asset.barcode,
-      acquisitionDate: asset.acquisitionDate || null,
-      notes: asset.observations ?? null,
-      attributeValues: asset.attributeValues.map((attribute) => ({
-        attributeDefinitionId: attribute.attributeDefinitionId,
-        value: attribute.value,
-      })),
-      removedAttachmentIds: [],
-    };
   }
 
   private formatDate(value: string | null | undefined): string | null {

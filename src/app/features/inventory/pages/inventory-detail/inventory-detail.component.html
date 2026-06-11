@@ -40,22 +40,28 @@
       <div class="flex flex-wrap items-center gap-2.5">
         <app-action-button
           label="Editar"
-          variant="outline"
+          variant="primary"
+          icon="edit"
           size="sm"
+          [className]="'!border-info !bg-info !text-info-content hover:!bg-info/90'"
           [routerLink]="['/inventory', asset.id, 'edit']"
         />
         <app-action-button
           label="Imprimir tarjeta"
-          variant="outline"
+          variant="primary"
+          icon="print"
           size="sm"
+          [className]="'!border-primary !bg-primary !text-primary-content hover:!bg-primary/90'"
           (clicked)="printLabel()"
         />
 
         @if (canSendToMaintenance()) {
           <app-action-button
             label="Enviar a mantenimiento"
-            variant="outline"
+            variant="primary"
+            icon="build"
             size="sm"
+            [className]="'!border-warning !bg-warning !text-warning-content hover:!bg-warning/90'"
             (clicked)="openStatusModal('maintenance')"
           />
         }
@@ -63,7 +69,9 @@
         @if (canReactivate()) {
           <app-action-button
             label="Reactivar"
+            icon="restart_alt"
             size="sm"
+            [className]="'!border-success !bg-success !text-success-content hover:!bg-success/90'"
             (clicked)="openStatusModal('reactivate')"
           />
         }
@@ -71,6 +79,7 @@
         @if (canDecommission()) {
           <app-action-button
             label="Dar de baja"
+            icon="delete_forever"
             size="sm"
             [className]="'!border-error !bg-error !text-error-content hover:!bg-error/90'"
             (clicked)="openStatusModal('decommission')"
@@ -242,6 +251,23 @@
                           </p>
                         }
 
+                        @if (event.attachments.length > 0) {
+                          <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                            @for (attachment of event.attachments; track attachment.id) {
+                              <app-file-attachment-item
+                                [fileName]="attachment.fileName"
+                                [mimeType]="attachment.mimeType"
+                                [sizeBytes]="attachment.sizeBytes"
+                                [previewable]="true"
+                                layout="compact"
+                                [showActionsOnHover]="false"
+                                (previewRequested)="openAttachmentPreview(attachment)"
+                                (downloadRequested)="downloadAttachment(attachment.downloadUrl, attachment.fileName)"
+                              />
+                            }
+                          </div>
+                        }
+
                         <span class="mt-1 text-[11px] font-medium text-base-content/45">
                           Por {{ event.user }}
                         </span>
@@ -308,27 +334,14 @@
     />
 
     @if (statusActionConfig(); as config) {
-      <app-confirmation-modal
+      <app-asset-status-change-modal
         [open]="isStatusModalOpen()"
-        [title]="config.title"
-        [message]="config.message"
-        [tone]="config.tone"
-        [icon]="config.icon"
-        [confirmLabel]="config.confirmLabel"
+        [asset]="asset"
+        [intent]="config"
         [loading]="isUpdatingStatus()"
-        [loadingLabel]="config.loadingLabel"
-        (confirmed)="confirmStatusChange()"
+        (confirmed)="confirmStatusChange($event)"
         (cancelled)="closeStatusModal()"
-        (closed)="closeStatusModal()"
-      >
-        <div modal-details class="rounded-lg border border-base-300/70 bg-base-100 px-4 py-3">
-          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-base-content/45">
-            Activo
-          </p>
-          <p class="mt-1 text-sm font-semibold text-base-content">{{ asset.name }}</p>
-          <p class="mt-1 text-xs text-base-content/55">{{ asset.code }} · {{ asset.condition }}</p>
-        </div>
-      </app-confirmation-modal>
+      />
     }
   </div>
 } @else {
