@@ -94,7 +94,7 @@ export class SelectFieldComponent implements ControlValueAccessor {
     this.hasSelection() ? 'block truncate text-base-content' : 'block truncate text-base-content/45',
   );
   readonly menuClass = computed(() =>
-    `absolute left-0 top-[calc(100%+0.375rem)] z-50 w-full origin-top overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_36px_-16px_rgba(15,23,42,0.35)] ${
+    `absolute left-0 top-[calc(100%+0.375rem)] z-[70] w-full origin-top overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_36px_-16px_rgba(15,23,42,0.35)] ${
       this.isOpen() ? 'app-select-menu-enter' : 'hidden'
     }`,
   );
