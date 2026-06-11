@@ -455,11 +455,12 @@ export class InventoryFormComponent implements OnDestroy {
       this.isSubmitting.set(true);
       const id = this.id();
       const newAttachmentFiles = this.newAttachments().map((attachment) => attachment.file);
+      let savedAsset: InventoryAsset;
 
       if (id) {
-        await firstValueFrom(this.assetsService.update(id, payload, newAttachmentFiles));
+        savedAsset = await firstValueFrom(this.assetsService.update(id, payload, newAttachmentFiles));
       } else {
-        await firstValueFrom(this.assetsService.create(payload, newAttachmentFiles));
+        savedAsset = await firstValueFrom(this.assetsService.create(payload, newAttachmentFiles));
       }
 
       this.notifications.success({
@@ -467,7 +468,7 @@ export class InventoryFormComponent implements OnDestroy {
           ? 'Activo actualizado correctamente.'
           : 'Activo registrado correctamente.',
       });
-      await this.router.navigate(['/inventory']);
+      await this.router.navigate(['/inventory', savedAsset.id]);
     } catch (error: unknown) {
       this.notifications.error({
         message: this.resolveSaveErrorMessage(error),
