@@ -171,7 +171,11 @@ export class ReportsHomeComponent {
     }
 
     const reportName = pending.tab === 'assets' ? 'Reporte de Activos' : 'Reporte de Préstamos';
-    return `Se preparará la descarga del ${reportName} en formato ${this.exportLabels[pending.format]}. Puedes continuar o cancelar esta acción.`;
+    if (pending.format === 'excel') {
+      return `Se preparará la descarga tabular del ${reportName} en formato Excel, incluyendo metadatos institucionales y filtros aplicados.`;
+    }
+
+    return `Se preparará el informe formal del ${reportName} en formato ${this.exportLabels[pending.format]}, listo para impresión y firma manual.`;
   });
   readonly exportDialogIcon = computed(() => {
     const pending = this.pendingExport();
