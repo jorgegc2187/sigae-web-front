@@ -29,7 +29,7 @@ export interface InventoryAsset {
 export interface AssetTraceabilityEntry {
   id: string;
   date: string;
-  type: 'Creación' | 'Edición' | 'Estado' | 'Ubicación' | 'Baja' | 'Préstamo' | 'Devolución';
+  type: 'Creación' | 'Edición' | 'Estado' | 'Ubicación' | 'Baja' | 'Reactivación' | 'Préstamo' | 'Devolución';
   description: string;
   user: string;
 }
@@ -83,6 +83,7 @@ export interface AssetResponse {
   serialNumber: string | null;
   barcode: string | null;
   acquisitionDate: string | null;
+  decommissionedAt: string | null;
   notes: string | null;
   attributeValues: AssetAttributeValueResponse[];
   attachments: AssetAttachmentSummary[];

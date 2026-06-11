@@ -14,7 +14,7 @@ import {
 
 interface AssetTraceabilityResponse {
   id: string;
-  eventType: 'CREATED' | 'UPDATED' | 'CONDITION_CHANGED' | 'LOCATION_CHANGED' | 'DECOMMISSIONED' | 'LOANED' | 'RETURNED';
+  eventType: 'CREATED' | 'UPDATED' | 'CONDITION_CHANGED' | 'LOCATION_CHANGED' | 'DECOMMISSIONED' | 'REACTIVATED' | 'LOANED' | 'RETURNED';
   description: string;
   userName: string;
   occurredAt: string;
@@ -184,6 +184,7 @@ export class AssetsService {
       CONDITION_CHANGED: 'Estado',
       LOCATION_CHANGED: 'Ubicación',
       DECOMMISSIONED: 'Baja',
+      REACTIVATED: 'Reactivación',
       LOANED: 'Préstamo',
       RETURNED: 'Devolución',
     };
