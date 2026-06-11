@@ -1,19 +1,35 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { catchError, firstValueFrom, map, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { ConfirmationModalComponent, ConfirmationModalTone } from '../../../../shared/ui/confirmation-modal/confirmation-modal.component';
 import { FileAttachmentItemComponent } from '../../../../shared/ui/file-attachment-item/file-attachment-item.component';
-import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
+import { ProcessingLoaderComponent } from '../../../../shared/ui/processing-loader/processing-loader.component';
 import { InventoryAttachmentPreviewModalComponent } from '../../components/inventory-attachment-preview-modal/inventory-attachment-preview-modal.component';
-import { AssetAttachmentSummary, AssetCondition } from '../../models/inventory.model';
+import { AssetAttachmentSummary, AssetCondition, AssetRequest, AssetTraceabilityEntry, InventoryAsset } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
 import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
 
+type InventoryDetailStatusAction = 'maintenance' | 'decommission' | 'reactivate';
+type InventoryDetailField = {
+  label: string;
+  value: string | null;
+  mono?: boolean;
+  accent?: boolean;
+};
+
 @Component({
   selector: 'app-inventory-detail',
-  imports: [RouterLink, ActionButtonComponent, StatusBadgeComponent, FileAttachmentItemComponent, InventoryAttachmentPreviewModalComponent],
+  imports: [
+    RouterLink,
+    ActionButtonComponent,
+    FileAttachmentItemComponent,
+    InventoryAttachmentPreviewModalComponent,
+    ConfirmationModalComponent,
+    ProcessingLoaderComponent,
+  ],
   templateUrl: './inventory-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -23,26 +39,126 @@ export class InventoryDetailComponent {
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
 
-  private readonly assetResource = toSignal(
+  private readonly assetId = toSignal(
     this.route.paramMap.pipe(
       map((params) => params.get('id') ?? ''),
-      switchMap((id) => (id ? this.assetsService.getById(id).pipe(catchError(() => of(null))) : of(null))),
     ),
-    { initialValue: null },
+    { initialValue: '' },
   );
-  private readonly traceabilityResource = toSignal(
-    this.route.paramMap.pipe(
-      map((params) => params.get('id') ?? ''),
-      switchMap((id) => (id ? this.assetsService.traceability(id).pipe(catchError(() => of([]))) : of([]))),
-    ),
-    { initialValue: [] },
-  );
-
-  readonly asset = computed(() => this.assetResource());
-  readonly traceability = computed(() => this.traceabilityResource());
+  readonly asset = signal<InventoryAsset | null>(null);
+  readonly traceability = signal<AssetTraceabilityEntry[]>([]);
   readonly attributeEntries = computed(() => Object.entries(this.asset()?.attributes ?? {}));
   readonly isAttachmentPreviewOpen = signal(false);
   readonly previewAttachment = signal<AssetAttachmentSummary | null>(null);
+  readonly isStatusModalOpen = signal(false);
+  readonly pendingStatusAction = signal<InventoryDetailStatusAction | null>(null);
+  readonly isUpdatingStatus = signal(false);
+
+  readonly generalDetailRows = computed<InventoryDetailField[][]>(() => {
+    const asset = this.asset();
+    if (!asset) {
+      return [];
+    }
+
+    return [
+      [
+        { label: 'Nombre del activo', value: asset.name },
+        { label: 'Codigo SIGAE', value: asset.code, mono: true },
+      ],
+      [
+        { label: 'Categoria', value: asset.categoryName },
+        { label: 'Tipo', value: asset.typeName },
+      ],
+      [
+        { label: 'Ubicacion actual', value: asset.locationName, accent: true },
+        { label: 'Serial number', value: asset.serial ?? null },
+      ],
+      [
+        { label: 'Barcode', value: asset.barcode ?? null },
+        { label: 'Fecha de adquisicion', value: this.formatDate(asset.acquisitionDate) ?? null },
+      ],
+      [
+        { label: 'Proveedor', value: asset.supplierName ?? null },
+        { label: 'Disponibilidad', value: asset.availableForLoan ? 'Disponible para prestamo' : 'No disponible para prestamo' },
+      ],
+    ];
+  });
+  readonly formattedTraceability = computed(() =>
+    this.traceability().map((event) => ({
+      ...event,
+      formattedDate: this.formatTraceabilityDate(event.date),
+      accentClass: this.traceabilityAccentClass(event.type),
+      title: this.traceabilityTitle(event),
+      detail: this.traceabilityDetail(event),
+      reasonLabel: this.normalizeText(event.reason),
+    })),
+  );
+  readonly statusActionConfig = computed(() => {
+    const asset = this.asset();
+    const action = this.pendingStatusAction();
+    if (!asset || !action) {
+      return null;
+    }
+
+    if (action === 'maintenance') {
+      return {
+        nextCondition: 'Mantenimiento' as AssetCondition,
+        title: 'Enviar activo a mantenimiento',
+        message: `El activo ${asset.name} pasará a mantenimiento y dejará de estar disponible para préstamo.`,
+        confirmLabel: 'Enviar a mantenimiento',
+        loadingLabel: 'Actualizando estado...',
+        tone: 'warning' as ConfirmationModalTone,
+        icon: 'build',
+        successMessage: 'Activo enviado a mantenimiento correctamente.',
+      };
+    }
+
+    if (action === 'decommission') {
+      return {
+        nextCondition: 'Dado de baja' as AssetCondition,
+        title: 'Dar de baja activo',
+        message: `El activo ${asset.name} quedará marcado como dado de baja.`,
+        confirmLabel: 'Dar de baja',
+        loadingLabel: 'Actualizando estado...',
+        tone: 'danger' as ConfirmationModalTone,
+        icon: 'delete_forever',
+        successMessage: 'Activo dado de baja correctamente.',
+      };
+    }
+
+    return {
+      nextCondition: 'Bueno' as AssetCondition,
+      title: 'Reactivar activo',
+      message: `El activo ${asset.name} volverá al estado Bueno.`,
+      confirmLabel: 'Reactivar',
+      loadingLabel: 'Actualizando estado...',
+      tone: 'info' as ConfirmationModalTone,
+      icon: 'restart_alt',
+      successMessage: 'Activo reactivado correctamente.',
+    };
+  });
+  readonly canSendToMaintenance = computed(() => {
+    const condition = this.asset()?.condition;
+    return !!condition && condition !== 'Mantenimiento' && condition !== 'Dado de baja';
+  });
+  readonly canDecommission = computed(() => this.asset()?.condition !== 'Dado de baja');
+  readonly canReactivate = computed(() => {
+    const condition = this.asset()?.condition;
+    return condition === 'Dado de baja' || condition === 'Mantenimiento';
+  });
+
+  constructor() {
+    effect(() => {
+      const assetId = this.assetId();
+      if (!assetId) {
+        this.asset.set(null);
+        this.traceability.set([]);
+        return;
+      }
+
+      void this.refreshCurrentAsset(assetId);
+    });
+  }
 
   printLabel(): void {
     const asset = this.asset();
@@ -65,6 +181,43 @@ export class InventoryDetailComponent {
     this.previewAttachment.set(null);
   }
 
+  openStatusModal(action: InventoryDetailStatusAction): void {
+    this.pendingStatusAction.set(action);
+    this.isStatusModalOpen.set(true);
+  }
+
+  closeStatusModal(): void {
+    if (this.isUpdatingStatus()) {
+      return;
+    }
+
+    this.isStatusModalOpen.set(false);
+    this.pendingStatusAction.set(null);
+  }
+
+  async confirmStatusChange(): Promise<void> {
+    const asset = this.asset();
+    const config = this.statusActionConfig();
+    if (!asset || !config) {
+      return;
+    }
+
+    this.isUpdatingStatus.set(true);
+
+    try {
+      const payload = this.buildStatusUpdatePayload(asset, config.nextCondition);
+      await firstValueFrom(this.assetsService.update(asset.id, payload));
+      this.notifications.success({ message: config.successMessage });
+      await this.refreshCurrentAsset(asset.id);
+      this.isStatusModalOpen.set(false);
+      this.pendingStatusAction.set(null);
+    } catch {
+      this.notifications.error({ message: 'No se pudo actualizar el estado del activo.' });
+    } finally {
+      this.isUpdatingStatus.set(false);
+    }
+  }
+
   async downloadAttachment(downloadUrl: string, filename: string): Promise<void> {
     try {
       const response = await firstValueFrom(this.assetsService.downloadAttachment(downloadUrl));
@@ -83,11 +236,170 @@ export class InventoryDetailComponent {
     }
   }
 
-  conditionTone(condition: AssetCondition): 'success' | 'warning' | 'error' | 'neutral' | 'info' {
-    if (condition === 'Bueno') return 'success';
-    if (condition === 'Regular') return 'warning';
-    if (condition === 'Mantenimiento') return 'info';
-    if (condition === 'Malo') return 'error';
-    return 'neutral';
+  getAssetStatusClass(condition: AssetCondition): string {
+    if (condition === 'Bueno') return 'border-success/20 bg-success/10 text-success';
+    if (condition === 'Regular') return 'border-warning/20 bg-warning/10 text-warning';
+    if (condition === 'Mantenimiento') return 'border-info/20 bg-info/10 text-info';
+    if (condition === 'Malo') return 'border-error/20 bg-error/10 text-error';
+    return 'border-base-300 bg-base-200 text-base-content/60';
+  }
+
+  private async refreshCurrentAsset(assetId: string): Promise<void> {
+    const [asset, traceability] = await Promise.all([
+      firstValueFrom(this.assetsService.getById(assetId).pipe(catchError(() => of(null)))),
+      firstValueFrom(this.assetsService.traceability(assetId).pipe(catchError(() => of([])))),
+    ]);
+
+    this.asset.set(asset);
+    this.traceability.set(traceability);
+  }
+
+  private buildStatusUpdatePayload(asset: InventoryAsset, condition: AssetCondition): AssetRequest {
+    return {
+      code: asset.code,
+      name: asset.name,
+      assetTypeId: asset.typeId,
+      locationId: asset.locationId,
+      supplierId: asset.supplierId ?? null,
+      condition: this.assetsService.toApiCondition(condition),
+      serialNumber: asset.serial,
+      barcode: asset.barcode,
+      acquisitionDate: asset.acquisitionDate || null,
+      notes: asset.observations ?? null,
+      attributeValues: asset.attributeValues.map((attribute) => ({
+        attributeDefinitionId: attribute.attributeDefinitionId,
+        value: attribute.value,
+      })),
+      removedAttachmentIds: [],
+    };
+  }
+
+  private formatDate(value: string | null | undefined): string | null {
+    if (!value) {
+      return null;
+    }
+
+    const date = new Date(`${value}T00:00:00`);
+    return new Intl.DateTimeFormat('es-PE', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
+  }
+
+  private formatTraceabilityDate(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat('es-PE', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  }
+
+  private traceabilityAccentClass(type: AssetTraceabilityEntry['type']): string {
+    const map: Record<AssetTraceabilityEntry['type'], string> = {
+      Creación: 'bg-primary',
+      Edición: 'bg-secondary',
+      Estado: 'bg-warning',
+      Ubicación: 'bg-info',
+      Baja: 'bg-error',
+      Reactivación: 'bg-success',
+      Préstamo: 'bg-primary',
+      Devolución: 'bg-success',
+    };
+
+    return map[type];
+  }
+
+  private traceabilityTitle(event: AssetTraceabilityEntry): string {
+    switch (event.type) {
+      case 'Creación':
+        return 'Registro inicial';
+      case 'Edición':
+        return this.updatedTraceabilityTitle(event.description);
+      case 'Estado':
+        return 'Cambio de estado';
+      case 'Ubicación':
+        return event.previousValue && event.newValue ? 'Cambio de ubicación' : 'Asignación de ubicación';
+      case 'Baja':
+        return 'Baja';
+      case 'Reactivación':
+        return 'Reactivación';
+      case 'Préstamo':
+        return 'Préstamo';
+      case 'Devolución':
+        return 'Devolución';
+    }
+  }
+
+  private traceabilityDetail(event: AssetTraceabilityEntry): string {
+    if (event.type === 'Edición') {
+      return this.traceabilityChangeDetail(event);
+    }
+
+    if (event.type === 'Estado' || event.type === 'Baja' || event.type === 'Reactivación') {
+      if (event.previousValue && event.newValue) {
+        return `${event.previousValue} -> ${event.newValue}`;
+      }
+
+      if (event.newValue) {
+        return event.newValue;
+      }
+    }
+
+    if (event.type === 'Ubicación') {
+      if (event.previousValue && event.newValue) {
+        return `Trasladado de ${event.previousValue} a ${event.newValue}.`;
+      }
+    }
+
+    return event.description;
+  }
+
+  private updatedTraceabilityTitle(description: string): string {
+    if (description.startsWith('Atributo "')) {
+      return 'Atributo actualizado';
+    }
+
+    const titles: Array<[string, string]> = [
+      ['Nombre del activo actualizado.', 'Cambio de nombre'],
+      ['Codigo del activo actualizado.', 'Cambio de codigo'],
+      ['Proveedor del activo actualizado.', 'Cambio de proveedor'],
+      ['Serial number del activo actualizado.', 'Cambio de serial number'],
+      ['Barcode del activo actualizado.', 'Cambio de barcode'],
+      ['Fecha de adquisicion del activo actualizada.', 'Cambio de fecha de adquisicion'],
+      ['Notas del activo actualizadas.', 'Cambio de observaciones'],
+      ['Tipo de activo actualizado.', 'Cambio de tipo'],
+      ['Categoria del activo actualizada.', 'Cambio de categoria'],
+    ];
+
+    return titles.find(([value]) => value === description)?.[1] ?? 'Actualización';
+  }
+
+  private traceabilityChangeDetail(event: AssetTraceabilityEntry): string {
+    if (event.previousValue && event.newValue) {
+      return `${event.previousValue} -> ${event.newValue}`;
+    }
+
+    if (event.newValue && !event.previousValue) {
+      return `Nuevo valor: ${event.newValue}`;
+    }
+
+    if (event.previousValue && !event.newValue) {
+      return `Valor eliminado: ${event.previousValue}`;
+    }
+
+    return event.description;
+  }
+
+  normalizeText(value: string | null | undefined, fallback = 'No registrado'): string {
+    return value == null || value.trim() === '' ? fallback : value;
   }
 }

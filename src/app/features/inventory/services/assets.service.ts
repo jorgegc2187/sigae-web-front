@@ -16,6 +16,9 @@ interface AssetTraceabilityResponse {
   id: string;
   eventType: 'CREATED' | 'UPDATED' | 'CONDITION_CHANGED' | 'LOCATION_CHANGED' | 'DECOMMISSIONED' | 'REACTIVATED' | 'LOANED' | 'RETURNED';
   description: string;
+  previousValue: string | null;
+  newValue: string | null;
+  reason: string | null;
   userName: string;
   occurredAt: string;
 }
@@ -115,6 +118,9 @@ export class AssetsService {
         date: entry.occurredAt,
         type: this.toTraceabilityType(entry.eventType),
         description: entry.description,
+        previousValue: entry.previousValue,
+        newValue: entry.newValue,
+        reason: entry.reason,
         user: entry.userName,
       }))),
     );

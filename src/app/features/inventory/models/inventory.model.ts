@@ -31,6 +31,9 @@ export interface AssetTraceabilityEntry {
   date: string;
   type: 'Creación' | 'Edición' | 'Estado' | 'Ubicación' | 'Baja' | 'Reactivación' | 'Préstamo' | 'Devolución';
   description: string;
+  previousValue?: string | null;
+  newValue?: string | null;
+  reason?: string | null;
   user: string;
 }
 

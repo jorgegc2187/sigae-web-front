@@ -1,0 +1,21 @@
+<article [class]="resolvedHostClass()">
+  <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-base-content/45">
+    {{ label() }}
+  </p>
+
+  @if (isLink()) {
+    @if (routerLink(); as link) {
+      <a [routerLink]="link" [class]="resolvedValueClass() + ' inline-flex items-center gap-1.5 text-primary hover:underline'">
+        <span>{{ displayValue() }}</span>
+      </a>
+    } @else if (href(); as linkHref) {
+      <a [href]="linkHref" [class]="resolvedValueClass() + ' inline-flex items-center gap-1.5 text-primary hover:underline'">
+        <span>{{ displayValue() }}</span>
+      </a>
+    }
+  } @else {
+    <p [class]="resolvedValueClass()">
+      {{ displayValue() }}
+    </p>
+  }
+</article>
