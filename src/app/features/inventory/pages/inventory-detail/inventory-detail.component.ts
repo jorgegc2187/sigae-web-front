@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
@@ -38,6 +38,10 @@ export class InventoryDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly traceabilityScrollViewport = viewChild<ElementRef<HTMLDivElement>>('traceabilityScrollViewport');
+  private traceabilityScrollSyncFrame: number | null = null;
+  private readonly traceabilityScrollTolerance = 12;
 
   private readonly assetId = toSignal(
     this.route.paramMap.pipe(
@@ -53,6 +57,9 @@ export class InventoryDetailComponent {
   readonly isStatusModalOpen = signal(false);
   readonly pendingStatusAction = signal<InventoryDetailStatusAction | null>(null);
   readonly isUpdatingStatus = signal(false);
+  readonly hasTraceabilityOverflow = signal(false);
+  readonly canScrollUp = signal(false);
+  readonly canScrollDown = signal(false);
 
   readonly generalDetailRows = computed<InventoryDetailField[][]>(() => {
     const asset = this.asset();
@@ -158,6 +165,23 @@ export class InventoryDetailComponent {
 
       void this.refreshCurrentAsset(assetId);
     });
+
+    effect(() => {
+      this.formattedTraceability().length;
+      this.scheduleTraceabilityScrollSync();
+    });
+
+    if (typeof window !== 'undefined') {
+      const handleResize = () => this.scheduleTraceabilityScrollSync();
+      window.addEventListener('resize', handleResize, { passive: true });
+      this.destroyRef.onDestroy(() => window.removeEventListener('resize', handleResize));
+    }
+
+    this.destroyRef.onDestroy(() => {
+      if (this.traceabilityScrollSyncFrame !== null && typeof window !== 'undefined') {
+        window.cancelAnimationFrame(this.traceabilityScrollSyncFrame);
+      }
+    });
   }
 
   printLabel(): void {
@@ -242,6 +266,28 @@ export class InventoryDetailComponent {
     if (condition === 'Mantenimiento') return 'border-info/20 bg-info/10 text-info';
     if (condition === 'Malo') return 'border-error/20 bg-error/10 text-error';
     return 'border-base-300 bg-base-200 text-base-content/60';
+  }
+
+  onTraceabilityScroll(): void {
+    this.syncTraceabilityScrollState();
+  }
+
+  scrollTraceabilityToTop(): void {
+    const viewport = this.traceabilityScrollViewport()?.nativeElement;
+    if (!viewport) {
+      return;
+    }
+
+    viewport.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  scrollTraceabilityToBottom(): void {
+    const viewport = this.traceabilityScrollViewport()?.nativeElement;
+    if (!viewport) {
+      return;
+    }
+
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
   }
 
   private async refreshCurrentAsset(assetId: string): Promise<void> {
@@ -397,6 +443,40 @@ export class InventoryDetailComponent {
     }
 
     return event.description;
+  }
+
+  private scheduleTraceabilityScrollSync(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (this.traceabilityScrollSyncFrame !== null) {
+      window.cancelAnimationFrame(this.traceabilityScrollSyncFrame);
+    }
+
+    this.traceabilityScrollSyncFrame = window.requestAnimationFrame(() => {
+      this.traceabilityScrollSyncFrame = null;
+      this.syncTraceabilityScrollState();
+    });
+  }
+
+  private syncTraceabilityScrollState(): void {
+    const viewport = this.traceabilityScrollViewport()?.nativeElement;
+    if (!viewport) {
+      this.hasTraceabilityOverflow.set(false);
+      this.canScrollUp.set(false);
+      this.canScrollDown.set(false);
+      return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = viewport;
+    const hasOverflow = scrollHeight - clientHeight > this.traceabilityScrollTolerance;
+    const nearTop = scrollTop <= this.traceabilityScrollTolerance;
+    const nearBottom = scrollTop + clientHeight >= scrollHeight - this.traceabilityScrollTolerance;
+
+    this.hasTraceabilityOverflow.set(hasOverflow);
+    this.canScrollUp.set(hasOverflow && !nearTop);
+    this.canScrollDown.set(hasOverflow && !nearBottom);
   }
 
   normalizeText(value: string | null | undefined, fallback = 'No registrado'): string {

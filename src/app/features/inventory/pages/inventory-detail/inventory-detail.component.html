@@ -196,58 +196,105 @@
       <div class="lg:col-span-4">
         <section
           id="traceability"
-          class="rounded-xl border border-base-300/70 bg-base-100 p-5 shadow-sm lg:sticky lg:top-24"
+          class="rounded-xl border border-base-300/70 bg-base-100 shadow-sm lg:sticky lg:top-24"
         >
           <h3
-            class="mb-6 flex items-center gap-2 border-b border-base-300/70 pb-4 text-[16px] font-semibold text-base-content"
+            class="flex items-center gap-2 border-b border-base-300/70 px-5 py-4 text-[16px] font-semibold text-base-content"
           >
             <span class="material-symbols-outlined text-[20px] text-primary">history</span>
             Historial de trazabilidad
           </h3>
 
           @if (formattedTraceability().length > 0) {
-            <div class="relative ml-3 space-y-6 border-l-2 border-base-300/70 pb-2">
-              @for (event of formattedTraceability(); track event.id) {
-                <article class="relative pl-6">
-                  <span
-                    class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-4 border-base-100"
-                    [class]="event.accentClass"
-                  ></span>
-
-                  <div class="flex flex-col gap-1">
-                    <div class="flex items-start justify-between gap-2">
-                      <span class="text-[14px] font-semibold text-base-content">{{
-                        event.title
-                      }}</span>
+            <div class="relative">
+              <div
+                #traceabilityScrollViewport
+                class="max-h-[48vh] overflow-y-auto px-5 py-5 sm:max-h-[52vh] lg:max-h-[60vh]"
+                (scroll)="onTraceabilityScroll()"
+              >
+                <div class="relative ml-3 space-y-6 border-l-2 border-base-300/70 pb-2">
+                  @for (event of formattedTraceability(); track event.id) {
+                    <article class="relative pl-6">
                       <span
-                        class="rounded bg-base-200 px-1.5 py-0.5 text-[11px] text-base-content/55 whitespace-nowrap"
-                      >
-                        {{ event.formattedDate }}
-                      </span>
-                    </div>
+                        class="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-4 border-base-100"
+                        [class]="event.accentClass"
+                      ></span>
 
-                    <p class="text-[13px] leading-relaxed text-base-content/65">
-                      {{ event.detail }}
-                    </p>
+                      <div class="flex flex-col gap-1">
+                        <div class="flex items-start justify-between gap-2">
+                          <span class="text-[14px] font-semibold text-base-content">{{
+                            event.title
+                          }}</span>
+                          <span
+                            class="rounded bg-base-200 px-1.5 py-0.5 text-[11px] text-base-content/55 whitespace-nowrap"
+                          >
+                            {{ event.formattedDate }}
+                          </span>
+                        </div>
 
-                    @if (event.reasonLabel && event.reasonLabel !== 'No registrado') {
-                      <p class="text-[12px] text-base-content/55">
-                        Motivo: {{ event.reasonLabel }}.
-                      </p>
-                    }
+                        <p class="text-[13px] leading-relaxed text-base-content/65">
+                          {{ event.detail }}
+                        </p>
 
-                    <span class="mt-1 text-[11px] font-medium text-base-content/45">
-                      Por {{ event.user }}
-                    </span>
-                  </div>
-                </article>
+                        @if (event.reasonLabel && event.reasonLabel !== 'No registrado') {
+                          <p class="text-[12px] text-base-content/55">
+                            Motivo: {{ event.reasonLabel }}.
+                          </p>
+                        }
+
+                        <span class="mt-1 text-[11px] font-medium text-base-content/45">
+                          Por {{ event.user }}
+                        </span>
+                      </div>
+                    </article>
+                  }
+                </div>
+              </div>
+
+              @if (hasTraceabilityOverflow()) {
+                <div
+                  class="pointer-events-none absolute inset-x-5 top-0 h-10 bg-gradient-to-b from-base-100 to-transparent"
+                  [class.opacity-100]="canScrollUp()"
+                  [class.opacity-0]="!canScrollUp()"
+                ></div>
+                <div
+                  class="pointer-events-none absolute inset-x-5 bottom-0 h-12 bg-gradient-to-t from-base-100 via-base-100/90 to-transparent"
+                  [class.opacity-100]="canScrollDown()"
+                  [class.opacity-0]="!canScrollDown()"
+                ></div>
+              }
+
+              @if (canScrollUp()) {
+                <button
+                  type="button"
+                  class="absolute right-4 top-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-base-300 bg-base-100/95 text-base-content/65 shadow-sm backdrop-blur transition-colors hover:border-primary/30 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  (click)="scrollTraceabilityToTop()"
+                  aria-label="Ir al inicio del historial de trazabilidad"
+                >
+                  <span class="material-symbols-outlined text-[20px]">keyboard_double_arrow_up</span>
+                </button>
+              }
+
+              @if (canScrollDown()) {
+                <button
+                  type="button"
+                  class="absolute bottom-4 right-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-base-300 bg-base-100/95 text-base-content/65 shadow-sm backdrop-blur transition-colors hover:border-primary/30 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  (click)="scrollTraceabilityToBottom()"
+                  aria-label="Ir al final del historial de trazabilidad"
+                >
+                  <span class="material-symbols-outlined text-[20px]">keyboard_double_arrow_down</span>
+                </button>
               }
             </div>
           } @else {
             <div
-              class="rounded-lg border border-dashed border-base-300 bg-base-100 px-4 py-6 text-sm text-base-content/55"
+              class="px-5 py-5"
             >
-              Aun no hay eventos de trazabilidad para este activo.
+              <div
+                class="rounded-lg border border-dashed border-base-300 bg-base-100 px-4 py-6 text-sm text-base-content/55"
+              >
+                Aun no hay eventos de trazabilidad para este activo.
+              </div>
             </div>
           }
         </section>
