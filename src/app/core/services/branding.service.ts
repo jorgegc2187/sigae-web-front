@@ -1,5 +1,6 @@
-import { HttpClient, httpResource } from '@angular/common/http';
-import { computed, Injectable, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { httpResource } from '@angular/common/http';
+import { computed, effect, Injectable, inject } from '@angular/core';
 import { APP_CONFIG } from '../config/app.tokens';
 import {
   InstitutionBranding,
@@ -9,9 +10,10 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class BrandingService {
-  private readonly http = inject(HttpClient);
+  private readonly document = inject(DOCUMENT);
   private readonly appConfig = inject(APP_CONFIG);
   private readonly baseUrl = `${this.appConfig.apiUrl}/settings`;
+  private readonly defaultFaviconHref = 'favicon.ico';
 
   readonly brandingResource = httpResource<InstitutionBrandingResponse>(() => `${this.baseUrl}/branding`);
 
@@ -26,6 +28,12 @@ export class BrandingService {
 
   readonly systemName = computed(() => this.branding().systemName);
   readonly logoUrl = computed(() => this.branding().logoUrl);
+
+  constructor() {
+    effect(() => {
+      this.syncFavicon(this.logoUrl());
+    });
+  }
 
   reload(): void {
     this.brandingResource.reload();
@@ -45,5 +53,38 @@ export class BrandingService {
     }
 
     return `${this.baseUrl}/logo?v=${encodeURIComponent(updatedAt)}`;
+  }
+
+  private syncFavicon(logoUrl: string | null): void {
+    const faviconLink = this.getOrCreateFaviconLink();
+    faviconLink.href = logoUrl ?? this.defaultFaviconHref;
+    faviconLink.type = this.resolveFaviconMimeType(faviconLink.href);
+  }
+
+  private getOrCreateFaviconLink(): HTMLLinkElement {
+    const existingLink = this.document.head.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (existingLink) {
+      return existingLink;
+    }
+
+    const link = this.document.createElement('link');
+    link.rel = 'icon';
+    this.document.head.appendChild(link);
+    return link;
+  }
+
+  private resolveFaviconMimeType(href: string): string {
+    const normalizedHref = href.toLowerCase();
+    if (normalizedHref.includes('.png')) {
+      return 'image/png';
+    }
+    if (normalizedHref.includes('.svg')) {
+      return 'image/svg+xml';
+    }
+    if (normalizedHref.includes('.jpg') || normalizedHref.includes('.jpeg')) {
+      return 'image/jpeg';
+    }
+
+    return 'image/x-icon';
   }
 }
