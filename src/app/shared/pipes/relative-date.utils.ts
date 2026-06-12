@@ -3,17 +3,36 @@ export function parseRelativeDateValue(value: string | Date | null | undefined):
     return null;
   }
 
-  const date = value instanceof Date ? value : new Date(value);
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  const shortIsoDateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (shortIsoDateMatch) {
+    const [, yearValue, monthValue, dayValue] = shortIsoDateMatch;
+    const year = Number(yearValue);
+    const monthIndex = Number(monthValue) - 1;
+    const day = Number(dayValue);
+    const date = new Date(year, monthIndex, day);
+
+    return date.getFullYear() === year &&
+      date.getMonth() === monthIndex &&
+      date.getDate() === day
+      ? date
+      : null;
+  }
+
+  const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function toUtcDay(date: Date): number {
-  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+export function toCalendarDay(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
 export function getRelativeDateDayDifference(date: Date, referenceDate: Date = new Date()): number {
-  const targetDay = toUtcDay(date);
-  const todayDay = toUtcDay(referenceDate);
+  const targetDay = toCalendarDay(date);
+  const todayDay = toCalendarDay(referenceDate);
   return Math.round((targetDay - todayDay) / 86_400_000);
 }
 

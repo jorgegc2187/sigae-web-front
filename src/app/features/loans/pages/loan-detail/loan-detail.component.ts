@@ -6,6 +6,7 @@ import { NotificationService } from '../../../../shared/services/notification.se
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { FileAttachmentItemComponent } from '../../../../shared/ui/file-attachment-item/file-attachment-item.component';
 import { formatFileAttachmentSize, getFileAttachmentIcon, getFileAttachmentTypeLabel } from '../../../../shared/utils/file-attachment.util';
+import { parseRelativeDateValue } from '../../../../shared/pipes/relative-date.utils';
 import { LoanActivity, LoanAssetStatus, LoanAttachmentSummary, LoanDetail, LoanReturnPayload } from '../../models/loan.model';
 import { LoanAttachmentPreviewModalComponent } from '../../components/loan-attachment-preview-modal/loan-attachment-preview-modal.component';
 import { LoanReturnModalComponent } from '../../components/loan-return-modal/loan-return-modal.component';
@@ -35,15 +36,6 @@ export class LoanDetailComponent {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    timeZone: 'UTC',
-  });
-  private readonly detailDateFormatter = new Intl.DateTimeFormat('es-PE', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
     timeZone: 'UTC',
   });
 
@@ -145,15 +137,8 @@ export class LoanDetailComponent {
   });
 
   formatCardDate(dateIso: string): string {
-    const parts = this.detailDateFormatter.formatToParts(new Date(dateIso));
-    const day = parts.find((part) => part.type === 'day')?.value ?? '';
-    const month = parts.find((part) => part.type === 'month')?.value ?? '';
-    const year = parts.find((part) => part.type === 'year')?.value ?? '';
-    const hour = parts.find((part) => part.type === 'hour')?.value ?? '';
-    const minute = parts.find((part) => part.type === 'minute')?.value ?? '';
-    const dayPeriod = parts.find((part) => part.type === 'dayPeriod')?.value?.toUpperCase() ?? '';
-
-    return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod}`;
+    const parsedDate = parseRelativeDateValue(dateIso);
+    return parsedDate ? this.shortDateFormatter.format(parsedDate) : dateIso;
   }
 
   formatActivityDate(dateIso: string): string {
