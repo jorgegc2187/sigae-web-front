@@ -6,6 +6,7 @@ import { BulkSelectionBannerComponent } from '../../../../shared/ui/bulk-selecti
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
+import { TableIconActionComponent } from '../../../../shared/ui/table-icon-action/table-icon-action.component';
 import { AssetCondition } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
 import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
@@ -20,6 +21,7 @@ import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util'
     DesktopPaginationComponent,
     SearchInputComponent,
     SelectFieldComponent,
+    TableIconActionComponent,
   ],
   templateUrl: './inventory-group-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -148,13 +148,14 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-right">
-                  <a
-                    class="inline-flex rounded-lg p-1 text-base-content/35 transition-all hover:text-primary md:opacity-0 md:group-hover:opacity-100"
-                    [routerLink]="['/inventory', asset.id]"
-                    aria-label="Ver activo"
-                  >
-                    <span class="material-symbols-outlined text-[20px]">visibility</span>
-                  </a>
+                  <div class="flex items-center justify-end gap-2">
+                    <app-table-icon-action
+                      icon="visibility"
+                      label="Ver activo"
+                      tone="view"
+                      [routerLink]="['/inventory', asset.id]"
+                    />
+                  </div>
                 </td>
               </tr>
             } @empty {
@@ -304,13 +305,14 @@
                   <app-status-badge [label]="loan.status" [tone]="loanStatusTone(loan.status)" />
                 </td>
                 <td class="px-4 py-3 text-right">
-                  <a
-                    class="inline-flex rounded-lg p-1 text-base-content/35 transition-all hover:text-primary md:opacity-0 md:group-hover:opacity-100"
-                    [routerLink]="['/loans', loan.id]"
-                    aria-label="Ver prestamo"
-                  >
-                    <span class="material-symbols-outlined text-[20px]">visibility</span>
-                  </a>
+                  <div class="flex items-center justify-end gap-2">
+                    <app-table-icon-action
+                      icon="visibility"
+                      label="Ver préstamo"
+                      tone="view"
+                      [routerLink]="['/loans', loan.id]"
+                    />
+                  </div>
                 </td>
               </tr>
             } @empty {

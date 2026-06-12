@@ -7,6 +7,7 @@ import { DatePickerComponent, DateRangeValue } from '../../../../shared/ui/date-
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/status-badge/status-badge.component';
+import { TableIconActionComponent } from '../../../../shared/ui/table-icon-action/table-icon-action.component';
 import {
   AssetReportFilters,
   AssetReportRow,
@@ -26,7 +27,7 @@ interface PendingReportExport {
 
 @Component({
   selector: 'app-reports-home',
-  imports: [RouterLink, ActionButtonComponent, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent, SelectFieldComponent],
+  imports: [RouterLink, ActionButtonComponent, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent, SelectFieldComponent, TableIconActionComponent],
   templateUrl: './reports-home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

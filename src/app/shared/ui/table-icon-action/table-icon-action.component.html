@@ -1,0 +1,25 @@
+@if (isLink()) {
+  <a
+    [class]="buttonClasses()"
+    [routerLink]="routerLink()"
+    [fragment]="fragment() ?? undefined"
+    [attr.aria-label]="label()"
+    [attr.title]="label()"
+    [attr.aria-disabled]="disabled()"
+    [attr.tabindex]="disabled() ? -1 : null"
+    (click)="onClick($event)"
+  >
+    <span class="material-symbols-outlined text-[19px]">{{ icon() }}</span>
+  </a>
+} @else {
+  <button
+    [class]="buttonClasses()"
+    [attr.aria-label]="label()"
+    [attr.title]="label()"
+    [disabled]="disabled()"
+    [type]="type()"
+    (click)="onClick($event)"
+  >
+    <span class="material-symbols-outlined text-[19px]">{{ icon() }}</span>
+  </button>
+}

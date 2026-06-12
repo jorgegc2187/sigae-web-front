@@ -134,41 +134,32 @@
                     {{ unit.lastInspectionDate | date: 'dd/MM/yyyy' }}
                   </td>
                   <td class="px-4 py-3 text-right">
-                    <div class="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                      <a
-                        class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
+                    <div class="flex items-center justify-end gap-2">
+                      <app-table-icon-action
+                        icon="visibility"
+                        label="Ver detalle de unidad"
+                        tone="view"
                         [routerLink]="['/inventory', unit.id]"
-                        aria-label="Ver detalle de unidad"
-                        title="Ver detalle"
-                      >
-                        <span class="material-symbols-outlined text-[18px]">visibility</span>
-                      </a>
-                      <a
-                        class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
+                      />
+                      <app-table-icon-action
+                        icon="edit"
+                        label="Editar unidad"
+                        tone="edit"
                         [routerLink]="['/inventory', unit.id, 'edit']"
-                        aria-label="Editar unidad"
-                        title="Editar"
-                      >
-                        <span class="material-symbols-outlined text-[18px]">edit</span>
-                      </a>
-                      <a
-                        class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
+                      />
+                      <app-table-icon-action
+                        icon="history"
+                        label="Ver historial de unidad"
+                        tone="history"
                         [routerLink]="['/inventory', unit.id]"
                         fragment="traceability"
-                        aria-label="Ver historial de unidad"
-                        title="Historial"
-                      >
-                        <span class="material-symbols-outlined text-[18px]">history</span>
-                      </a>
-                      <button
-                        type="button"
-                        class="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-base-200 hover:text-primary"
-                        aria-label="Imprimir tarjeta de unidad"
-                        title="Imprimir tarjeta"
-                        (click)="printUnitLabel(unit.id)"
-                      >
-                        <span class="material-symbols-outlined text-[18px]">print</span>
-                      </button>
+                      />
+                      <app-table-icon-action
+                        icon="print"
+                        label="Imprimir tarjeta de unidad"
+                        tone="print"
+                        (clicked)="printUnitLabel(unit.id)"
+                      />
                     </div>
                   </td>
                 </tr>
