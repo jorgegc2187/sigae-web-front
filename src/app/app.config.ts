@@ -9,7 +9,6 @@ import {
 import {
   provideRouter,
   TitleStrategy,
-  withViewTransitions,
   withComponentInputBinding,
 } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -26,21 +25,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideRouter(
-      routes,
-      withViewTransitions({
-        onViewTransitionCreated: ({ transition }) => {
-          void transition.finished.catch((error: unknown) => {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-              return;
-            }
-
-            throw error;
-          });
-        },
-      }),
-      withComponentInputBinding(),
-    ),
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideAppInitializer(() => inject(AuthService).initializeSession()),
     { provide: APP_CONFIG, useValue: environment },
