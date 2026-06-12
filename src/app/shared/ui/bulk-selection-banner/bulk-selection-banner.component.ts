@@ -9,6 +9,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
   },
 })
 export class BulkSelectionBannerComponent {
+  readonly visible = input(false);
   readonly visibleSelectedCount = input.required<number>();
   readonly totalFilteredCount = input.required<number>();
   readonly itemLabelSingular = input.required<string>();

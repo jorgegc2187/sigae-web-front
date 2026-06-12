@@ -96,18 +96,17 @@
       </div>
     </section>
 
-    @if (shouldShowSelectAllFilteredGroupsBanner()) {
-      <app-bulk-selection-banner
-        [visibleSelectedCount]="visibleSelectedGroupsCount()"
-        [totalFilteredCount]="groupedAssets().length"
-        itemLabelSingular="familia"
-        itemLabelPlural="familias"
-        scopeLabel="del inventario"
-        [allFilteredSelected]="isAllFilteredGroupsSelected()"
-        (selectAllRequested)="selectAllFilteredGroups()"
-        (clearRequested)="clearGroupSelection()"
-      />
-    }
+    <app-bulk-selection-banner
+      [visible]="shouldShowSelectAllFilteredGroupsBanner()"
+      [visibleSelectedCount]="visibleSelectedGroupsCount()"
+      [totalFilteredCount]="groupedAssets().length"
+      itemLabelSingular="familia"
+      itemLabelPlural="familias"
+      scopeLabel="del inventario"
+      [allFilteredSelected]="isAllFilteredGroupsSelected()"
+      (selectAllRequested)="selectAllFilteredGroups()"
+      (clearRequested)="clearGroupSelection()"
+    />
 
     <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
       <div class="overflow-x-auto">
@@ -288,18 +287,17 @@
       </div>
     </section>
 
-    @if (shouldShowSelectAllFilteredAssetsBanner()) {
-      <app-bulk-selection-banner
-        [visibleSelectedCount]="visibleSelectedAssetsCount()"
-        [totalFilteredCount]="filteredAssets().length"
-        itemLabelSingular="activo"
-        itemLabelPlural="activos"
-        scopeLabel="del inventario"
-        [allFilteredSelected]="isAllFilteredAssetsSelected()"
-        (selectAllRequested)="selectAllFilteredAssets()"
-        (clearRequested)="clearAssetSelection()"
-      />
-    }
+    <app-bulk-selection-banner
+      [visible]="shouldShowSelectAllFilteredAssetsBanner()"
+      [visibleSelectedCount]="visibleSelectedAssetsCount()"
+      [totalFilteredCount]="filteredAssets().length"
+      itemLabelSingular="activo"
+      itemLabelPlural="activos"
+      scopeLabel="del inventario"
+      [allFilteredSelected]="isAllFilteredAssetsSelected()"
+      (selectAllRequested)="selectAllFilteredAssets()"
+      (clearRequested)="clearAssetSelection()"
+    />
 
     <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
       <div class="overflow-x-auto">

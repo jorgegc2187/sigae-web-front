@@ -74,18 +74,17 @@
       </div>
     </section>
 
-    @if (shouldShowSelectAllFilteredUnitsBanner()) {
-      <app-bulk-selection-banner
-        [visibleSelectedCount]="visibleSelectedUnitsCount()"
-        [totalFilteredCount]="filteredUnits().length"
-        itemLabelSingular="unidad"
-        itemLabelPlural="unidades"
-        scopeLabel="de esta familia"
-        [allFilteredSelected]="isAllFilteredUnitsSelected()"
-        (selectAllRequested)="selectAllFilteredUnits()"
-        (clearRequested)="clearUnitSelection()"
-      />
-    }
+    <app-bulk-selection-banner
+      [visible]="shouldShowSelectAllFilteredUnitsBanner()"
+      [visibleSelectedCount]="visibleSelectedUnitsCount()"
+      [totalFilteredCount]="filteredUnits().length"
+      itemLabelSingular="unidad"
+      itemLabelPlural="unidades"
+      scopeLabel="de esta familia"
+      [allFilteredSelected]="isAllFilteredUnitsSelected()"
+      (selectAllRequested)="selectAllFilteredUnits()"
+      (clearRequested)="clearUnitSelection()"
+    />
 
     <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
       <div class="overflow-x-auto">
