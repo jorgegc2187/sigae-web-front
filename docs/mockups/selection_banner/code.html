@@ -1,0 +1,844 @@
+<!doctype html>
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>EduAsset Admin - Inventario de Activos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'on-secondary-fixed': '#0b1c30',
+              'on-tertiary-fixed-variant': '#7d2d00',
+              'surface-bright': '#f7f9fb',
+              'surface-tint': '#0053db',
+              'on-primary': '#ffffff',
+              'primary-container': '#2563eb',
+              background: '#f7f9fb',
+              'surface-container-high': '#e6e8ea',
+              'on-secondary-fixed-variant': '#38485d',
+              'primary-fixed': '#dbe1ff',
+              'on-tertiary-container': '#ffede6',
+              'secondary-container': '#d0e1fb',
+              'error-container': '#ffdad6',
+              'secondary-fixed': '#d3e4fe',
+              'on-background': '#191c1e',
+              'surface-container-lowest': '#ffffff',
+              'on-surface-variant': '#434655',
+              'on-tertiary-fixed': '#360f00',
+              'on-surface': '#191c1e',
+              'on-secondary-container': '#54647a',
+              tertiary: '#943700',
+              'primary-fixed-dim': '#b4c5ff',
+              'surface-container-low': '#f2f4f6',
+              'inverse-surface': '#2d3133',
+              'inverse-primary': '#b4c5ff',
+              'on-error-container': '#93000a',
+              'tertiary-fixed-dim': '#ffb596',
+              'surface-variant': '#e0e3e5',
+              'on-primary-fixed-variant': '#003ea8',
+              'on-tertiary': '#ffffff',
+              'on-primary-container': '#eeefff',
+              surface: '#f7f9fb',
+              error: '#ba1a1a',
+              secondary: '#505f76',
+              primary: '#004ac6',
+              'surface-dim': '#d8dadc',
+              'tertiary-fixed': '#ffdbcd',
+              'inverse-on-surface': '#eff1f3',
+              outline: '#737686',
+              'on-secondary': '#ffffff',
+              'outline-variant': '#c3c6d7',
+              'tertiary-container': '#bc4800',
+              'surface-container-highest': '#e0e3e5',
+              'on-error': '#ffffff',
+              'surface-container': '#eceef0',
+              'secondary-fixed-dim': '#b7c8e1',
+              'on-primary-fixed': '#00174b',
+            },
+            borderRadius: {
+              DEFAULT: '0.25rem',
+              lg: '0.5rem',
+              xl: '0.75rem',
+              full: '9999px',
+            },
+            spacing: {
+              'stack-lg': '1.5rem',
+              'margin-desktop': '2rem',
+              'margin-mobile': '1rem',
+              'stack-md': '1rem',
+              'container-max': '1440px',
+              'stack-sm': '0.5rem',
+              gutter: '1.5rem',
+            },
+            fontFamily: {
+              'headline-md': ['Hanken Grotesk'],
+              'headline-sm': ['Hanken Grotesk'],
+              'body-lg': ['Inter'],
+              'label-md': ['Inter'],
+              'body-sm': ['Inter'],
+              'label-bold': ['Inter'],
+              'display-lg': ['Hanken Grotesk'],
+              'body-md': ['Inter'],
+            },
+            fontSize: {
+              'headline-md': ['20px', { lineHeight: '28px', fontWeight: '600' }],
+              'headline-sm': ['16px', { lineHeight: '24px', fontWeight: '600' }],
+              'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+              'label-md': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+              'body-sm': ['13px', { lineHeight: '18px', fontWeight: '400' }],
+              'label-bold': [
+                '12px',
+                { lineHeight: '16px', letterSpacing: '0.05em', fontWeight: '600' },
+              ],
+              'display-lg': [
+                '30px',
+                { lineHeight: '38px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+              'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+      .material-symbols-outlined.filled {
+        font-variation-settings: 'FILL' 1;
+      }
+
+      /* Custom scrollbar for tables */
+      .table-container::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+      .table-container::-webkit-scrollbar-track {
+        background: theme('colors.surface-container-low');
+      }
+      .table-container::-webkit-scrollbar-thumb {
+        background: theme('colors.outline-variant');
+        border-radius: 4px;
+      }
+      .table-container::-webkit-scrollbar-thumb:hover {
+        background: theme('colors.outline');
+      }
+
+      /* Checkbox styling */
+      .custom-checkbox {
+        appearance: none;
+        background-color: transparent;
+        margin: 0;
+        font: inherit;
+        color: currentColor;
+        width: 1.15em;
+        height: 1.15em;
+        border: 0.15em solid theme('colors.outline');
+        border-radius: 0.15em;
+        transform: translateY(-0.075em);
+        display: grid;
+        place-content: center;
+      }
+
+      .custom-checkbox::before {
+        content: '';
+        width: 0.65em;
+        height: 0.65em;
+        transform: scale(0);
+        transition: 120ms transform ease-in-out;
+        box-shadow: inset 1em 1em white;
+        background-color: transform-origin;
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+      }
+
+      .custom-checkbox:checked {
+        background-color: theme('colors.primary');
+        border-color: theme('colors.primary');
+      }
+
+      .custom-checkbox:checked::before {
+        transform: scale(1);
+      }
+
+      .custom-checkbox:focus {
+        outline: 2px solid theme('colors.primary-fixed-dim');
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-background font-body-md min-h-screen flex selection:bg-primary-fixed selection:text-on-primary-fixed"
+  >
+    <!-- SideNavBar -->
+    <aside
+      class="fixed left-0 top-0 h-screen w-[260px] bg-surface-container-lowest shadow-sm flex flex-col py-stack-lg gap-stack-md z-30 transition-all duration-200 ease-in-out hidden md:flex"
+    >
+      <!-- Brand Header -->
+      <div class="px-stack-lg mb-stack-md flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
+        >
+          <span class="material-symbols-outlined filled text-[24px]">school</span>
+        </div>
+        <div>
+          <h1 class="text-headline-sm font-headline-sm text-on-surface">Northwood Academy</h1>
+          <p class="text-label-md font-label-md text-on-surface-variant">Asset Management</p>
+        </div>
+      </div>
+      <!-- CTA -->
+      <div class="px-stack-lg mb-stack-md">
+        <button
+          class="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary rounded-lg py-2.5 px-4 flex items-center justify-center gap-2 transition-colors"
+        >
+          <span class="material-symbols-outlined text-[20px]">add</span>
+          <span class="font-label-bold text-label-bold">New Asset</span>
+        </button>
+      </div>
+      <!-- Navigation Links -->
+      <nav class="flex-1 overflow-y-auto px-stack-sm flex flex-col gap-1">
+        <a
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-secondary-container hover:bg-surface-container transition-all duration-200 ease-in-out group"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors"
+            >dashboard</span
+          >
+          <span class="font-label-bold text-label-bold">Dashboard</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary bg-secondary-container/30 border-r-4 border-primary transition-all duration-200 ease-in-out group"
+          href="#"
+        >
+          <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+          <span class="font-label-bold text-label-bold">Inventory</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-secondary-container hover:bg-surface-container transition-all duration-200 ease-in-out group"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors"
+            >local_shipping</span
+          >
+          <span class="font-label-bold text-label-bold">Logistics</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-secondary-container hover:bg-surface-container transition-all duration-200 ease-in-out group"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors"
+            >analytics</span
+          >
+          <span class="font-label-bold text-label-bold">Reports</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-secondary-container hover:bg-surface-container transition-all duration-200 ease-in-out group"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors"
+            >settings</span
+          >
+          <span class="font-label-bold text-label-bold">Settings</span>
+        </a>
+      </nav>
+      <!-- Footer Links -->
+      <div class="px-stack-sm mt-auto flex flex-col gap-1">
+        <a
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-secondary-container hover:bg-surface-container transition-all duration-200 ease-in-out group"
+          href="#"
+        >
+          <span class="material-symbols-outlined text-[20px]">contact_support</span>
+          <span class="font-label-bold text-label-bold">Support</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-secondary-container hover:bg-surface-container transition-all duration-200 ease-in-out group"
+          href="#"
+        >
+          <span class="material-symbols-outlined text-[20px]">logout</span>
+          <span class="font-label-bold text-label-bold">Logout</span>
+        </a>
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 md:ml-[260px] relative">
+      <!-- TopNavBar -->
+      <header
+        class="bg-surface-container-lowest w-full h-16 border-b border-surface-container-high flex justify-between items-center px-margin-desktop z-20 sticky top-0"
+      >
+        <!-- Left: Search/Brand -->
+        <div class="flex items-center gap-4">
+          <h2 class="text-headline-md font-headline-md text-primary md:hidden">EduAsset Admin</h2>
+          <div
+            class="hidden md:flex items-center bg-surface-container-low rounded-full px-4 py-2 w-64 border border-transparent focus-within:border-primary-fixed-dim focus-within:bg-surface-container-lowest transition-colors"
+          >
+            <span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2"
+              >search</span
+            >
+            <input
+              class="bg-transparent border-none outline-none text-body-sm font-body-sm text-on-surface w-full placeholder-on-surface-variant focus:ring-0 p-0"
+              placeholder="Search assets..."
+              type="text"
+            />
+          </div>
+        </div>
+        <!-- Right: Actions & Profile -->
+        <div class="flex items-center gap-2">
+          <button
+            class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors relative"
+          >
+            <span class="material-symbols-outlined">notifications</span>
+            <span
+              class="absolute top-2 right-2.5 w-2 h-2 bg-error rounded-full border border-surface-container-lowest"
+            ></span>
+          </button>
+          <button
+            class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors hidden md:flex"
+          >
+            <span class="material-symbols-outlined">help_outline</span>
+          </button>
+          <button
+            class="px-4 py-2 text-label-bold font-label-bold text-secondary hover:bg-surface-container-low rounded-lg transition-colors hidden sm:block"
+          >
+            Settings
+          </button>
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden border-2 border-surface-container-highest ml-2 cursor-pointer active:opacity-80"
+          >
+            <img
+              alt="Administrator Profile"
+              class="w-full h-full object-cover"
+              data-alt="A professional headshot of a middle-aged male administrator with a short beard and glasses, smiling warmly. He is wearing a neat blue collared shirt. The background is a slightly blurred, bright, modern office space. The lighting is soft, natural, and even, conveying a sense of approachability and competence suitable for a corporate or educational setting."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDylFjj6nNpx-6JFGOsPK7OwRyfulOUne9WY-fTq7uA5TKrmZrO_iYsvuxiFXsRbG5GDt3TvLj5i9Ur94ErLqoclozWppteN0LYpCMWwBrHtFSlGx6VZ_dS5zwD7siyQT0jHCYTg4JmRlKEPn6fBRVpQK2IaoS6Nzs9-GsPeIAjZRmP2FIYbZNf1XyhMYJvypACPawacr0CVjE7N4zx626I8sIcZJq97-oKg6CxZCxBEZDLFxQ2B4wKmCHGS0Iwq3f9TAktGqc6lyc"
+            />
+          </div>
+        </div>
+      </header>
+      <!-- Page Content -->
+      <div
+        class="p-margin-desktop flex-1 flex flex-col max-w-container-max mx-auto w-full relative"
+      >
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-stack-lg">
+          <div>
+            <h2 class="text-display-lg font-display-lg text-on-surface mb-1">Inventory</h2>
+            <p class="text-body-md font-body-md text-on-surface-variant">
+              Manage and track all registered educational assets.
+            </p>
+          </div>
+          <!-- Quick Filters / Actions -->
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <select
+                class="appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg pl-4 pr-10 py-2 text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option>All Categories</option>
+                <option>Electronics</option>
+                <option>Furniture</option>
+                <option>Lab Equipment</option>
+              </select>
+              <span
+                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]"
+                >expand_more</span
+              >
+            </div>
+            <div class="relative">
+              <select
+                class="appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg pl-4 pr-10 py-2 text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option>All Status</option>
+                <option>Available</option>
+                <option>In Use</option>
+                <option>Maintenance</option>
+              </select>
+              <span
+                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]"
+                >expand_more</span
+              >
+            </div>
+            <button
+              class="bg-surface-container-lowest border border-outline-variant hover:bg-surface-container-low text-on-surface rounded-lg p-2 flex items-center justify-center transition-colors"
+            >
+              <span class="material-symbols-outlined text-[20px]">filter_list</span>
+            </button>
+          </div>
+        </div>
+        <!-- Advanced Selection Banner (Hidden by default, shown via JS) -->
+        <div
+          class="hidden w-full bg-primary-fixed border border-primary/20 rounded-lg p-3 mb-stack-md flex items-center justify-center gap-4 transition-all duration-300 transform scale-95 opacity-0 origin-top"
+          id="selection-banner"
+        >
+          <p class="text-body-sm font-body-sm text-on-primary-fixed-variant">
+            Se seleccionaron los
+            <strong class="font-label-bold" id="selected-count">10</strong> activos de esta página.
+          </p>
+          <button
+            class="text-label-bold font-label-bold text-primary hover:text-on-primary-fixed-variant underline underline-offset-2 transition-colors"
+          >
+            Seleccionar los 145 activos del Inventario
+          </button>
+        </div>
+        <!-- Floating Contextual Action Bar (Hidden by default) -->
+        <div
+          class="fixed bottom-margin-desktop left-1/2 -translate-x-1/2 bg-surface-container-lowest shadow-[0_20px_25px_-5px_rgba(37,99,235,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] border border-surface-container-high rounded-full px-6 py-3 flex items-center gap-6 z-50 transition-all duration-300 translate-y-20 opacity-0 pointer-events-none"
+          id="bulk-action-bar"
+        >
+          <div class="flex items-center gap-2 border-r border-outline-variant pr-6">
+            <span
+              class="w-6 h-6 rounded-full bg-primary text-on-primary text-label-bold font-label-bold flex items-center justify-center"
+              id="bulk-count"
+              >1</span
+            >
+            <span class="text-body-sm font-body-sm text-on-surface-variant">seleccionados</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-body-sm font-body-sm text-on-surface hover:bg-surface-container-low transition-colors"
+            >
+              <span class="material-symbols-outlined text-[18px]">download</span>
+              Exportar
+            </button>
+            <button
+              class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-body-sm font-body-sm text-on-surface hover:bg-surface-container-low transition-colors"
+            >
+              <span class="material-symbols-outlined text-[18px]">move_location</span>
+              Reubicar
+            </button>
+            <button
+              class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-body-sm font-body-sm text-on-surface hover:bg-surface-container-low transition-colors"
+            >
+              <span class="material-symbols-outlined text-[18px]">person_add</span>
+              Asignar
+            </button>
+            <div class="w-[1px] h-4 bg-outline-variant mx-2"></div>
+            <button
+              class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-body-sm font-body-sm text-error hover:bg-error-container transition-colors"
+            >
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+              Eliminar
+            </button>
+          </div>
+          <button
+            class="ml-2 w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+            id="close-bulk"
+          >
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+        <!-- Inventory Table Card -->
+        <div
+          class="bg-surface-container-lowest rounded-xl border border-surface-container-highest shadow-[0px_1px_3px_rgba(0,0,0,0.05),0px_10px_15px_-3px_rgba(0,0,0,0.03)] overflow-hidden flex-1 flex flex-col"
+        >
+          <div class="table-container overflow-x-auto w-full">
+            <table class="w-full text-left border-collapse min-w-[800px]">
+              <thead>
+                <tr class="border-b border-surface-container-high bg-surface-bright/50">
+                  <th class="p-4 w-12 align-middle">
+                    <input class="custom-checkbox" id="select-all" type="checkbox" />
+                  </th>
+                  <th
+                    class="px-4 py-3 text-label-bold font-label-bold text-secondary uppercase tracking-wider"
+                  >
+                    Código
+                  </th>
+                  <th
+                    class="px-4 py-3 text-label-bold font-label-bold text-secondary uppercase tracking-wider"
+                  >
+                    Activo
+                  </th>
+                  <th
+                    class="px-4 py-3 text-label-bold font-label-bold text-secondary uppercase tracking-wider"
+                  >
+                    Categoría
+                  </th>
+                  <th
+                    class="px-4 py-3 text-label-bold font-label-bold text-secondary uppercase tracking-wider"
+                  >
+                    Ubicación
+                  </th>
+                  <th
+                    class="px-4 py-3 text-label-bold font-label-bold text-secondary uppercase tracking-wider"
+                  >
+                    Estado
+                  </th>
+                  <th
+                    class="px-4 py-3 text-label-bold font-label-bold text-secondary uppercase tracking-wider text-right"
+                  >
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-surface-container-high" id="table-body">
+                <!-- Row 1 -->
+                <tr
+                  class="hover:bg-surface-container-lowest/50 transition-colors group h-14 bg-surface-container-lowest asset-row"
+                >
+                  <td class="p-4 align-middle">
+                    <input class="custom-checkbox row-checkbox" type="checkbox" />
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <span
+                      class="text-label-md font-label-md text-on-surface-variant font-mono bg-surface-container-low px-2 py-1 rounded"
+                      >AST-2023-001</span
+                    >
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-8 h-8 rounded bg-surface-container-low flex items-center justify-center text-secondary border border-outline-variant/30"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">laptop_mac</span>
+                      </div>
+                      <div>
+                        <p class="text-body-sm font-body-sm font-medium text-on-surface">
+                          MacBook Pro 14" M2
+                        </p>
+                        <p class="text-label-md font-label-md text-on-surface-variant">Laptop</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <span class="text-body-sm font-body-sm text-on-surface-variant"
+                      >Electronics</span
+                    >
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div class="flex items-center gap-1.5 text-on-surface-variant">
+                      <span class="material-symbols-outlined text-[16px]">location_on</span>
+                      <span class="text-body-sm font-body-sm">IT Dept, Room 302</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container/50 text-on-secondary-container border border-secondary-container"
+                    >
+                      <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                      <span class="text-label-md font-label-md">In Use</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle text-right">
+                    <div
+                      class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <button
+                        class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+                        title="Edit"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                      </button>
+                      <button
+                        class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+                        title="Details"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Row 2 -->
+                <tr
+                  class="hover:bg-surface-container-lowest/50 transition-colors group h-14 bg-surface-container-lowest asset-row"
+                >
+                  <td class="p-4 align-middle">
+                    <input class="custom-checkbox row-checkbox" type="checkbox" />
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <span
+                      class="text-label-md font-label-md text-on-surface-variant font-mono bg-surface-container-low px-2 py-1 rounded"
+                      >AST-2023-045</span
+                    >
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-8 h-8 rounded bg-surface-container-low flex items-center justify-center text-secondary border border-outline-variant/30"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">chair_alt</span>
+                      </div>
+                      <div>
+                        <p class="text-body-sm font-body-sm font-medium text-on-surface">
+                          Ergonomic Chair Pro
+                        </p>
+                        <p class="text-label-md font-label-md text-on-surface-variant">Furniture</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <span class="text-body-sm font-body-sm text-on-surface-variant">Furniture</span>
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div class="flex items-center gap-1.5 text-on-surface-variant">
+                      <span class="material-symbols-outlined text-[16px]">location_on</span>
+                      <span class="text-body-sm font-body-sm">Main Storage</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]"
+                    >
+                      <div class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></div>
+                      <span class="text-label-md font-label-md">Available</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle text-right">
+                    <div
+                      class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <button
+                        class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+                        title="Edit"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                      </button>
+                      <button
+                        class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+                        title="Details"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Row 3 -->
+                <tr
+                  class="hover:bg-surface-container-lowest/50 transition-colors group h-14 bg-surface-container-lowest asset-row"
+                >
+                  <td class="p-4 align-middle">
+                    <input class="custom-checkbox row-checkbox" type="checkbox" />
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <span
+                      class="text-label-md font-label-md text-on-surface-variant font-mono bg-surface-container-low px-2 py-1 rounded"
+                      >AST-2022-112</span
+                    >
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-8 h-8 rounded bg-surface-container-low flex items-center justify-center text-secondary border border-outline-variant/30"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">science</span>
+                      </div>
+                      <div>
+                        <p class="text-body-sm font-body-sm font-medium text-on-surface">
+                          Digital Microscope X400
+                        </p>
+                        <p class="text-label-md font-label-md text-on-surface-variant">
+                          Lab Equipment
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <span class="text-body-sm font-body-sm text-on-surface-variant"
+                      >Lab Equipment</span
+                    >
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div class="flex items-center gap-1.5 text-on-surface-variant">
+                      <span class="material-symbols-outlined text-[16px]">location_on</span>
+                      <span class="text-body-sm font-body-sm">Science Lab B</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle">
+                    <div
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#fffbeb] text-[#92400e] border border-[#fde68a]"
+                    >
+                      <div class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></div>
+                      <span class="text-label-md font-label-md">Maintenance</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 align-middle text-right">
+                    <div
+                      class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <button
+                        class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+                        title="Edit"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                      </button>
+                      <button
+                        class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+                        title="Details"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination Footer -->
+          <div
+            class="px-4 py-3 border-t border-surface-container-high bg-surface-bright flex items-center justify-between mt-auto"
+          >
+            <span class="text-label-md font-label-md text-on-surface-variant"
+              >Showing 1 to 10 of 145 entries</span
+            >
+            <div class="flex items-center gap-1">
+              <button
+                class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled=""
+              >
+                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+              <button
+                class="w-8 h-8 rounded border border-primary bg-primary text-on-primary flex items-center justify-center text-label-md font-label-bold"
+              >
+                1
+              </button>
+              <button
+                class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low text-label-md font-label-bold"
+              >
+                2
+              </button>
+              <button
+                class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low text-label-md font-label-bold"
+              >
+                3
+              </button>
+              <span class="text-on-surface-variant px-1">...</span>
+              <button
+                class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low text-label-md font-label-bold"
+              >
+                15
+              </button>
+              <button
+                class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low"
+              >
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const selectAll = document.getElementById('select-all');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const assetRows = document.querySelectorAll('.asset-row');
+
+        const selectionBanner = document.getElementById('selection-banner');
+        const bulkActionBar = document.getElementById('bulk-action-bar');
+        const bulkCount = document.getElementById('bulk-count');
+        const closeBulkBtn = document.getElementById('close-bulk');
+
+        let selectedCount = 0;
+        const totalRows = rowCheckboxes.length;
+
+        function updateUI() {
+          // Update select all state
+          if (selectedCount === 0) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+          } else if (selectedCount === totalRows) {
+            selectAll.checked = true;
+            selectAll.indeterminate = false;
+          } else {
+            selectAll.checked = false;
+            selectAll.indeterminate = true;
+          }
+
+          // Show/hide bulk action bar
+          if (selectedCount > 0) {
+            bulkCount.textContent = selectedCount;
+            bulkActionBar.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+          } else {
+            bulkActionBar.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            // Ensure banner is hidden if action bar is hidden
+            hideBanner();
+          }
+
+          // Show banner only if ALL on current page are selected
+          if (selectedCount === totalRows) {
+            showBanner();
+          } else {
+            hideBanner();
+          }
+
+          // Style selected rows
+          rowCheckboxes.forEach((cb, index) => {
+            if (cb.checked) {
+              assetRows[index].classList.add('bg-primary-fixed/20');
+              assetRows[index].classList.remove('bg-surface-container-lowest');
+            } else {
+              assetRows[index].classList.remove('bg-primary-fixed/20');
+              assetRows[index].classList.add('bg-surface-container-lowest');
+            }
+          });
+        }
+
+        function showBanner() {
+          selectionBanner.classList.remove('hidden');
+          // Small delay to allow display:block to apply before animating opacity/transform
+          requestAnimationFrame(() => {
+            selectionBanner.classList.remove('scale-95', 'opacity-0');
+          });
+        }
+
+        function hideBanner() {
+          selectionBanner.classList.add('scale-95', 'opacity-0');
+          // Wait for transition to finish before hiding
+          setTimeout(() => {
+            if (selectedCount !== totalRows) {
+              selectionBanner.classList.add('hidden');
+            }
+          }, 300);
+        }
+
+        // Select All Header Checkbox
+        selectAll.addEventListener('change', (e) => {
+          const isChecked = e.target.checked;
+          rowCheckboxes.forEach((cb) => (cb.checked = isChecked));
+          selectedCount = isChecked ? totalRows : 0;
+          updateUI();
+        });
+
+        // Individual Row Checkboxes
+        rowCheckboxes.forEach((cb) => {
+          cb.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              selectedCount++;
+            } else {
+              selectedCount--;
+            }
+            updateUI();
+          });
+        });
+
+        // Close bulk action bar manually
+        closeBulkBtn.addEventListener('click', () => {
+          rowCheckboxes.forEach((cb) => (cb.checked = false));
+          selectedCount = 0;
+          updateUI();
+        });
+      });
+    </script>
+  </body>
+</html>
