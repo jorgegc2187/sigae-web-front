@@ -70,7 +70,7 @@ export class InventoryDetailComponent {
     return [
       [
         { label: 'Nombre del activo', value: asset.name },
-        { label: 'Codigo SIGAE', value: asset.code, mono: true },
+        { label: 'Codigo interno', value: asset.code, mono: true },
       ],
       [
         { label: 'Categoria', value: asset.categoryName },
@@ -81,11 +81,10 @@ export class InventoryDetailComponent {
         { label: 'Serial number', value: asset.serial ?? null },
       ],
       [
-        { label: 'Barcode', value: asset.barcode ?? null },
         { label: 'Fecha de adquisicion', value: this.formatDate(asset.acquisitionDate) ?? null },
+        { label: 'Proveedor', value: asset.supplierName ?? null },
       ],
       [
-        { label: 'Proveedor', value: asset.supplierName ?? null },
         { label: 'Disponibilidad', value: asset.availableForLoan ? 'Disponible para prestamo' : 'No disponible para prestamo' },
       ],
     ];
@@ -402,7 +401,6 @@ export class InventoryDetailComponent {
       ['Codigo del activo actualizado.', 'Cambio de codigo'],
       ['Proveedor del activo actualizado.', 'Cambio de proveedor'],
       ['Serial number del activo actualizado.', 'Cambio de serial number'],
-      ['Barcode del activo actualizado.', 'Cambio de barcode'],
       ['Fecha de adquisicion del activo actualizada.', 'Cambio de fecha de adquisicion'],
       ['Notas del activo actualizadas.', 'Cambio de observaciones'],
       ['Tipo de activo actualizado.', 'Cambio de tipo'],

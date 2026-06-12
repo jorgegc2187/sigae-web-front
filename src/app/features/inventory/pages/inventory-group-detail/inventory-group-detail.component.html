@@ -25,7 +25,7 @@
             <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
             <app-search-input
               widthClass="w-full"
-              placeholder="Buscar por código SIGAE o ubicación..."
+              placeholder="Buscar por código interno o ubicación..."
               [value]="searchQuery()"
               (valueChange)="updateQuery($event)"
             />
@@ -88,7 +88,7 @@
                   aria-label="Seleccionar todas las unidades visibles"
                 />
               </th>
-              <th class="px-4 py-3">Código SIGAE</th>
+              <th class="px-4 py-3">Código interno</th>
               <th class="px-4 py-3">Ubicación específica</th>
               <th class="px-4 py-3">Estado</th>
               <th class="px-4 py-3">Última inspección</th>

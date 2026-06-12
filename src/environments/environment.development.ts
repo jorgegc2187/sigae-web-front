@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:9301/api',
-  appName: 'SIGAE',
+  appName: 'Sistema de Gestión de Activos',
 } as const;

@@ -16,7 +16,6 @@ export interface InventoryAsset {
   supplierName?: string;
   condition: AssetCondition;
   serial: string | null;
-  barcode: string | null;
   acquisitionDate: string;
   observations?: string;
   attributes: Record<string, string>;
@@ -85,7 +84,6 @@ export interface AssetResponse {
   supplierName: string | null;
   condition: AssetCondition;
   serialNumber: string | null;
-  barcode: string | null;
   acquisitionDate: string | null;
   decommissionedAt: string | null;
   notes: string | null;
@@ -103,7 +101,6 @@ export interface AssetRequest {
   supplierId: string | null;
   condition: AssetRequestCondition;
   serialNumber: string | null;
-  barcode: string | null;
   acquisitionDate: string | null;
   notes: string | null;
   attributeValues: Array<{

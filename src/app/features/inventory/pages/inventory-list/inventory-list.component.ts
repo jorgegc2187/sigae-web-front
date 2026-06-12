@@ -113,7 +113,6 @@ export class InventoryListComponent {
         || asset.name.toLowerCase().includes(query)
         || asset.code.toLowerCase().includes(query)
         || asset.serial?.toLowerCase().includes(query)
-        || asset.barcode?.toLowerCase().includes(query)
         || asset.locationName.toLowerCase().includes(query);
       const matchesCategory = categoryId === 'all' || asset.categoryId === categoryId;
       const matchesStatus = status === 'all' || asset.condition === status;

@@ -439,7 +439,6 @@ export class InventoryFormComponent implements OnDestroy {
       supplierId: value.supplierId || null,
       condition: this.assetsService.toApiCondition(value.condition),
       serialNumber: this.isEdit() ? this.existingAsset()?.serial ?? null : null,
-      barcode: this.isEdit() ? this.existingAsset()?.barcode ?? null : null,
       acquisitionDate: value.acquisitionDate || null,
       notes: this.normalizeOptional(value.observations),
       removedAttachmentIds: this.removedAttachmentIds(),

@@ -176,7 +176,6 @@ export class AssetsService {
       supplierName: asset.supplierName ?? undefined,
       condition,
       serial: asset.serialNumber,
-      barcode: asset.barcode,
       acquisitionDate: asset.acquisitionDate ?? '',
       observations: asset.notes ?? '',
       attributes: Object.fromEntries(
