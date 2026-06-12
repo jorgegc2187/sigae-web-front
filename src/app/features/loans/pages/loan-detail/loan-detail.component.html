@@ -10,31 +10,40 @@
       </div>
     </section>
   } @else if (loan(); as loanDetail) {
-    <div class="breadcrumbs p-0 text-sm text-base-content/60">
-      <ul>
-        <li><a routerLink="/loans" class="transition-colors hover:text-primary">Préstamos</a></li>
-        <li class="font-medium text-base-content">Detalle del préstamo</li>
-      </ul>
-    </div>
+    <header
+      class="flex flex-col gap-4 border-b border-base-300/70 pb-6 md:flex-row md:items-start md:justify-between"
+    >
+      <div class="flex items-start gap-3">
+        <a
+          routerLink="/loans"
+          class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-primary"
+          aria-label="Volver a préstamos"
+        >
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+        </a>
 
-    <header class="flex flex-col gap-5 border-b border-base-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
-      <div class="space-y-3">
-        <div class="flex flex-col gap-3 md:flex-row md:items-center">
-          <h1 class="text-2xl font-bold tracking-tight text-base-content md:text-3xl">{{ pageTitle() }}</h1>
-          <app-loan-status-badge [status]="loanDetail.status" />
+        <div class="min-w-0 space-y-2">
+          <h1 class="text-[24px] font-bold leading-tight text-base-content md:text-[28px]">
+            {{ pageTitle() }}
+          </h1>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="rounded-md bg-primary/10 px-2 py-0.5 text-[12px] font-medium text-primary">
+              {{ loanDetail.code }}
+            </span>
+            <app-loan-status-badge [status]="loanDetail.status" />
+          </div>
         </div>
-        <p class="max-w-2xl text-sm leading-6 text-base-content/60">
-          Consulta los datos del préstamo, activos asignados, adjuntos y actividad registrada.
-        </p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-2.5">
         <app-action-button
           [label]="actionLabel()"
           [icon]="loanDetail.status === 'Devuelto' ? 'check_circle' : 'assignment_return'"
           [variant]="loanDetail.status === 'Devuelto' ? 'neutral' : 'primary'"
           [disabled]="loanDetail.status === 'Devuelto' || isReturning()"
           [loading]="isReturning()"
+          size="sm"
           className="shadow-sm"
           (clicked)="onReturnLoan()"
         />
