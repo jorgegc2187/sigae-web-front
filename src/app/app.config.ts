@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  LOCALE_ID,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
@@ -29,6 +30,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideAppInitializer(() => inject(AuthService).initializeSession()),
     { provide: APP_CONFIG, useValue: environment },
+    { provide: LOCALE_ID, useValue: 'es-PE' },
     { provide: TitleStrategy, useClass: BrandingTitleStrategy },
   ]
 };

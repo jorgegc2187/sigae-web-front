@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { Params } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { BrandingService } from '../../services/branding.service';
@@ -10,6 +11,7 @@ interface SidebarNavItem {
   label: string;
   icon: string;
   route: string;
+  queryParams?: Params;
   exact?: boolean;
   adminOnly?: boolean;
   showDividerBefore?: boolean;
@@ -49,7 +51,7 @@ export class SidebarComponent {
   readonly navItems = computed(() =>
     [
       { label: 'Dashboard', icon: 'grid_view', route: '/dashboard', exact: true },
-      { label: 'Inventario', icon: 'inventory_2', route: '/inventory' },
+      { label: 'Inventario', icon: 'inventory_2', route: '/inventory', queryParams: { view: 'list' } },
       { label: 'Préstamos', icon: 'swap_horiz', route: '/loans', badgeCount: this.shellNotificationsService.loanAttentionCount() || undefined },
       { label: 'Reportes', icon: 'bar_chart', route: '/reports' },
       { label: 'Categorías y Tipos', icon: 'category', route: '/settings/categories', adminOnly: true, showDividerBefore: true },
