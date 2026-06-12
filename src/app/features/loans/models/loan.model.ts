@@ -48,6 +48,7 @@ export interface LoanSummary {
 
 export interface LoanDetail extends LoanSummary {
   completedDate: string | null;
+  createdByName: string | null;
   notes?: string;
   signatureDataUrl: string | null;
   attachments: LoanAttachmentSummary[];

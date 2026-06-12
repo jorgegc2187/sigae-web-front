@@ -116,6 +116,10 @@
                 <p class="mb-1 text-[11px] font-bold uppercase tracking-wider text-base-content/50">Fecha de vencimiento</p>
                 <p class="text-sm font-medium leading-6 text-base-content">{{ formatCardDate(loanDetail.dueDate) }}</p>
               </div>
+              <div>
+                <p class="mb-1 text-[11px] font-bold uppercase tracking-wider text-base-content/50">Registrado por</p>
+                <p class="text-sm font-medium leading-6 text-base-content">{{ loanDetail.createdByName || 'No registrado' }}</p>
+              </div>
             </div>
 
             <div class="mt-6">
@@ -251,6 +255,7 @@
                   <div class="space-y-1">
                     <p class="text-sm font-semibold text-base-content">{{ activity.title }}</p>
                     <p class="text-sm leading-6 text-base-content/65">{{ activity.description }}</p>
+                    <p class="text-xs font-medium text-base-content/55">Por {{ activityActorLabel(activity) }}</p>
                     <time class="text-[11px] font-bold uppercase tracking-wider text-base-content/40">
                       {{ formatActivityDate(activity.timestamp) }}, {{ formatActivityTime(activity.timestamp) }}
                     </time>

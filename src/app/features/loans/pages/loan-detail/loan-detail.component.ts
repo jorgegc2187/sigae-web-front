@@ -156,6 +156,11 @@ export class LoanDetailComponent {
       .toUpperCase();
   }
 
+  activityActorLabel(activity: LoanActivity): string {
+    const actor = activity.actor?.trim();
+    return actor && actor.length > 0 ? actor : 'No registrado';
+  }
+
   getAssetStatusClass(status: LoanAssetStatus): string {
     const map: Record<LoanAssetStatus, string> = {
       Bueno: 'border-success/20 bg-success/10 text-success',
