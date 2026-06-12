@@ -38,26 +38,53 @@
 
       @if (notificationsOpen()) {
         <div class="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[22rem] overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-2xl shadow-base-content/10">
-          <div class="flex items-center justify-between border-b border-base-300 px-4 py-3">
+          <div class="flex items-center justify-between border-b border-base-300 px-4 py-4">
             <p class="text-sm font-semibold text-base-content">Notificaciones</p>
             <button
               type="button"
-              class="flex h-8 w-8 items-center justify-center rounded-lg text-base-content/45 transition-colors hover:bg-base-200 hover:text-base-content"
-              aria-label="Cerrar notificaciones"
-              (click)="closeNotifications()"
+              class="text-[11px] font-semibold uppercase tracking-[0.08em] text-primary transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+              [disabled]="totalNotifications() === 0 || notificationsMarkAllLoading()"
+              (click)="markAllNotifications()"
             >
-              <span class="material-symbols-outlined text-[18px]">close</span>
+              Marcar todas
+            </button>
+          </div>
+
+          <div class="flex border-b border-base-300">
+            <button
+              type="button"
+              class="flex-1 border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors"
+              [class.border-primary]="activeNotificationFilter() === 'all'"
+              [class.text-primary]="activeNotificationFilter() === 'all'"
+              [class.border-transparent]="activeNotificationFilter() !== 'all'"
+              [class.text-base-content/60]="activeNotificationFilter() !== 'all'"
+              [attr.aria-selected]="activeNotificationFilter() === 'all'"
+              (click)="onNotificationFilterChange('all')"
+            >
+              Todas
+            </button>
+            <button
+              type="button"
+              class="flex-1 border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors"
+              [class.border-primary]="activeNotificationFilter() === 'unread'"
+              [class.text-primary]="activeNotificationFilter() === 'unread'"
+              [class.border-transparent]="activeNotificationFilter() !== 'unread'"
+              [class.text-base-content/60]="activeNotificationFilter() !== 'unread'"
+              [attr.aria-selected]="activeNotificationFilter() === 'unread'"
+              (click)="onNotificationFilterChange('unread')"
+            >
+              No leídas
             </button>
           </div>
 
           @if (notificationsInitialLoadPending()) {
             <div class="flex items-center gap-3 px-4 py-6 text-sm text-base-content/60">
               <span class="loading loading-spinner loading-sm text-primary"></span>
-              Cargando alertas activas...
+              Cargando notificaciones...
             </div>
           } @else if (notificationsError() && !notificationsHasSnapshot()) {
             <div class="space-y-3 px-4 py-5">
-              <p class="text-sm text-base-content/70">No se pudieron cargar las notificaciones activas.</p>
+              <p class="text-sm text-base-content/70">No se pudieron cargar las notificaciones.</p>
               <button
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg border border-base-300 px-3 py-2 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200"
@@ -72,33 +99,31 @@
               <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-base-200 text-base-content/40">
                 <span class="material-symbols-outlined text-[24px]">notifications_none</span>
               </div>
-              <p class="text-sm font-medium text-base-content/75">No hay alertas activas</p>
-              <p class="mt-1 text-xs text-base-content/50">La campana mostrará vencimientos y alertas de seguridad.</p>
+              <p class="text-sm font-medium text-base-content/75">
+                {{ activeNotificationFilter() === 'unread' ? 'No hay notificaciones sin leer' : 'No hay notificaciones disponibles' }}
+              </p>
             </div>
           } @else {
-            <div class="max-h-[24rem] overflow-y-auto">
+            <div class="max-h-[25rem] overflow-y-auto px-2 py-2">
               @for (item of notifications(); track item.id) {
-                <button
-                  type="button"
-                  class="flex w-full items-start gap-3 border-b border-base-200 px-4 py-3 text-left transition-colors hover:bg-base-200/70"
-                  (click)="onNotificationSelect(item)"
-                >
-                  <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" [class]="notificationToneClass(item)">
-                    <span class="material-symbols-outlined text-[19px]">{{ notificationIcon(item) }}</span>
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-start justify-between gap-3">
-                      <p class="text-sm font-semibold leading-5 text-base-content">{{ item.title }}</p>
-                      <span class="shrink-0 text-[11px] text-base-content/45">
-                        {{ item.occurredAt | date: 'dd MMM, HH:mm' : 'UTC' : 'es-PE' }}
-                      </span>
-                    </div>
-                    <p class="mt-1 text-sm leading-5 text-base-content/65">{{ item.message }}</p>
-                  </div>
-                </button>
+                <app-notification-list-item
+                  [item]="item"
+                  [compact]="true"
+                  (selected)="onNotificationSelect($event)"
+                />
               }
             </div>
           }
+
+          <div class="border-t border-base-300 bg-base-200/40 px-3 py-3 text-center">
+            <button
+              type="button"
+              class="text-sm font-semibold text-primary transition-opacity hover:opacity-80"
+              (click)="openNotificationsHistory()"
+            >
+              Ver todo el historial
+            </button>
+          </div>
         </div>
       }
     </div>
@@ -114,3 +139,126 @@
     </div>
   </div>
 </header>
+
+@if (notificationsDrawerOpen()) {
+  <div class="fixed inset-0 z-[60]">
+    <button
+      type="button"
+      class="absolute inset-0 bg-base-content/35 backdrop-blur-[1px]"
+      aria-label="Cerrar historial de notificaciones"
+      (click)="closeNotificationsHistory()"
+    ></button>
+
+    <aside class="absolute right-0 top-0 flex h-full w-full max-w-[26rem] flex-col border-l border-base-300 bg-base-100 shadow-2xl shadow-base-content/20">
+      <div class="flex items-center justify-between border-b border-base-300 px-5 py-4">
+        <div>
+          <h3 class="text-base font-semibold text-base-content">Notificaciones</h3>
+          <p class="mt-1 text-xs text-base-content/55">Historial reciente y alertas activas</p>
+        </div>
+        <button
+          type="button"
+          class="flex h-9 w-9 items-center justify-center rounded-xl text-base-content/50 transition-colors hover:bg-base-200 hover:text-base-content"
+          aria-label="Cerrar historial de notificaciones"
+          (click)="closeNotificationsHistory()"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between border-b border-base-300 px-5 py-3">
+        <div class="flex rounded-xl bg-base-200 p-1">
+          <button
+            type="button"
+            class="rounded-lg px-3 py-2 text-xs font-semibold transition-colors"
+            [class.bg-base-100]="activeNotificationFilter() === 'all'"
+            [class.text-primary]="activeNotificationFilter() === 'all'"
+            [class.shadow-sm]="activeNotificationFilter() === 'all'"
+            [class.text-base-content/60]="activeNotificationFilter() !== 'all'"
+            [attr.aria-selected]="activeNotificationFilter() === 'all'"
+            (click)="onNotificationFilterChange('all')"
+          >
+            Todas
+          </button>
+          <button
+            type="button"
+            class="rounded-lg px-3 py-2 text-xs font-semibold transition-colors"
+            [class.bg-base-100]="activeNotificationFilter() === 'unread'"
+            [class.text-primary]="activeNotificationFilter() === 'unread'"
+            [class.shadow-sm]="activeNotificationFilter() === 'unread'"
+            [class.text-base-content/60]="activeNotificationFilter() !== 'unread'"
+            [attr.aria-selected]="activeNotificationFilter() === 'unread'"
+            (click)="onNotificationFilterChange('unread')"
+          >
+            No leídas
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="text-xs font-semibold uppercase tracking-[0.08em] text-primary transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+          [disabled]="totalNotifications() === 0 || notificationsMarkAllLoading()"
+          (click)="markAllNotifications()"
+        >
+          Marcar todas
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-4 py-4">
+        @if (notificationsDrawerLoading() && drawerNotifications().length === 0) {
+          <div class="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-100 px-4 py-5 text-sm text-base-content/60">
+            <span class="loading loading-spinner loading-sm text-primary"></span>
+            Cargando historial...
+          </div>
+        } @else if (notificationsError() && drawerNotifications().length === 0) {
+          <div class="space-y-3 rounded-2xl border border-base-300 bg-base-100 px-4 py-5">
+            <p class="text-sm text-base-content/70">No se pudo cargar el historial de notificaciones.</p>
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-lg border border-base-300 px-3 py-2 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200"
+              (click)="openNotificationsHistory()"
+            >
+              <span class="material-symbols-outlined text-[18px]">refresh</span>
+              Reintentar
+            </button>
+          </div>
+        } @else if (notificationsDrawerEmpty()) {
+          <div class="rounded-2xl border border-dashed border-base-300 bg-base-100 px-4 py-10 text-center">
+            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-base-200 text-base-content/40">
+              <span class="material-symbols-outlined text-[24px]">notifications_none</span>
+            </div>
+            <p class="text-sm font-medium text-base-content/75">
+              {{ activeNotificationFilter() === 'unread' ? 'No hay notificaciones sin leer' : 'No hay notificaciones registradas' }}
+            </p>
+          </div>
+        } @else {
+          <div class="space-y-3">
+            @for (item of drawerNotifications(); track item.id) {
+              <app-notification-list-item
+                [item]="item"
+                (selected)="onNotificationSelect($event)"
+              />
+            }
+          </div>
+
+          @if (notificationsDrawerHasMore()) {
+            <div class="pt-4 text-center">
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl border border-base-300 px-4 py-2 text-sm font-medium text-base-content/75 transition-colors hover:bg-base-200"
+                [disabled]="notificationsDrawerLoading()"
+                (click)="loadMoreNotificationsHistory()"
+              >
+                @if (notificationsDrawerLoading()) {
+                  <span class="loading loading-spinner loading-xs text-primary"></span>
+                } @else {
+                  <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                }
+                Ver más
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </aside>
+  </div>
+}

@@ -1,20 +1,20 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, output } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { BrandingService } from '../../services/branding.service';
 import { ShellNotificationsService } from '../notifications/shell-notifications.service';
-import { LiveNotificationItem } from '../notifications/live-notifications.model';
+import { NotificationFilter, NotificationItem } from '../notifications/notifications.model';
+import { NotificationListItemComponent } from '../../../shared/ui/notification-list-item/notification-list-item.component';
 
 @Component({
   selector: 'app-header',
-  imports: [DatePipe],
+  imports: [NotificationListItemComponent],
   templateUrl: './header.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:click)': 'onDocumentClick($event)',
-    '(document:keydown.escape)': 'closeNotifications()',
+    '(document:keydown.escape)': 'closeNotificationSurfaces()',
   },
 })
 export class HeaderComponent {
@@ -35,12 +35,19 @@ export class HeaderComponent {
 
   readonly pageTitle = computed(() => this.activeRouteData()?.['pageTitle'] ?? this.brandingService.systemName());
   readonly pageSubtitle = computed(() => this.activeRouteData()?.['pageSubtitle'] ?? '');
-  readonly notificationsOpen = signal(false);
   readonly notifications = this.shellNotificationsService.items;
+  readonly drawerNotifications = this.shellNotificationsService.drawerItems;
+  readonly activeNotificationFilter = this.shellNotificationsService.activeFilter;
   readonly notificationsInitialLoadPending = this.shellNotificationsService.initialLoadPending;
   readonly notificationsHasSnapshot = this.shellNotificationsService.hasSnapshot;
   readonly notificationsError = this.shellNotificationsService.hasError;
-  readonly totalNotifications = this.shellNotificationsService.totalActiveCount;
+  readonly notificationsOpen = this.shellNotificationsService.isPanelOpen;
+  readonly notificationsDrawerOpen = this.shellNotificationsService.isDrawerOpen;
+  readonly notificationsDrawerLoading = this.shellNotificationsService.isDrawerLoading;
+  readonly notificationsDrawerHasMore = this.shellNotificationsService.drawerHasMore;
+  readonly notificationsDrawerEmpty = this.shellNotificationsService.drawerEmpty;
+  readonly notificationsMarkAllLoading = this.shellNotificationsService.isMarkingAll;
+  readonly totalNotifications = this.shellNotificationsService.unreadCount;
   readonly notificationBadgeLabel = computed(() => {
     const count = this.totalNotifications();
     return count > 99 ? '99+' : String(count);
@@ -50,12 +57,17 @@ export class HeaderComponent {
     this.menuClick.emit();
   }
 
-  toggleNotifications() {
-    this.notificationsOpen.update((current) => !current);
+  async toggleNotifications() {
+    await this.shellNotificationsService.togglePanel();
   }
 
   closeNotifications() {
-    this.notificationsOpen.set(false);
+    this.shellNotificationsService.closePanel();
+  }
+
+  closeNotificationSurfaces() {
+    this.shellNotificationsService.closePanel();
+    this.shellNotificationsService.closeDrawer();
   }
 
   onDocumentClick(event: MouseEvent) {
@@ -77,33 +89,28 @@ export class HeaderComponent {
     await this.shellNotificationsService.reload();
   }
 
-  async onNotificationSelect(item: LiveNotificationItem) {
-    this.closeNotifications();
-    await this.router.navigateByUrl(item.route);
+  async onNotificationSelect(item: NotificationItem) {
+    await this.shellNotificationsService.openNotification(item);
   }
 
-  notificationIcon(item: LiveNotificationItem): string {
-    switch (item.type) {
-      case 'loan_overdue':
-        return 'warning';
-      case 'loan_due_today':
-        return 'event_upcoming';
-      case 'user_invitation_pending':
-        return 'mail';
-      case 'user_mfa_pending':
-        return 'verified_user';
-    }
+  async onNotificationFilterChange(filterValue: NotificationFilter) {
+    await this.shellNotificationsService.setFilter(filterValue);
   }
 
-  notificationToneClass(item: LiveNotificationItem): string {
-    switch (item.severity) {
-      case 'error':
-        return 'bg-error/10 text-error';
-      case 'warning':
-        return 'bg-warning/15 text-warning';
-      default:
-        return 'bg-info/10 text-info';
-    }
+  async openNotificationsHistory() {
+    await this.shellNotificationsService.openDrawer();
+  }
+
+  closeNotificationsHistory() {
+    this.shellNotificationsService.closeDrawer();
+  }
+
+  async markAllNotifications() {
+    await this.shellNotificationsService.markAllAsRead();
+  }
+
+  async loadMoreNotificationsHistory() {
+    await this.shellNotificationsService.loadMoreDrawer();
   }
 
   private getDeepestRouteData() {
