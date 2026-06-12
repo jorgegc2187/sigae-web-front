@@ -1,148 +1,383 @@
 <div class="space-y-6">
-  <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
-    <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-      <div class="flex flex-1 flex-wrap items-end gap-4">
-        <div class="min-w-[260px] flex-1">
-          <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
-          <app-search-input
-            widthClass="w-full"
-            placeholder="Buscar por nombre, marca o modelo..."
-            [value]="query()"
-            (valueChange)="updateQuery($event)"
-          />
-        </div>
+  <div class="border-b border-base-300">
+    <div class="flex gap-6 overflow-x-auto">
+      <button
+        type="button"
+        class="shrink-0 border-b-2 pb-3 text-sm font-medium transition-colors"
+        [class.border-primary]="currentView() === 'list'"
+        [class.text-primary]="currentView() === 'list'"
+        [class.font-semibold]="currentView() === 'list'"
+        [class.border-transparent]="currentView() !== 'list'"
+        [class.text-base-content/65]="currentView() !== 'list'"
+        [class.hover:text-primary]="currentView() !== 'list'"
+        (click)="setActiveView('list')"
+      >
+        Lista completa
+      </button>
+      <button
+        type="button"
+        class="shrink-0 border-b-2 pb-3 text-sm font-medium transition-colors"
+        [class.border-primary]="currentView() === 'grouped'"
+        [class.text-primary]="currentView() === 'grouped'"
+        [class.font-semibold]="currentView() === 'grouped'"
+        [class.border-transparent]="currentView() !== 'grouped'"
+        [class.text-base-content/65]="currentView() !== 'grouped'"
+        [class.hover:text-primary]="currentView() !== 'grouped'"
+        (click)="setActiveView('grouped')"
+      >
+        Agrupados
+      </button>
+    </div>
+  </div>
 
-        <div class="min-w-[220px] flex-1">
-          <app-select-field
-            label="Categoría"
-            appearance="toolbar"
-            placeholder="Todas las categorías"
-            [options]="categoryOptions()"
-            [value]="categoryId()"
-            (valueChange)="updateCategory($event)"
-          />
-        </div>
-
-        <button
-          type="button"
-          class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
-          (click)="clearFilters()"
-        >
-          <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
-          Limpiar Filtros
-        </button>
-      </div>
-
-      <div class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
-        @if (hasSelectedGroups()) {
-          <div class="animate-in fade-in slide-in-from-top-1 duration-200 ease-out">
-            <app-action-button
-              label="Imprimir tarjetas"
-              icon="print"
-              variant="outline"
-              hostClass="w-full xl:w-auto"
-              (clicked)="printSelectedLabels()"
+  @if (currentView() === 'grouped') {
+    <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div class="flex flex-1 flex-wrap items-end gap-4">
+          <div class="min-w-[260px] flex-1">
+            <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
+            <app-search-input
+              widthClass="w-full"
+              placeholder="Buscar por nombre, marca o modelo..."
+              [value]="query()"
+              (valueChange)="updateQuery($event)"
             />
           </div>
-        }
-        <app-action-button
-          label="Escanear QR"
-          icon="qr_code_scanner"
-          variant="outline"
-          hostClass="w-full xl:w-auto"
-          (clicked)="openQrScanner()"
-        />
-        <app-action-button
-          label="Registrar activo"
-          icon="add"
-          routerLink="/inventory/new"
-          hostClass="w-full xl:w-auto"
-        />
-      </div>
-    </div>
-  </section>
 
-  <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
-    <div class="overflow-x-auto">
-      <table class="w-full min-w-[920px] border-collapse text-left">
-        <thead>
-          <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
-            <th class="w-12 px-4 py-3 text-center">
-              <input
-                type="checkbox"
-                class="checkbox checkbox-sm border border-base-300"
-                [checked]="areAllVisibleSelected()"
-                (change)="toggleSelectAll($any($event.target).checked)"
-                aria-label="Seleccionar todas las familias visibles"
+          <div class="min-w-[220px] flex-1">
+            <app-select-field
+              label="Categoría"
+              appearance="toolbar"
+              placeholder="Todas las categorías"
+              [options]="categoryOptions()"
+              [value]="categoryId()"
+              (valueChange)="updateCategory($event)"
+            />
+          </div>
+
+          <button
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
+            (click)="clearFilters()"
+          >
+            <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+            Limpiar Filtros
+          </button>
+        </div>
+
+        <div
+          class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0"
+        >
+          @if (hasSelectedGroups()) {
+            <div class="animate-in fade-in slide-in-from-top-1 duration-200 ease-out">
+              <app-action-button
+                label="Imprimir tarjetas"
+                icon="print"
+                variant="outline"
+                hostClass="w-full xl:w-auto"
+                (clicked)="printSelectedLabels()"
               />
-            </th>
-            <th class="px-4 py-3">Nombre del Activo</th>
-            <th class="px-4 py-3">Categoría</th>
-            <th class="px-4 py-3">Cantidad Total</th>
-            <th class="px-4 py-3">Último Ingreso</th>
-            <th class="px-4 py-3 text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm">
-          @for (group of visibleGroups(); track group.groupId) {
-            <tr class="group border-b border-base-300 last:border-b-0 hover:bg-base-200/20">
-              <td class="px-4 py-3 text-center">
+            </div>
+          }
+          <app-action-button
+            label="Escanear QR"
+            icon="qr_code_scanner"
+            variant="outline"
+            hostClass="w-full xl:w-auto"
+            (clicked)="openQrScanner()"
+          />
+          <app-action-button
+            label="Registrar activo"
+            icon="add"
+            routerLink="/inventory/new"
+            hostClass="w-full xl:w-auto"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[920px] border-collapse text-left">
+          <thead>
+            <tr
+              class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60"
+            >
+              <th class="w-12 px-4 py-3 text-center">
                 <input
                   type="checkbox"
                   class="checkbox checkbox-sm border border-base-300"
-                  [checked]="isGroupSelected(group.groupId)"
-                  (change)="toggleGroupSelection(group.groupId, $any($event.target).checked)"
-                  aria-label="Seleccionar familia de activo"
+                  [checked]="areAllVisibleSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                  aria-label="Seleccionar todas las familias visibles"
                 />
-              </td>
-              <td class="px-4 py-3">
-                <div class="font-medium text-base-content">{{ group.displayName }}</div>
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
-                  <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-base-200 text-primary">
-                    <span class="material-symbols-outlined text-[20px]">{{ group.categoryIcon }}</span>
+              </th>
+              <th class="px-4 py-3">Nombre del Activo</th>
+              <th class="px-4 py-3">Categoría</th>
+              <th class="px-4 py-3">Cantidad Total</th>
+              <th class="px-4 py-3">Último Ingreso</th>
+              <th class="px-4 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            @for (group of visibleGroups(); track group.groupId) {
+              <tr class="group border-b border-base-300 last:border-b-0 hover:bg-base-200/20">
+                <td class="px-4 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm border border-base-300"
+                    [checked]="isGroupSelected(group.groupId)"
+                    (change)="toggleGroupSelection(group.groupId, $any($event.target).checked)"
+                    aria-label="Seleccionar familia de activo"
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium text-base-content">{{ group.displayName }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-lg bg-base-200 text-primary"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">{{
+                        group.categoryIcon
+                      }}</span>
+                    </div>
+                    <span class="text-sm font-medium text-base-content/80">
+                      {{ group.categoryName }}
+                    </span>
                   </div>
-                  <span class="text-sm font-medium text-base-content/80">
-                    {{ group.categoryName }}
-                  </span>
-                </div>
-              </td>
-              <td class="px-4 py-3 font-medium text-base-content">{{ group.totalUnits }}</td>
-              <td class="px-4 py-3 text-base-content/70">
-                {{ group.lastEntryDate | date: 'dd/MM/yyyy' }}
-              </td>
-              <td class="px-4 py-3 text-right">
-                <a
-                  class="inline-flex items-center justify-end gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
-                  [routerLink]="['/inventory/groups', group.groupId]"
-                >
-                  Ver unidades
-                  <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                </a>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center gap-3 text-base-content/55">
-                  <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl">inventory_2</span>
-                  <p class="text-sm font-medium">No hay activos que coincidan con los filtros aplicados.</p>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+                </td>
+                <td class="px-4 py-3 font-medium text-base-content">{{ group.totalUnits }}</td>
+                <td class="px-4 py-3 text-base-content/70">
+                  {{ group.lastEntryDate | date: 'dd/MM/yyyy' }}
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <a
+                    class="inline-flex items-center justify-end gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                    [routerLink]="['/inventory/groups', group.groupId]"
+                  >
+                    Ver unidades
+                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center gap-3 text-base-content/55">
+                    <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl"
+                      >inventory_2</span
+                    >
+                    <p class="text-sm font-medium">
+                      No hay activos que coincidan con los filtros aplicados.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-    <app-desktop-pagination
-      [currentPage]="currentPage()"
-      [totalPages]="totalPages()"
-      [resultLabel]="resultLabel()"
-      (pageChange)="goToPage($event)"
-    />
-  </section>
+      <app-desktop-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [resultLabel]="resultLabel()"
+        (pageChange)="goToPage($event)"
+      />
+    </section>
+  } @else {
+    <section class="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div class="flex flex-1 flex-wrap items-end gap-4">
+          <div class="min-w-[260px] flex-1">
+            <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
+            <app-search-input
+              widthClass="w-full"
+              placeholder="Buscar por nombre, código, serie, barcode o ubicación..."
+              [value]="listQuery()"
+              (valueChange)="updateListQuery($event)"
+            />
+          </div>
+
+          <div class="min-w-[220px] flex-1">
+            <app-select-field
+              label="Categoría"
+              appearance="toolbar"
+              placeholder="Todas las categorías"
+              [options]="categoryOptions()"
+              [value]="listCategoryId()"
+              (valueChange)="updateListCategory($event)"
+            />
+          </div>
+
+          <div class="min-w-[220px] flex-1">
+            <app-select-field
+              label="Estado"
+              appearance="toolbar"
+              placeholder="Todos los estados"
+              [options]="listStatusOptions"
+              [value]="listStatus()"
+              (valueChange)="updateListStatus($event)"
+            />
+          </div>
+
+          <div class="min-w-[220px] flex-1">
+            <app-select-field
+              label="Ubicación"
+              appearance="toolbar"
+              placeholder="Todas las ubicaciones"
+              [options]="listLocationOptions()"
+              [value]="listLocationId()"
+              (valueChange)="updateListLocation($event)"
+            />
+          </div>
+
+          <button
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
+            (click)="clearListFilters()"
+          >
+            <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+            Limpiar Filtros
+          </button>
+        </div>
+
+        <div
+          class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0"
+        >
+          @if (hasSelectedAssets()) {
+            <div class="animate-in fade-in slide-in-from-top-1 duration-200 ease-out">
+              <app-action-button
+                label="Imprimir tarjetas"
+                icon="print"
+                variant="outline"
+                hostClass="w-full xl:w-auto"
+                (clicked)="printSelectedAssetLabels()"
+              />
+            </div>
+          }
+          <app-action-button
+            label="Escanear QR"
+            icon="qr_code_scanner"
+            variant="outline"
+            hostClass="w-full xl:w-auto"
+            (clicked)="openQrScanner()"
+          />
+          <app-action-button
+            label="Registrar activo"
+            icon="add"
+            routerLink="/inventory/new"
+            hostClass="w-full xl:w-auto"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[1120px] border-collapse text-left">
+          <thead>
+            <tr
+              class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60"
+            >
+              <th class="w-12 px-4 py-3 text-center">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm border border-base-300"
+                  [checked]="areAllVisibleAssetsSelected()"
+                  (change)="toggleSelectAllAssets($any($event.target).checked)"
+                  aria-label="Seleccionar todos los activos visibles"
+                />
+              </th>
+              <th class="px-4 py-3">Código</th>
+              <th class="px-4 py-3">Nombre</th>
+              <th class="px-4 py-3">Categoría</th>
+              <th class="px-4 py-3">Tipo</th>
+              <th class="px-4 py-3">Ubicación</th>
+              <th class="px-4 py-3">Estado</th>
+              <th class="px-4 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            @for (asset of visibleAssets(); track asset.id) {
+              <tr class="group border-b border-base-300 last:border-b-0 hover:bg-base-200/20">
+                <td class="px-4 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm border border-base-300"
+                    [checked]="isAssetSelected(asset.id)"
+                    (change)="toggleAssetSelection(asset.id, $any($event.target).checked)"
+                    aria-label="Seleccionar activo"
+                  />
+                </td>
+                <td class="px-4 py-3 font-medium text-base-content">{{ asset.code }}</td>
+                <td class="px-4 py-3 text-base-content/80">{{ asset.name }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ asset.categoryName }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ asset.typeName }}</td>
+                <td class="px-4 py-3 text-base-content/70">{{ asset.locationName }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold"
+                    [class]="getAssetStatusClass(asset.condition)"
+                  >
+                    {{ asset.condition }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-base-content/35 transition-all hover:bg-base-200 hover:text-primary md:opacity-0 md:group-hover:opacity-100"
+                      (click)="printAssetLabel(asset.id)"
+                      aria-label="Imprimir tarjeta del activo"
+                    >
+                      <span class="material-symbols-outlined text-[19px]">print</span>
+                    </button>
+                    <a
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-base-content/35 transition-all hover:bg-base-200 hover:text-primary md:opacity-0 md:group-hover:opacity-100"
+                      [routerLink]="['/inventory', asset.id, 'edit']"
+                      aria-label="Editar activo"
+                    >
+                      <span class="material-symbols-outlined text-[19px]">edit</span>
+                    </a>
+                    <a
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-base-content/35 transition-all hover:bg-base-200 hover:text-primary md:opacity-0 md:group-hover:opacity-100"
+                      [routerLink]="['/inventory', asset.id]"
+                      aria-label="Ver activo"
+                    >
+                      <span class="material-symbols-outlined text-[19px]">visibility</span>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center gap-3 text-base-content/55">
+                    <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl"
+                      >inventory_2</span
+                    >
+                    <p class="text-sm font-medium">
+                      No hay activos que coincidan con los filtros aplicados.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-desktop-pagination
+        [currentPage]="listCurrentPage()"
+        [totalPages]="listTotalPages()"
+        [resultLabel]="listResultLabel()"
+        (pageChange)="goToListPage($event)"
+      />
+    </section>
+  }
 
   @if (isQrScannerOpen()) {
     <app-asset-qr-scanner-modal
