@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { BulkSelectionBannerComponent } from '../../../../shared/ui/bulk-selection-banner/bulk-selection-banner.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
@@ -15,6 +16,7 @@ import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util'
     RouterLink,
     DatePipe,
     ActionButtonComponent,
+    BulkSelectionBannerComponent,
     DesktopPaginationComponent,
     SearchInputComponent,
     SelectFieldComponent,
@@ -30,6 +32,7 @@ export class InventoryGroupDetailComponent {
   readonly searchQuery = signal('');
   readonly selectedStatus = signal<'all' | AssetCondition>('all');
   readonly selectedUnitIds = signal<string[]>([]);
+  readonly isAllFilteredUnitsSelected = signal(false);
   readonly statusOptions: SelectFieldOption[] = [
     { value: 'all', label: 'Todos los estados' },
     { value: 'Bueno', label: 'Bueno' },
@@ -81,24 +84,33 @@ export class InventoryGroupDetailComponent {
     return `Mostrando ${start} a ${end} de ${total} unidades`;
   });
   readonly hasSelectedUnits = computed(() => this.selectedUnitIds().length > 0);
+  readonly selectedUnitsCount = computed(() => this.selectedUnitIds().length);
+  readonly visibleSelectedUnitsCount = computed(() =>
+    this.paginatedUnits().filter((unit) => this.selectedUnitIds().includes(unit.id)).length,
+  );
+  readonly shouldShowSelectAllFilteredUnitsBanner = computed(() =>
+    this.selectedUnitsCount() > 0
+    && (this.isAllFilteredUnitsSelected()
+      || (this.areAllVisibleSelected() && this.filteredUnits().length > this.visibleSelectedUnitsCount())),
+  );
 
   updateQuery(value: string): void {
     this.searchQuery.set(value);
     this.currentPage.set(1);
-    this.selectedUnitIds.set([]);
+    this.clearUnitSelection();
   }
 
   updateStatusFilter(status: string): void {
     this.selectedStatus.set(status as 'all' | AssetCondition);
     this.currentPage.set(1);
-    this.selectedUnitIds.set([]);
+    this.clearUnitSelection();
   }
 
   clearFilters(): void {
     this.searchQuery.set('');
     this.selectedStatus.set('all');
     this.currentPage.set(1);
-    this.selectedUnitIds.set([]);
+    this.clearUnitSelection();
   }
 
   goToPage(page: number): void {
@@ -106,10 +118,15 @@ export class InventoryGroupDetailComponent {
   }
 
   toggleSelectAll(checked: boolean): void {
+    this.isAllFilteredUnitsSelected.set(false);
     this.selectedUnitIds.set(checked ? this.paginatedUnits().map((unit) => unit.id) : []);
   }
 
   toggleUnitSelection(unitId: string, checked: boolean): void {
+    if (!checked && this.isAllFilteredUnitsSelected()) {
+      this.isAllFilteredUnitsSelected.set(false);
+    }
+
     this.selectedUnitIds.update((current) =>
       checked ? [...new Set([...current, unitId])] : current.filter((id) => id !== unitId),
     );
@@ -122,6 +139,16 @@ export class InventoryGroupDetailComponent {
   areAllVisibleSelected(): boolean {
     const visibleUnitIds = this.paginatedUnits().map((unit) => unit.id);
     return visibleUnitIds.length > 0 && visibleUnitIds.every((unitId) => this.selectedUnitIds().includes(unitId));
+  }
+
+  selectAllFilteredUnits(): void {
+    this.selectedUnitIds.set(this.filteredUnits().map((unit) => unit.id));
+    this.isAllFilteredUnitsSelected.set(true);
+  }
+
+  clearUnitSelection(): void {
+    this.selectedUnitIds.set([]);
+    this.isAllFilteredUnitsSelected.set(false);
   }
 
   printSelectedLabels(): void {

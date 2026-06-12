@@ -74,6 +74,19 @@
       </div>
     </section>
 
+    @if (shouldShowSelectAllFilteredUnitsBanner()) {
+      <app-bulk-selection-banner
+        [visibleSelectedCount]="visibleSelectedUnitsCount()"
+        [totalFilteredCount]="filteredUnits().length"
+        itemLabelSingular="unidad"
+        itemLabelPlural="unidades"
+        scopeLabel="de esta familia"
+        [allFilteredSelected]="isAllFilteredUnitsSelected()"
+        (selectAllRequested)="selectAllFilteredUnits()"
+        (clearRequested)="clearUnitSelection()"
+      />
+    }
+
     <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
       <div class="overflow-x-auto">
         <table class="w-full min-w-[920px] border-collapse text-left">

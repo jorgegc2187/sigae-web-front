@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { AssetQrScannerModalComponent } from '../../../../shared/ui/asset-qr-scanner-modal/asset-qr-scanner-modal.component';
+import { BulkSelectionBannerComponent } from '../../../../shared/ui/bulk-selection-banner/bulk-selection-banner.component';
 import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagination/desktop-pagination.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
@@ -24,6 +25,7 @@ type InventoryView = 'grouped' | 'list';
     RouterLink,
     AssetQrScannerModalComponent,
     ActionButtonComponent,
+    BulkSelectionBannerComponent,
     DesktopPaginationComponent,
     SearchInputComponent,
     SelectFieldComponent,
@@ -42,12 +44,14 @@ export class InventoryListComponent {
   readonly categoryId = signal('all');
   readonly currentPage = signal(1);
   readonly selectedGroupIds = signal<string[]>([]);
+  readonly isAllFilteredGroupsSelected = signal(false);
   readonly listQuery = signal('');
   readonly listCategoryId = signal('all');
   readonly listStatus = signal<'all' | AssetCondition>('all');
   readonly listLocationId = signal('all');
   readonly listCurrentPage = signal(1);
   readonly selectedAssetIds = signal<string[]>([]);
+  readonly isAllFilteredAssetsSelected = signal(false);
   readonly isQrScannerOpen = signal(false);
   readonly pageSize = 10;
   readonly listPageSize = 10;
@@ -101,6 +105,15 @@ export class InventoryListComponent {
     return `Mostrando ${start} a ${end} de ${total} familias de activos`;
   });
   readonly hasSelectedGroups = computed(() => this.selectedGroupIds().length > 0);
+  readonly selectedGroupsCount = computed(() => this.selectedGroupIds().length);
+  readonly visibleSelectedGroupsCount = computed(() =>
+    this.visibleGroups().filter((group) => this.selectedGroupIds().includes(group.groupId)).length,
+  );
+  readonly shouldShowSelectAllFilteredGroupsBanner = computed(() =>
+    this.selectedGroupsCount() > 0
+    && (this.isAllFilteredGroupsSelected()
+      || (this.areAllVisibleSelected() && this.groupedAssets().length > this.visibleSelectedGroupsCount())),
+  );
   readonly filteredAssets = computed(() => {
     const query = this.listQuery().trim().toLowerCase();
     const categoryId = this.listCategoryId();
@@ -133,6 +146,15 @@ export class InventoryListComponent {
     return `Mostrando ${start} a ${end} de ${total} activos`;
   });
   readonly hasSelectedAssets = computed(() => this.selectedAssetIds().length > 0);
+  readonly selectedAssetsCount = computed(() => this.selectedAssetIds().length);
+  readonly visibleSelectedAssetsCount = computed(() =>
+    this.visibleAssets().filter((asset) => this.selectedAssetIds().includes(asset.id)).length,
+  );
+  readonly shouldShowSelectAllFilteredAssetsBanner = computed(() =>
+    this.selectedAssetsCount() > 0
+    && (this.isAllFilteredAssetsSelected()
+      || (this.areAllVisibleAssetsSelected() && this.filteredAssets().length > this.visibleSelectedAssetsCount())),
+  );
 
   constructor() {
     effect(() => {
@@ -153,44 +175,44 @@ export class InventoryListComponent {
   updateQuery(value: string): void {
     this.query.set(value);
     this.currentPage.set(1);
-    this.selectedGroupIds.set([]);
+    this.clearGroupSelection();
   }
 
   updateCategory(categoryId: string): void {
     this.categoryId.set(categoryId);
     this.currentPage.set(1);
-    this.selectedGroupIds.set([]);
+    this.clearGroupSelection();
   }
 
   clearFilters(): void {
     this.query.set('');
     this.categoryId.set('all');
     this.currentPage.set(1);
-    this.selectedGroupIds.set([]);
+    this.clearGroupSelection();
   }
 
   updateListQuery(value: string): void {
     this.listQuery.set(value);
     this.listCurrentPage.set(1);
-    this.selectedAssetIds.set([]);
+    this.clearAssetSelection();
   }
 
   updateListCategory(categoryId: string): void {
     this.listCategoryId.set(categoryId);
     this.listCurrentPage.set(1);
-    this.selectedAssetIds.set([]);
+    this.clearAssetSelection();
   }
 
   updateListStatus(status: string): void {
     this.listStatus.set(status as 'all' | AssetCondition);
     this.listCurrentPage.set(1);
-    this.selectedAssetIds.set([]);
+    this.clearAssetSelection();
   }
 
   updateListLocation(locationId: string): void {
     this.listLocationId.set(locationId);
     this.listCurrentPage.set(1);
-    this.selectedAssetIds.set([]);
+    this.clearAssetSelection();
   }
 
   clearListFilters(): void {
@@ -199,7 +221,7 @@ export class InventoryListComponent {
     this.listStatus.set('all');
     this.listLocationId.set('all');
     this.listCurrentPage.set(1);
-    this.selectedAssetIds.set([]);
+    this.clearAssetSelection();
   }
 
   goToPage(page: number): void {
@@ -211,10 +233,15 @@ export class InventoryListComponent {
   }
 
   toggleSelectAll(checked: boolean): void {
+    this.isAllFilteredGroupsSelected.set(false);
     this.selectedGroupIds.set(checked ? this.visibleGroups().map((group) => group.groupId) : []);
   }
 
   toggleGroupSelection(groupId: string, checked: boolean): void {
+    if (!checked && this.isAllFilteredGroupsSelected()) {
+      this.isAllFilteredGroupsSelected.set(false);
+    }
+
     this.selectedGroupIds.update((current) =>
       checked ? [...new Set([...current, groupId])] : current.filter((id) => id !== groupId),
     );
@@ -230,10 +257,15 @@ export class InventoryListComponent {
   }
 
   toggleSelectAllAssets(checked: boolean): void {
+    this.isAllFilteredAssetsSelected.set(false);
     this.selectedAssetIds.set(checked ? this.visibleAssets().map((asset) => asset.id) : []);
   }
 
   toggleAssetSelection(assetId: string, checked: boolean): void {
+    if (!checked && this.isAllFilteredAssetsSelected()) {
+      this.isAllFilteredAssetsSelected.set(false);
+    }
+
     this.selectedAssetIds.update((current) =>
       checked ? [...new Set([...current, assetId])] : current.filter((id) => id !== assetId),
     );
@@ -246,6 +278,26 @@ export class InventoryListComponent {
   areAllVisibleAssetsSelected(): boolean {
     const visibleAssetIds = this.visibleAssets().map((asset) => asset.id);
     return visibleAssetIds.length > 0 && visibleAssetIds.every((assetId) => this.selectedAssetIds().includes(assetId));
+  }
+
+  selectAllFilteredGroups(): void {
+    this.selectedGroupIds.set(this.groupedAssets().map((group) => group.groupId));
+    this.isAllFilteredGroupsSelected.set(true);
+  }
+
+  selectAllFilteredAssets(): void {
+    this.selectedAssetIds.set(this.filteredAssets().map((asset) => asset.id));
+    this.isAllFilteredAssetsSelected.set(true);
+  }
+
+  clearGroupSelection(): void {
+    this.selectedGroupIds.set([]);
+    this.isAllFilteredGroupsSelected.set(false);
+  }
+
+  clearAssetSelection(): void {
+    this.selectedAssetIds.set([]);
+    this.isAllFilteredAssetsSelected.set(false);
   }
 
   openQrScanner(): void {
@@ -287,9 +339,9 @@ export class InventoryListComponent {
     }
 
     if (currentView === 'grouped') {
-      this.selectedGroupIds.set([]);
+      this.clearGroupSelection();
     } else {
-      this.selectedAssetIds.set([]);
+      this.clearAssetSelection();
     }
 
     await this.router.navigate([], {
