@@ -36,6 +36,7 @@ export class SidebarComponent {
     ),
     { initialValue: this.router.url },
   );
+  private readonly currentPath = computed(() => this.currentUrl().split('?')[0]?.split('#')[0] ?? '');
 
   readonly isMobileOpen = input(false);
   readonly isDesktopCollapsed = input(false);
@@ -69,18 +70,18 @@ export class SidebarComponent {
   }
 
   isItemActive(item: SidebarNavItem) {
-    const currentUrl = this.currentUrl();
+    const currentPath = this.currentPath();
 
     if (item.activePrefixes?.length) {
       return item.activePrefixes.some((prefix) =>
-        currentUrl === prefix || currentUrl.startsWith(`${prefix}/`),
+        currentPath === prefix || currentPath.startsWith(`${prefix}/`),
       );
     }
 
     if (item.exact) {
-      return currentUrl === item.route;
+      return currentPath === item.route;
     }
 
-    return currentUrl === item.route || currentUrl.startsWith(`${item.route}/`);
+    return currentPath === item.route || currentPath.startsWith(`${item.route}/`);
   }
 }
