@@ -5,7 +5,7 @@ export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
     component: DashboardHomeComponent,
-    title: 'Dashboard - SIGAE',
+    title: 'Dashboard',
     data: {
       pageTitle: 'Panel Principal',
       pageSubtitle: 'Resumen operativo global',

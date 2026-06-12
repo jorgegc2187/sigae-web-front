@@ -19,7 +19,7 @@ export const routes: Routes = [
   {
     path: 'print/inventory-labels',
     canActivate: [authGuard],
-    title: 'Imprimir tarjetas de activos - SIGAE',
+    title: 'Imprimir tarjetas de activos',
     loadComponent: () =>
       import('./features/inventory/pages/inventory-label-print/inventory-label-print.component').then(
         (m) => m.InventoryLabelPrintComponent,
@@ -72,7 +72,7 @@ export const routes: Routes = [
               pageTitle: 'Configuración',
               pageSubtitle: 'Gestione la información institucional y la identidad visual del sistema',
             },
-            title: 'Configuración - SIGAE',
+            title: 'Configuración',
             loadComponent: () =>
               import('./features/settings/pages/settings-home/settings-home.component').then(
                 (m) => m.SettingsHomeComponent,

@@ -5,7 +5,7 @@ export const REPORTS_ROUTES: Routes = [
     path: '',
     loadComponent: () =>
       import('./pages/reports-home/reports-home.component').then((m) => m.ReportsHomeComponent),
-    title: 'Reportes - SIGAE',
+    title: 'Reportes',
     data: {
       pageTitle: 'Reportes',
       pageSubtitle: 'Exportaciones y consultas operativas',

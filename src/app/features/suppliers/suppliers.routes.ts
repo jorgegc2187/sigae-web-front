@@ -5,7 +5,7 @@ export const SUPPLIERS_ROUTES: Routes = [
     path: '',
     loadComponent: () =>
       import('./pages/supplier-list/supplier-list.component').then((m) => m.SupplierListComponent),
-    title: 'Proveedores - SIGAE',
+    title: 'Proveedores',
     data: {
       pageTitle: 'Proveedores',
       pageSubtitle: 'Gestión de proveedores del inventario',

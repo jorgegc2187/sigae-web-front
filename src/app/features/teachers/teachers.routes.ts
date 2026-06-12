@@ -14,7 +14,7 @@ export const TEACHERS_ROUTES: Routes = [
       import('./pages/teacher-form/teacher-form.component').then(
         (m) => m.TeacherFormComponent,
       ),
-    title: 'Editar Docente - SIGAE',
+    title: 'Editar Docente',
   },
   {
     path: 'new',
@@ -28,7 +28,7 @@ export const TEACHERS_ROUTES: Routes = [
       import('./pages/teacher-form/teacher-form.component').then(
         (m) => m.TeacherFormComponent,
       ),
-    title: 'Nuevo Docente - SIGAE',
+    title: 'Nuevo Docente',
   },
   {
     path: '',
@@ -36,7 +36,7 @@ export const TEACHERS_ROUTES: Routes = [
       import('./pages/teacher-list/teacher-list.component').then(
         (m) => m.TeacherListComponent
       ),
-    title: 'Docentes - SIGAE',
+    title: 'Docentes',
     data: {
       pageTitle: 'Docentes',
       pageSubtitle: 'Gestión del personal docente',
