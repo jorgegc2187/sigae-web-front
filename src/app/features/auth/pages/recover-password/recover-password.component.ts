@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -60,10 +61,15 @@ export class RecoverPasswordComponent {
         'Si el correo está registrado, recibirás un enlace de recuperación en los próximos minutos.'
       );
       this.form.reset();
-    } catch {
-      this.errorMessage.set(
-        'No pudimos procesar tu solicitud en este momento. Intenta nuevamente en unos minutos.'
-      );
+    } catch (error) {
+      const authError = this.auth.getPublicAuthErrorPayload(error);
+      if (error instanceof HttpErrorResponse && error.status === 429 && authError.message) {
+        this.errorMessage.set(authError.message);
+      } else {
+        this.errorMessage.set(
+          'No pudimos procesar tu solicitud en este momento. Intenta nuevamente en unos minutos.'
+        );
+      }
     } finally {
       this.isSubmitting.set(false);
     }

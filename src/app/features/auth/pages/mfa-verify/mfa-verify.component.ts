@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -62,8 +63,13 @@ export class MfaVerifyComponent {
     try {
       await this.auth.verifyMfa(challenge.challengeToken, this.form.getRawValue().code);
       await this.router.navigate(['/dashboard']);
-    } catch {
-      this.errorMessage.set('El código no es válido o expiró. Inténtelo nuevamente.');
+    } catch (error) {
+      const authError = this.auth.getPublicAuthErrorPayload(error);
+      if (error instanceof HttpErrorResponse && error.status === 429 && authError.message) {
+        this.errorMessage.set(authError.message);
+      } else {
+        this.errorMessage.set('El código no es válido o expiró. Inténtelo nuevamente.');
+      }
     } finally {
       this.isSubmitting.set(false);
     }

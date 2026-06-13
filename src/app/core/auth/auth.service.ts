@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -19,6 +19,7 @@ import {
   ApiUserStatus,
   UserRole,
   UserStatus,
+  AuthPublicErrorPayload,
 } from './auth.models';
 
 const ACCESS_TOKEN_KEY = 'sigae.accessToken';
@@ -124,6 +125,29 @@ export class AuthService {
     await firstValueFrom(
       this.http.post<void>(`${this.appConfig.apiUrl}/auth/reset-password`, payload),
     );
+  }
+
+  getPublicAuthErrorPayload(error: unknown): AuthPublicErrorPayload {
+    if (!(error instanceof HttpErrorResponse) || typeof error.error !== 'object' || error.error === null) {
+      return {
+        message: null,
+        code: null,
+        retryAfterSeconds: null,
+      };
+    }
+
+    const apiError = error.error as {
+      message?: unknown;
+      code?: unknown;
+      retryAfterSeconds?: unknown;
+    };
+
+    return {
+      message: typeof apiError.message === 'string' ? apiError.message : null,
+      code: typeof apiError.code === 'string' ? apiError.code : null,
+      retryAfterSeconds:
+        typeof apiError.retryAfterSeconds === 'number' ? apiError.retryAfterSeconds : null,
+    };
   }
 
   async refreshAccessToken(): Promise<string | null> {

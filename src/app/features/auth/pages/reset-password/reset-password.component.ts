@@ -165,7 +165,10 @@ export class ResetPasswordComponent {
       this.form.reset();
       this.resetState.set('success');
     } catch (error) {
-      if (error instanceof HttpErrorResponse && error.status === 400) {
+      const authError = this.auth.getPublicAuthErrorPayload(error);
+      if (error instanceof HttpErrorResponse && error.status === 429 && authError.message) {
+        this.submissionError.set(authError.message);
+      } else if (error instanceof HttpErrorResponse && error.status === 400) {
         const backendMessage =
           typeof error.error?.message === 'string'
             ? error.error.message
@@ -195,10 +198,10 @@ export class ResetPasswordComponent {
         return;
       }
 
+      const authError = this.auth.getPublicAuthErrorPayload(error);
       const backendMessage =
-        error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
-          ? error.error.message
-          : 'El enlace de recuperación es inválido o ya expiró.';
+        authError.message ??
+        'El enlace de recuperación es inválido o ya expiró.';
       this.invalidMessage.set(backendMessage);
       this.resetState.set('invalid');
     }

@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -86,8 +87,13 @@ export class LoginComponent {
         return;
       }
       await this.router.navigate(['/dashboard']);
-    } catch {
-      this.loginError.set('No pudimos iniciar sesión con esas credenciales.');
+    } catch (error) {
+      const authError = this.auth.getPublicAuthErrorPayload(error);
+      if (error instanceof HttpErrorResponse && error.status === 429 && authError.message) {
+        this.loginError.set(authError.message);
+      } else {
+        this.loginError.set('No pudimos iniciar sesión con esas credenciales.');
+      }
     } finally {
       this.isSubmitting.set(false);
     }

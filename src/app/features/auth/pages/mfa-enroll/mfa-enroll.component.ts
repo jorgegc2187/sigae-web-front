@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -64,8 +65,13 @@ export class MfaEnrollComponent {
     try {
       await this.auth.confirmMfaEnrollment(challenge.challengeToken, this.form.getRawValue().code);
       await this.router.navigate(['/dashboard']);
-    } catch {
-      this.errorMessage.set('El código no es válido o expiró. Revise su app autenticadora e inténtelo nuevamente.');
+    } catch (error) {
+      const authError = this.auth.getPublicAuthErrorPayload(error);
+      if (error instanceof HttpErrorResponse && error.status === 429 && authError.message) {
+        this.errorMessage.set(authError.message);
+      } else {
+        this.errorMessage.set('El código no es válido o expiró. Revise su app autenticadora e inténtelo nuevamente.');
+      }
     } finally {
       this.isSubmitting.set(false);
     }
@@ -87,8 +93,13 @@ export class MfaEnrollComponent {
       const data = await this.auth.startMfaEnrollment(challenge.challengeToken);
       this.enrollData.set(data);
       this.qrDataUrl.set(await QRCode.toDataURL(data.otpauthUri, { margin: 1, width: 220 }));
-    } catch {
-      this.errorMessage.set('No pudimos iniciar la configuración 2FA. Vuelva a iniciar sesión.');
+    } catch (error) {
+      const authError = this.auth.getPublicAuthErrorPayload(error);
+      if (error instanceof HttpErrorResponse && error.status === 429 && authError.message) {
+        this.errorMessage.set(authError.message);
+      } else {
+        this.errorMessage.set('No pudimos iniciar la configuración 2FA. Vuelva a iniciar sesión.');
+      }
     } finally {
       this.isLoading.set(false);
     }

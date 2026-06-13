@@ -71,3 +71,9 @@ export interface MfaEnrollStartResponse {
   manualKey: string;
   expiresIn: number;
 }
+
+export interface AuthPublicErrorPayload {
+  message: string | null;
+  code: string | null;
+  retryAfterSeconds: number | null;
+}
