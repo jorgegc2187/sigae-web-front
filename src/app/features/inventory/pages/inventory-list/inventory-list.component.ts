@@ -18,6 +18,7 @@ import { AssetsService } from '../../services/assets.service';
 import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
 
 type InventoryView = 'grouped' | 'list';
+type CreatedAtSortDirection = 'desc' | 'asc';
 
 @Component({
   selector: 'app-inventory-list',
@@ -51,6 +52,7 @@ export class InventoryListComponent {
   readonly listCategoryId = signal('all');
   readonly listStatus = signal<'all' | AssetCondition>('all');
   readonly listLocationId = signal('all');
+  readonly listCreatedAtSort = signal<CreatedAtSortDirection>('desc');
   readonly listCurrentPage = signal(1);
   readonly selectedAssetIds = signal<string[]>([]);
   readonly isAllFilteredAssetsSelected = signal(false);
@@ -93,6 +95,10 @@ export class InventoryListComponent {
     { value: 'Mantenimiento', label: 'Mantenimiento' },
     { value: 'Dado de baja', label: 'Dado de baja' },
   ];
+  readonly listCreatedAtSortOptions: SelectFieldOption[] = [
+    { value: 'desc', label: 'Más recientes primero' },
+    { value: 'asc', label: 'Más antiguos primero' },
+  ];
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.groupedAssets().length / this.pageSize)));
   readonly visibleGroups = computed(() => {
@@ -122,7 +128,7 @@ export class InventoryListComponent {
     const status = this.listStatus();
     const locationId = this.listLocationId();
 
-    return this.assets().filter((asset) => {
+    const filteredAssets = this.assets().filter((asset) => {
       const matchesQuery =
         !query
         || asset.name.toLowerCase().includes(query)
@@ -133,6 +139,14 @@ export class InventoryListComponent {
       const matchesStatus = status === 'all' || asset.condition === status;
       const matchesLocation = locationId === 'all' || asset.locationId === locationId;
       return matchesQuery && matchesCategory && matchesStatus && matchesLocation;
+    });
+
+    const direction = this.listCreatedAtSort();
+    return [...filteredAssets].sort((left, right) => {
+      const leftTime = Date.parse(left.createdAt);
+      const rightTime = Date.parse(right.createdAt);
+      const difference = (Number.isNaN(leftTime) ? 0 : leftTime) - (Number.isNaN(rightTime) ? 0 : rightTime);
+      return direction === 'asc' ? difference : -difference;
     });
   });
   readonly listTotalPages = computed(() => Math.max(1, Math.ceil(this.filteredAssets().length / this.listPageSize)));
@@ -217,11 +231,18 @@ export class InventoryListComponent {
     this.clearAssetSelection();
   }
 
+  updateListCreatedAtSort(direction: string): void {
+    this.listCreatedAtSort.set(direction === 'asc' ? 'asc' : 'desc');
+    this.listCurrentPage.set(1);
+    this.clearAssetSelection();
+  }
+
   clearListFilters(): void {
     this.listQuery.set('');
     this.listCategoryId.set('all');
     this.listStatus.set('all');
     this.listLocationId.set('all');
+    this.listCreatedAtSort.set('desc');
     this.listCurrentPage.set(1);
     this.clearAssetSelection();
   }

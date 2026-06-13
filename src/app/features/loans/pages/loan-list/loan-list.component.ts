@@ -19,6 +19,7 @@ import { LoansService } from '../../services/loans.service';
 
 type AssetsPopoverContext = 'desktop' | 'mobile';
 type LoanListQueryState = ListQueryState<LoanStatusTab>;
+type LoanDateSortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-loan-list',
@@ -53,8 +54,8 @@ export class LoanListComponent {
     page: 1,
     pageSize: this.pageSize,
     status: 'all',
-    sort: undefined,
-    direction: undefined,
+    sort: 'loanDate',
+    direction: 'desc',
   });
   readonly selectedLoanIds = signal<string[]>([]);
   private readonly loansResource = this.loansService.listResource(computed(() => ({
@@ -88,10 +89,10 @@ export class LoanListComponent {
   });
 
   readonly filteredLoans = computed(() => {
-    const { search, status } = this.queryState();
+    const { search, status, direction } = this.queryState();
     const normalizedQuery = search.toLowerCase().trim();
 
-    return this.loans().filter((loan) => {
+    const filteredLoans = this.loans().filter((loan) => {
       const matchesStatus =
         status === 'all' ||
         (status === 'active' && loan.status === 'Activo') ||
@@ -111,6 +112,13 @@ export class LoanListComponent {
         );
 
       return matchesStatus && matchesSearch;
+    });
+
+    return [...filteredLoans].sort((left, right) => {
+      const leftTime = Date.parse(left.loanDate);
+      const rightTime = Date.parse(right.loanDate);
+      const difference = (Number.isNaN(leftTime) ? 0 : leftTime) - (Number.isNaN(rightTime) ? 0 : rightTime);
+      return direction === 'asc' ? difference : -difference;
     });
   });
 
@@ -155,6 +163,10 @@ export class LoanListComponent {
       label: tab.badgeCount === undefined ? tab.label : `${tab.label} (${tab.badgeCount})`,
     })),
   );
+  readonly loanDateSortOptions: SelectFieldOption[] = [
+    { value: 'desc', label: 'Más recientes primero' },
+    { value: 'asc', label: 'Más antiguos primero' },
+  ];
 
   readonly selectedIds = computed(() => this.selectedLoanIds());
 
@@ -183,6 +195,28 @@ export class LoanListComponent {
 
   onStatusTabSelect(status: string) {
     this.onStatusTabChange(status as LoanStatusTab);
+  }
+
+  onLoanDateSortChange(direction: string) {
+    this.queryState.update((state) => ({
+      ...state,
+      sort: 'loanDate',
+      direction: direction === 'asc' ? 'asc' : 'desc',
+      page: 1,
+    }));
+    this.selectedLoanIds.set([]);
+  }
+
+  clearFilters() {
+    this.queryState.set({
+      search: '',
+      page: 1,
+      pageSize: this.pageSize,
+      status: 'all',
+      sort: 'loanDate',
+      direction: 'desc',
+    });
+    this.selectedLoanIds.set([]);
   }
 
   onPageChange(page: number) {

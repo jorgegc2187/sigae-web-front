@@ -20,6 +20,17 @@
       </div>
     </div>
 
+    <div>
+      <app-select-field
+        label="Ordenar por"
+        appearance="toolbar"
+        placeholder="Más recientes primero"
+        [options]="loanDateSortOptions"
+        [value]="queryState().direction ?? 'desc'"
+        (valueChange)="onLoanDateSortChange($event)"
+      />
+    </div>
+
     @if (isLoading()) {
       <div class="flex flex-col items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-6 py-12 text-center text-base-content/50 shadow-sm">
         <span class="loading loading-spinner loading-md text-primary"></span>
@@ -183,11 +194,22 @@
           <button
             type="button"
             class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
-            (click)="onSearch(''); onStatusTabSelect('all')"
+            (click)="clearFilters()"
           >
             <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
             Limpiar Filtros
           </button>
+
+          <div class="min-w-[220px] flex-1">
+            <app-select-field
+              label="Ordenar por"
+              appearance="toolbar"
+              placeholder="Más recientes primero"
+              [options]="loanDateSortOptions"
+              [value]="queryState().direction ?? 'desc'"
+              (valueChange)="onLoanDateSortChange($event)"
+            />
+          </div>
         </div>
 
         <div class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">

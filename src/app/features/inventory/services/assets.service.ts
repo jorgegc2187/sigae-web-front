@@ -165,6 +165,7 @@ export class AssetsService {
       id: asset.id,
       code: asset.code,
       name: asset.name,
+      createdAt: asset.createdAt,
       categoryId: asset.categoryId,
       categoryName: asset.categoryName,
       typeId: asset.assetTypeId,

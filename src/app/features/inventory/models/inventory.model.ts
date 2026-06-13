@@ -5,6 +5,7 @@ export interface InventoryAsset {
   id: string;
   code: string;
   name: string;
+  createdAt: string;
   categoryId: string;
   categoryName: string;
   typeId: string;
@@ -77,6 +78,7 @@ export interface AssetResponse {
   id: string;
   code: string;
   name: string;
+  createdAt: string;
   assetTypeId: string;
   assetTypeName: string;
   categoryId: string;
