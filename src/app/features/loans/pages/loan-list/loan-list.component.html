@@ -225,7 +225,7 @@
     } @else {
       <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[960px] border-collapse text-left">
+          <table class="w-full min-w-[1120px] border-collapse text-left">
             <thead>
               <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
                 <th class="w-12 px-4 py-3 text-center">
@@ -242,6 +242,7 @@
                 <th class="px-4 py-3">Ubicación</th>
                 <th class="px-4 py-3">Fecha préstamo</th>
                 <th class="px-4 py-3">Fecha límite</th>
+                <th class="px-4 py-3">Creado por</th>
                 <th class="px-4 py-3">Estado</th>
                 <th class="px-4 py-3 text-right">Acciones</th>
               </tr>
@@ -249,7 +250,7 @@
             <tbody class="text-sm">
               @if (isLoading()) {
                 <tr>
-                  <td colspan="8" class="px-6 py-12 text-center">
+                  <td colspan="9" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center gap-3 text-base-content/50">
                       <span class="loading loading-spinner loading-md text-primary"></span>
                       <p class="text-sm font-medium">Cargando préstamos...</p>
@@ -328,6 +329,14 @@
                         {{ loan.dueDate | relativeDateLabel }}
                       </span>
                     </td>
+                    <td class="px-4 py-4 text-base-content/65">
+                      <span
+                        class="block max-w-[180px] truncate"
+                        [attr.title]="loan.createdByName || 'No registrado'"
+                      >
+                        {{ loan.createdByName || 'No registrado' }}
+                      </span>
+                    </td>
                     <td class="px-4 py-4">
                       <app-loan-status-badge [status]="loan.status" />
                     </td>
@@ -344,7 +353,7 @@
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="8" class="px-6 py-12 text-center">
+                    <td colspan="9" class="px-6 py-12 text-center">
                       <div class="flex flex-col items-center gap-3 text-base-content/55">
                         <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl">manage_search</span>
                         <p class="text-sm font-medium">No hay préstamos que coincidan con los filtros aplicados.</p>

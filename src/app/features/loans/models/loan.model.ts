@@ -43,6 +43,7 @@ export interface LoanSummary {
   destination: string;
   loanDate: string;
   dueDate: string;
+  createdByName: string | null;
   status: LoanStatus;
 }
 

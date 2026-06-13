@@ -86,6 +86,7 @@ export class InventoryDetailComponent {
       ],
       [
         { label: 'Disponibilidad', value: asset.availableForLoan ? 'Disponible para prestamo' : 'No disponible para prestamo' },
+        { label: 'Creado por', value: asset.createdByName ?? null },
       ],
     ];
   });

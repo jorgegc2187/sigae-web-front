@@ -14,6 +14,7 @@ export interface InventoryAsset {
   locationName: string;
   supplierId?: string;
   supplierName?: string;
+  createdByName?: string | null;
   condition: AssetCondition;
   serial: string | null;
   acquisitionDate: string;
@@ -84,6 +85,7 @@ export interface AssetResponse {
   locationName: string;
   supplierId: string | null;
   supplierName: string | null;
+  createdByName: string | null;
   condition: AssetCondition;
   serialNumber: string | null;
   acquisitionDate: string | null;

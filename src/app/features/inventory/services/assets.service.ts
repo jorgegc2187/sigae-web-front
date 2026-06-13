@@ -174,6 +174,7 @@ export class AssetsService {
       locationName: asset.locationName,
       supplierId: asset.supplierId ?? undefined,
       supplierName: asset.supplierName ?? undefined,
+      createdByName: asset.createdByName,
       condition,
       serial: asset.serialNumber,
       acquisitionDate: asset.acquisitionDate ?? '',
