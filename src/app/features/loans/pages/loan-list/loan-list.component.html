@@ -191,15 +191,6 @@
             />
           </div>
 
-          <button
-            type="button"
-            class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
-            (click)="clearFilters()"
-          >
-            <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
-            Limpiar Filtros
-          </button>
-
           <div class="min-w-[220px] flex-1">
             <app-select-field
               label="Ordenar por"
@@ -210,6 +201,15 @@
               (valueChange)="onLoanDateSortChange($event)"
             />
           </div>
+
+          <button
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-md border border-base-300 bg-transparent px-4 text-sm font-medium text-base-content/70 transition-colors hover:bg-base-200/70 hover:text-base-content"
+            (click)="clearFilters()"
+          >
+            <span class="material-symbols-outlined text-[18px]">filter_list_off</span>
+            Limpiar Filtros
+          </button>
         </div>
 
         <div class="flex items-center gap-2 border-t border-base-300 pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0">
