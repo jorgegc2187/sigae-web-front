@@ -2,6 +2,7 @@
   <a
     [class]="classes()"
     [routerLink]="routerLink()"
+    [queryParams]="routerLink() ? queryParams() : null"
     [attr.href]="routerLink() ? null : href()"
     [attr.aria-label]="resolvedAriaLabel()"
     [attr.aria-disabled]="isDisabled()"

@@ -51,6 +51,8 @@ export interface InventoryAssetGroup {
   categoryId: string;
   categoryIcon: string;
   categoryName: string;
+  typeId: string;
+  typeName: string;
   totalUnits: number;
   lastEntryDate: string;
   units: InventoryAssetGroupUnit[];

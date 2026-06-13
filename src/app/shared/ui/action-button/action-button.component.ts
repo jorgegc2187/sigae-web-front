@@ -1,4 +1,5 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { Params } from '@angular/router';
 import { RouterLink } from '@angular/router';
 
 type ActionButtonVariant = 'primary' | 'outline' | 'ghost' | 'neutral';
@@ -28,6 +29,7 @@ export class ActionButtonComponent {
   readonly loadingLabel = input<string | null>(null);
   readonly href = input<string | null>(null);
   readonly routerLink = input<string | string[] | null>(null);
+  readonly queryParams = input<Params | null>(null);
   readonly ariaLabel = input<string | null>(null);
   readonly type = input<ActionButtonType>('button');
   readonly hostClass = input('');

@@ -13,8 +13,9 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   getControlErrorMessage,
   shouldShowControlError,
@@ -38,6 +39,7 @@ import {
   AssetAttachmentSummary,
   AssetCondition,
   InventoryAsset,
+  InventoryAssetGroup,
 } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
 
@@ -85,6 +87,7 @@ const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
 })
 export class InventoryFormComponent implements OnDestroy {
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
   private readonly assetsService = inject(AssetsService);
@@ -94,8 +97,14 @@ export class InventoryFormComponent implements OnDestroy {
 
   readonly attachmentPickerInput = viewChild<ElementRef<HTMLInputElement>>('attachmentPickerInput');
   readonly id = input<string | null>(null);
+  readonly sourceGroupId = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('sourceGroupId'))),
+    { initialValue: null },
+  );
   readonly existingAsset = signal<InventoryAsset | null>(null);
+  readonly sourceGroup = signal<InventoryAssetGroup | null>(null);
   readonly isLoadingAsset = signal(false);
+  readonly isLoadingSourceGroup = signal(false);
   readonly isSubmitting = signal(false);
   readonly showAttributeErrors = signal(false);
   readonly selectedCategoryId = signal('');
@@ -107,9 +116,13 @@ export class InventoryFormComponent implements OnDestroy {
   readonly isAttachmentPreviewOpen = signal(false);
   readonly previewAttachment = signal<AssetAttachmentSummary | null>(null);
   readonly inputClass =
-    'w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none';
+    'w-full border-0 bg-transparent p-0 text-sm text-base-content placeholder-shown:opacity-50 focus:outline-none disabled:cursor-not-allowed disabled:text-base-content/55';
 
   readonly isEdit = computed(() => Boolean(this.existingAsset()));
+  readonly isContextualCreateMode = computed(() => !this.id() && !!this.sourceGroupId());
+  readonly hasLockedSourceGroupContext = computed(
+    () => this.isContextualCreateMode() && !!this.sourceGroup(),
+  );
   readonly categories = toSignal(this.categoriesService.list(), { initialValue: [] });
   readonly locations = toSignal(this.locationsService.list('ACTIVE'), { initialValue: [] });
   readonly suppliers = toSignal(this.suppliersService.list(), { initialValue: [] });
@@ -175,15 +188,29 @@ export class InventoryFormComponent implements OnDestroy {
     { value: 'Dado de baja', label: 'Dado de baja' },
   ];
 
-  readonly isBusy = computed(() => this.isLoadingAsset() || this.isSubmitting());
-  readonly breadcrumbLabel = computed(() => (this.isEdit() ? 'Editar activo' : 'Registrar activo'));
+  readonly isBusy = computed(
+    () => this.isLoadingAsset() || this.isLoadingSourceGroup() || this.isSubmitting(),
+  );
+  readonly breadcrumbLabel = computed(() => {
+    if (this.isEdit()) {
+      return 'Editar activo';
+    }
+
+    if (this.hasLockedSourceGroupContext()) {
+      return 'Registrar unidad igual';
+    }
+
+    return 'Registrar activo';
+  });
   readonly submitLabel = computed(() => (this.isEdit() ? 'Guardar cambios' : 'Guardar activo'));
   readonly loadingLabel = computed(() =>
     this.isEdit() ? 'Guardando cambios...' : 'Guardando activo...',
   );
   readonly blockingTitle = computed(() =>
-    this.isLoadingAsset()
+      this.isLoadingAsset()
       ? 'Cargando activo'
+      : this.isLoadingSourceGroup()
+        ? 'Preparando formulario'
       : this.isEdit()
         ? 'Guardando cambios'
         : 'Guardando activo',
@@ -191,12 +218,9 @@ export class InventoryFormComponent implements OnDestroy {
   readonly blockingDescription = computed(() =>
     this.isLoadingAsset()
       ? 'Estamos recuperando la información actual del activo.'
+      : this.isLoadingSourceGroup()
+        ? 'Estamos cargando la familia seleccionada para precargar el formulario.'
       : 'Estamos guardando la información y esperando la confirmación del servidor.',
-  );
-  readonly generatedCodeLabel = computed(() =>
-    this.isEdit()
-      ? this.existingAsset()?.code ?? ''
-      : 'El código se generará automáticamente al guardar',
   );
 
   readonly nameError = computed(() => {
@@ -278,12 +302,17 @@ export class InventoryFormComponent implements OnDestroy {
       }
 
       this.form.enable({ emitEvent: false });
+      if (this.hasLockedSourceGroupContext()) {
+        this.form.controls.name.disable({ emitEvent: false });
+        this.form.controls.categoryId.disable({ emitEvent: false });
+        this.form.controls.typeId.disable({ emitEvent: false });
+      }
     });
 
     effect(() => {
       const categories = this.categories();
       const locations = this.locations();
-      if (!this.form.controls.categoryId.value && categories[0]) {
+      if (!this.form.controls.categoryId.value && categories[0] && !this.hasLockedSourceGroupContext()) {
         this.selectedCategoryId.set(categories[0].id);
         this.form.patchValue({
           categoryId: categories[0].id,
@@ -306,11 +335,15 @@ export class InventoryFormComponent implements OnDestroy {
     });
 
     queueMicrotask(() => {
-      void this.loadExistingAsset();
+      void this.initializeFormContext();
     });
   }
 
   updateCategory(categoryId: string): void {
+    if (this.hasLockedSourceGroupContext()) {
+      return;
+    }
+
     this.selectedCategoryId.set(categoryId);
     this.form.patchValue({
       categoryId,
@@ -521,6 +554,47 @@ export class InventoryFormComponent implements OnDestroy {
       });
     } finally {
       this.isLoadingAsset.set(false);
+    }
+  }
+
+  private async initializeFormContext(): Promise<void> {
+    if (this.id()) {
+      await this.loadExistingAsset();
+      return;
+    }
+
+    await this.loadSourceGroupContext();
+  }
+
+  private async loadSourceGroupContext(): Promise<void> {
+    const sourceGroupId = this.sourceGroupId();
+    if (!sourceGroupId) {
+      return;
+    }
+
+    try {
+      this.isLoadingSourceGroup.set(true);
+      const group = await firstValueFrom(this.assetsService.getGroupById(sourceGroupId));
+      this.sourceGroup.set(group);
+      this.selectedCategoryId.set(group.categoryId);
+      this.form.patchValue({
+        name: group.displayName,
+        categoryId: group.categoryId,
+        typeId: group.typeId,
+      });
+      this.form.markAsPristine();
+      this.form.markAsUntouched();
+    } catch (error: unknown) {
+      this.sourceGroup.set(null);
+      this.notifications.error({
+        message: this.getBackendMessage(
+          error,
+          'No se pudo cargar la familia seleccionada para agregar unidades iguales.',
+        ),
+      });
+      await this.router.navigate(['/inventory/groups', sourceGroupId]);
+    } finally {
+      this.isLoadingSourceGroup.set(false);
     }
   }
 

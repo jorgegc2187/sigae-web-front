@@ -6,6 +6,15 @@
     </ul>
   </div>
 
+  @if (hasLockedSourceGroupContext() && sourceGroup(); as group) {
+    <div class="mx-auto max-w-5xl rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-base-content/75">
+      Estás registrando una nueva unidad de la familia
+      <span class="font-semibold text-base-content">{{ group.displayName }}</span>.
+      Los campos <span class="font-semibold">nombre</span>, <span class="font-semibold">categoría</span> y
+      <span class="font-semibold">tipo</span> quedan bloqueados para conservar la agrupación.
+    </div>
+  }
+
   <div class="mx-auto max-w-5xl space-y-6">
       <section class="card rounded-xl border border-base-300/70 bg-base-100 shadow-sm">
         <div class="card-body p-5 md:p-6">
@@ -15,7 +24,13 @@
             </div>
             <div>
               <h3 class="text-base font-semibold text-base-content">Información general</h3>
-              <p class="text-sm text-base-content/55">Datos base, clasificación y estado actual del activo.</p>
+              <p class="text-sm text-base-content/55">
+                @if (hasLockedSourceGroupContext()) {
+                  Datos base de la familia seleccionada y estado actual de la nueva unidad.
+                } @else {
+                  Datos base, clasificación y estado actual del activo.
+                }
+              </p>
             </div>
           </div>
 
@@ -32,6 +47,8 @@
                   type="text"
                   formControlName="name"
                   [class]="inputClass"
+                  [readonly]="hasLockedSourceGroupContext()"
+                  [attr.aria-readonly]="hasLockedSourceGroupContext()"
                   placeholder="Ej. Laptop Lenovo ThinkPad"
                 />
               </app-form-field>
