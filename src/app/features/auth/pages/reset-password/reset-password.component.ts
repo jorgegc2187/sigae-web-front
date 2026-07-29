@@ -40,6 +40,7 @@ export class ResetPasswordComponent {
   readonly showConfirmPassword = signal(false);
   readonly submissionError = signal<string | null>(null);
   readonly invalidMessage = signal<string | null>(null);
+  private readonly resetSessionReady = signal(false);
   private readonly resetState = signal<ResetPasswordState>('checking');
   private tokenValidationRequestId = 0;
 
@@ -60,6 +61,10 @@ export class ResetPasswordComponent {
   readonly passwordRequirements = computed(() => evaluatePasswordPolicy(this.newPasswordValue()));
 
   readonly viewState = computed<'checking' | 'form' | 'invalid' | 'success'>(() => {
+    if (!this.resetSessionReady()) {
+      return 'checking';
+    }
+
     if (!this.normalizedToken()) {
       return 'invalid';
     }
@@ -116,7 +121,13 @@ export class ResetPasswordComponent {
   });
 
   constructor() {
+    void this.prepareResetSession();
+
     effect(() => {
+      if (!this.resetSessionReady()) {
+        return;
+      }
+
       const token = this.normalizedToken();
       this.submissionError.set(null);
 
@@ -132,6 +143,14 @@ export class ResetPasswordComponent {
 
       void this.validateToken(token, requestId);
     });
+  }
+
+  private async prepareResetSession(): Promise<void> {
+    if (this.auth.hasActiveSession()) {
+      await this.auth.logout(false);
+    }
+
+    this.resetSessionReady.set(true);
   }
 
   toggleNewPasswordVisibility(): void {

@@ -46,6 +46,9 @@ export class AuthService {
   readonly mfaChallenge = this.mfaChallengeState.asReadonly();
   readonly sessionStatus = this.sessionStatusState.asReadonly();
   readonly isAuthenticated = computed(() => this.sessionStatusState() === 'authenticated');
+  readonly hasActiveSession = computed(() =>
+    Boolean(this.accessTokenState() || this.refreshTokenState() || this.userState()),
+  );
 
   constructor() {
     if (!this.refreshTokenState()) {
@@ -155,7 +158,7 @@ export class AuthService {
     return refreshed ? this.accessTokenState() : null;
   }
 
-  async logout(): Promise<void> {
+  async logout(redirect = true): Promise<void> {
     const refreshToken = this.refreshTokenState();
     if (refreshToken) {
       try {
@@ -167,7 +170,9 @@ export class AuthService {
 
     this.clearSession();
     this.sessionStatusState.set('anonymous');
-    await this.router.navigate(['/auth/login']);
+    if (redirect) {
+      await this.router.navigate(['/auth/login']);
+    }
   }
 
   async handleSessionExpired(): Promise<void> {
