@@ -274,7 +274,7 @@
     (closed)="closeUserConfirmation()"
   >
     @if (pendingConfirmationUser(); as selectedUser) {
-      <div modal-details class="rounded-xl border border-base-300 bg-base-200/50 px-4 py-4">
+      <div #modalDetails modal-details class="rounded-xl border border-base-300 bg-base-200/50 px-4 py-4">
         <p class="text-sm font-semibold text-base-content">{{ selectedUser.name }}</p>
         <p class="mt-1 text-sm text-base-content/60">{{ selectedUser.email }}</p>
 

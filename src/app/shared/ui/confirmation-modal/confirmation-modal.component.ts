@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   computed,
+  contentChild,
   effect,
   input,
   output,
@@ -37,6 +38,8 @@ export class ConfirmationModalComponent {
   readonly closed = output<void>();
 
   private readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('dialog');
+  private readonly modalDetails = contentChild<ElementRef>('modalDetails');
+  readonly hasDetails = computed(() => Boolean(this.modalDetails()));
 
   readonly resolvedIcon = computed(() => {
     if (this.icon()) {

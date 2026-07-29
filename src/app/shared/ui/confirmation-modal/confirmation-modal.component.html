@@ -26,9 +26,11 @@
       </button>
     </div>
 
-    <div class="space-y-4 px-6 py-5">
-      <ng-content select="[modal-details]" />
-    </div>
+    @if (hasDetails()) {
+      <div class="space-y-4 px-6 py-5">
+        <ng-content select="[modal-details]" />
+      </div>
+    }
 
     <div class="flex justify-end gap-3 border-t border-base-300 px-6 py-4">
       <app-action-button
