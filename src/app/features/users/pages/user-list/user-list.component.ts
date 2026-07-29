@@ -29,6 +29,7 @@ type PendingUserConfirmationType =
   | 'deactivate'
   | 'cancelInvitation'
   | 'resendInvitation'
+  | 'resetPassword'
   | 'requireMfa'
   | 'removeMfaRequirement'
   | 'resetMfa';
@@ -99,6 +100,7 @@ export class UserListComponent {
       deactivate: 'Desactivar usuario',
       cancelInvitation: 'Anular invitación',
       resendInvitation: 'Reenviar invitación',
+      resetPassword: 'Restablecer contraseña',
       requireMfa: 'Requerir 2FA',
       removeMfaRequirement: 'Quitar requisito 2FA',
       resetMfa: 'Resetear 2FA',
@@ -116,6 +118,7 @@ export class UserListComponent {
       deactivate: `El usuario ${action.user.name} no podrá iniciar sesión hasta que vuelva a activarse.`,
       cancelInvitation: `El enlace actual de ${action.user.name} dejará de funcionar inmediatamente.`,
       resendInvitation: `Se invalidará cualquier enlace anterior y se enviará una nueva invitación al correo ${action.user.email}.`,
+      resetPassword: `Se generará un enlace de restablecimiento y se enviará al correo ${action.user.email}.`,
       requireMfa: `El usuario ${action.user.name} deberá configurar 2FA en su próximo inicio de sesión.`,
       removeMfaRequirement: `Se quitará el requisito de 2FA para ${action.user.name}. Si ya tenía 2FA activo, se desactivará.`,
       resetMfa: `El usuario ${action.user.name} deberá enrolar nuevamente su aplicación autenticadora.`,
@@ -133,6 +136,7 @@ export class UserListComponent {
       deactivate: 'Desactivar usuario',
       cancelInvitation: 'Anular invitación',
       resendInvitation: 'Reenviar invitación',
+      resetPassword: 'Enviar enlace',
       requireMfa: 'Requerir 2FA',
       removeMfaRequirement: 'Quitar requisito',
       resetMfa: 'Resetear 2FA',
@@ -150,6 +154,7 @@ export class UserListComponent {
       deactivate: 'person_off',
       cancelInvitation: 'cancel',
       resendInvitation: 'mail',
+      resetPassword: 'lock_reset',
       requireMfa: 'shield_lock',
       removeMfaRequirement: 'lock_open',
       resetMfa: 'restart_alt',
@@ -308,9 +313,7 @@ export class UserListComponent {
 
   onResetPassword(user: User) {
     this.closeActionsMenu();
-    this.notifications.info({
-      message: `Restablecimiento de contraseña para ${user.name} pendiente de conectar.`,
-    });
+    this.openUserConfirmation(user, 'resetPassword');
   }
 
   onToggleMfaRequirement(user: User) {
@@ -395,6 +398,9 @@ export class UserListComponent {
       case 'resendInvitation':
         await firstValueFrom(this.usersService.resendInvitation(action.user.id));
         return;
+      case 'resetPassword':
+        await firstValueFrom(this.usersService.requestPasswordReset(action.user.id));
+        return;
       case 'requireMfa':
         await firstValueFrom(this.usersService.updateMfaPolicy(action.user.id, true));
         return;
@@ -413,6 +419,7 @@ export class UserListComponent {
       deactivate: `Usuario ${action.user.name} desactivado correctamente.`,
       cancelInvitation: `Invitación anulada para ${action.user.name}.`,
       resendInvitation: `Invitación reenviada correctamente a ${action.user.name}.`,
+      resetPassword: `Enlace de restablecimiento enviado a ${action.user.name}.`,
       requireMfa: `2FA requerido para ${action.user.name}.`,
       removeMfaRequirement: `2FA desactivado para ${action.user.name}.`,
       resetMfa: `2FA reseteado para ${action.user.name}.`,
@@ -426,6 +433,7 @@ export class UserListComponent {
       deactivate: 'No se pudo desactivar el usuario.',
       cancelInvitation: 'No se pudo anular la invitación.',
       resendInvitation: 'No se pudo reenviar la invitación.',
+      resetPassword: 'No se pudo enviar el enlace de restablecimiento.',
       requireMfa: 'No se pudo requerir 2FA para este usuario.',
       removeMfaRequirement: 'No se pudo quitar el requisito 2FA.',
       resetMfa: 'No se pudo resetear el 2FA del usuario.',

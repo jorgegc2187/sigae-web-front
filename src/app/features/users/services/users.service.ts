@@ -51,6 +51,10 @@ export class UsersService {
     return this.http.post<UserResponse>(`${this.baseUrl}/${id}/invitation/resend`, {});
   }
 
+  requestPasswordReset(id: string) {
+    return this.http.post<UserResponse>(`${this.baseUrl}/${id}/password-reset`, {});
+  }
+
   updateMfaPolicy(id: string, mfaRequired: boolean) {
     const payload: UpdateUserMfaPolicyRequest = { mfaRequired };
     return this.http.patch<UserResponse>(`${this.baseUrl}/${id}/mfa-policy`, payload);
