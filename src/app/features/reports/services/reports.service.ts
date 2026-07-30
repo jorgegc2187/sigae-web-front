@@ -164,6 +164,23 @@ export class ReportsService {
     });
   }
 
+  downloadAssetsReportWithSignature(
+    filters: AssetReportFilters,
+    format: ReportExportFormat,
+    signature: Blob | null,
+  ) {
+    const formData = new FormData();
+    if (signature) {
+      formData.append('signature', signature, 'firma-reporte.png');
+    }
+
+    return this.http.post(`${this.baseUrl}/assets/export`, formData, {
+      params: this.buildParams(filters).set('format', format),
+      observe: 'response',
+      responseType: 'blob',
+    });
+  }
+
   downloadLoansReport(filters: LoanReportFilters, format: ReportExportFormat) {
     return this.http.get(`${this.baseUrl}/loans/export`, {
       params: this.buildLoanParams(filters).set('format', format),

@@ -390,12 +390,69 @@
           type="submit"
         />
       </form>
+      @if (pendingExport()?.tab === 'assets') {
+        <app-action-button
+          label="Usar firma digital"
+          icon="draw"
+          variant="neutral"
+          [fullWidth]="true"
+          className="sm:w-auto"
+          (clicked)="openAssetSignatureDialog()"
+        />
+      }
       <app-action-button
-        label="Descargar"
+        [label]="pendingExport()?.tab === 'assets' ? 'Descargar sin firma' : 'Descargar'"
         icon="download"
         [fullWidth]="true"
         className="sm:w-auto"
         (clicked)="confirmExport()"
+      />
+    </div>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>Cerrar</button>
+  </form>
+</dialog>
+
+<dialog #signatureDialog class="modal" (close)="onSignatureDialogClose()">
+  <div class="modal-box mx-3 flex max-h-[calc(100dvh-1.5rem)] w-auto max-w-2xl flex-col rounded-2xl border border-base-300 bg-base-100 p-0 shadow-xl sm:mx-0 sm:w-full sm:rounded-xl">
+    <div class="flex items-center justify-between gap-4 border-b border-base-300 px-5 py-4">
+      <div>
+        <h2 class="text-lg font-semibold text-base-content">Agregar firma digital</h2>
+        <p class="mt-1 text-sm text-base-content/60">Esta firma se aplicará solo al archivo que está por descargar.</p>
+      </div>
+      <form method="dialog">
+        <button
+          type="submit"
+          class="btn btn-ghost btn-sm btn-circle text-base-content/45 hover:text-base-content/70"
+          aria-label="Cerrar modal de firma digital"
+        >
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="overflow-y-auto px-6 py-6">
+      <app-loan-signature-pad #reportSignaturePad />
+    </div>
+
+    <div class="flex flex-col-reverse gap-3 border-t border-base-300 bg-base-200/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-end">
+      <button
+        type="button"
+        class="px-4 py-2 text-sm font-medium text-base-content/70 transition-colors hover:text-base-content disabled:cursor-not-allowed disabled:opacity-45"
+        [disabled]="!reportSignaturePad.hasSignature()"
+        (click)="clearReportSignature()"
+      >
+        Limpiar
+      </button>
+      <app-action-button
+        label="Firmar y descargar"
+        icon="download"
+        [disabled]="!reportSignaturePad.hasSignature()"
+        [fullWidth]="true"
+        className="sm:w-auto"
+        (clicked)="exportWithDigitalSignature()"
       />
     </div>
   </div>

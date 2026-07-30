@@ -8,6 +8,7 @@ import { DesktopPaginationComponent } from '../../../../shared/ui/desktop-pagina
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/status-badge/status-badge.component';
 import { TableIconActionComponent } from '../../../../shared/ui/table-icon-action/table-icon-action.component';
+import { LoanSignaturePadComponent } from '../../../loans/components/loan-signature-pad/loan-signature-pad.component';
 import {
   AssetReportFilters,
   LoanReportFilters,
@@ -28,7 +29,16 @@ interface PendingReportExport {
 
 @Component({
   selector: 'app-reports-home',
-  imports: [RouterLink, ActionButtonComponent, DatePickerComponent, DesktopPaginationComponent, StatusBadgeComponent, SelectFieldComponent, TableIconActionComponent],
+  imports: [
+    RouterLink,
+    ActionButtonComponent,
+    DatePickerComponent,
+    DesktopPaginationComponent,
+    StatusBadgeComponent,
+    SelectFieldComponent,
+    TableIconActionComponent,
+    LoanSignaturePadComponent,
+  ],
   templateUrl: './reports-home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,9 +52,12 @@ export class ReportsHomeComponent {
   } as const;
 
   readonly exportDialogRef = viewChild<ElementRef<HTMLDialogElement>>('exportDialog');
+  readonly signatureDialogRef = viewChild<ElementRef<HTMLDialogElement>>('signatureDialog');
+  readonly reportSignaturePad = viewChild<LoanSignaturePadComponent>('reportSignaturePad');
 
   readonly activeTab = signal<ReportsTab>('assets');
   readonly pendingExport = signal<PendingReportExport | null>(null);
+  private preservePendingExportOnClose = false;
 
   readonly assetCategoryId = signal('all');
   readonly assetLocationId = signal('all');
@@ -168,6 +181,10 @@ export class ReportsHomeComponent {
     }
 
     const reportName = pending.tab === 'assets' ? 'Reporte de Activos' : 'Reporte de Préstamos';
+    if (pending.tab === 'assets') {
+      return '¿Desea incluir una firma digital en esta descarga? La firma se utilizará únicamente para generar el archivo y no se guardará en el sistema.';
+    }
+
     if (pending.format === 'excel') {
       return `Se preparará la descarga tabular del ${reportName} en formato Excel, incluyendo metadatos institucionales y filtros aplicados.`;
     }
@@ -282,7 +299,7 @@ export class ReportsHomeComponent {
     }
 
     if (pending.tab === 'assets') {
-      await this.confirmAssetExport(pending.format);
+      await this.confirmAssetExport(pending.format, null);
       return;
     }
 
@@ -290,7 +307,48 @@ export class ReportsHomeComponent {
   }
 
   onExportDialogClose(): void {
+    if (this.preservePendingExportOnClose) {
+      this.preservePendingExportOnClose = false;
+      return;
+    }
     this.pendingExport.set(null);
+  }
+
+  openAssetSignatureDialog(): void {
+    const pending = this.pendingExport();
+    if (!pending || pending.tab !== 'assets') {
+      return;
+    }
+
+    this.preservePendingExportOnClose = true;
+    this.exportDialogRef()?.nativeElement.close();
+    this.signatureDialogRef()?.nativeElement.showModal();
+    requestAnimationFrame(() => this.reportSignaturePad()?.loadSignature(null));
+  }
+
+  closeSignatureDialog(): void {
+    this.signatureDialogRef()?.nativeElement.close();
+  }
+
+  onSignatureDialogClose(): void {
+    this.reportSignaturePad()?.clearSignature();
+    this.pendingExport.set(null);
+  }
+
+  clearReportSignature(): void {
+    this.reportSignaturePad()?.clearSignature();
+  }
+
+  async exportWithDigitalSignature(): Promise<void> {
+    const pending = this.pendingExport();
+    const signatureDataUrl = this.reportSignaturePad()?.getSignatureDataUrl() ?? null;
+    const signature = this.signatureDataUrlToBlob(signatureDataUrl);
+    if (!pending || pending.tab !== 'assets' || !signature) {
+      return;
+    }
+
+    await this.confirmAssetExport(pending.format, signature);
+    this.closeSignatureDialog();
   }
 
   getAssetStatusClass(condition: string): string {
@@ -332,10 +390,10 @@ export class ReportsHomeComponent {
     return `Mostrando ${start} a ${end} de ${total} resultados`;
   }
 
-  private async confirmAssetExport(format: ReportExportFormat): Promise<void> {
+  private async confirmAssetExport(format: ReportExportFormat, signature: Blob | null): Promise<void> {
     try {
       const response = await firstValueFrom(
-        this.reportsService.downloadAssetsReport(this.assetReportFilters(), format),
+        this.reportsService.downloadAssetsReportWithSignature(this.assetReportFilters(), format, signature),
       );
       const content = response.body;
       if (!content) {
@@ -393,6 +451,25 @@ export class ReportsHomeComponent {
     anchor.download = filename;
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  private signatureDataUrlToBlob(dataUrl: string | null): Blob | null {
+    if (!dataUrl) {
+      return null;
+    }
+
+    const [metadata, encodedContent] = dataUrl.split(',');
+    if (!metadata || !encodedContent) {
+      return null;
+    }
+
+    const contentType = metadata.match(/data:(.*?);base64/)?.[1] ?? 'image/png';
+    const binary = atob(encodedContent);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index++) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+    return new Blob([bytes], { type: contentType });
   }
 
   private buildFallbackFilename(format: ReportExportFormat, report: 'activos' | 'prestamos' = 'activos'): string {
