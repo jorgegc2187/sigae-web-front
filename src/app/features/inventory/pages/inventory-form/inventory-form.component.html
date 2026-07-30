@@ -172,12 +172,23 @@
               <span class="material-symbols-outlined text-[22px]">attach_file</span>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-base-content">Observaciones y adjuntos</h3>
-              <p class="text-sm text-base-content/55">Notas, imágenes y documentos relacionados al activo.</p>
+              <h3 class="text-base font-semibold text-base-content">Descripción, observaciones y adjuntos</h3>
+              <p class="text-sm text-base-content/55">Detalle técnico, notas, imágenes y documentos relacionados al activo.</p>
             </div>
           </div>
 
           <div class="space-y-5">
+            <fieldset class="fieldset w-full">
+              <label for="assetDescription" class="fieldset-legend">Descripción (Opcional)</label>
+              <textarea
+                id="assetDescription"
+                formControlName="description"
+                rows="4"
+                class="min-h-24 w-full resize-y rounded-lg border border-base-300 bg-base-100 px-4 py-3 text-sm text-base-content shadow-sm transition-all placeholder-shown:opacity-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Detalles técnicos: modelo, número de serie de batería, cargador u otros componentes..."
+              ></textarea>
+            </fieldset>
+
             <fieldset class="fieldset w-full">
               <label for="assetObservations" class="fieldset-legend">Observaciones (Opcional)</label>
               <textarea

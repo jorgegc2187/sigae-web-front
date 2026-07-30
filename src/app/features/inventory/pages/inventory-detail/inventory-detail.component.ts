@@ -403,6 +403,7 @@ export class InventoryDetailComponent {
       ['Proveedor del activo actualizado.', 'Cambio de proveedor'],
       ['Serial number del activo actualizado.', 'Cambio de serial number'],
       ['Fecha de adquisicion del activo actualizada.', 'Cambio de fecha de adquisicion'],
+      ['Descripción del activo actualizada.', 'Cambio de descripción'],
       ['Notas del activo actualizadas.', 'Cambio de observaciones'],
       ['Tipo de activo actualizado.', 'Cambio de tipo'],
       ['Categoria del activo actualizada.', 'Cambio de categoria'],

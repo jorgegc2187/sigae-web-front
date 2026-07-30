@@ -19,6 +19,7 @@ export interface InventoryAsset {
   condition: AssetCondition;
   serial: string | null;
   acquisitionDate: string;
+  description?: string;
   observations?: string;
   attributes: Record<string, string>;
   attributeValues: AssetAttributeValueResponse[];
@@ -92,6 +93,7 @@ export interface AssetResponse {
   serialNumber: string | null;
   acquisitionDate: string | null;
   decommissionedAt: string | null;
+  description: string | null;
   notes: string | null;
   attributeValues: AssetAttributeValueResponse[];
   attachments: AssetAttachmentSummary[];
@@ -118,6 +120,7 @@ export interface AssetRequest {
   condition: AssetRequestCondition;
   serialNumber: string | null;
   acquisitionDate: string | null;
+  description: string | null;
   notes: string | null;
   attributeValues: Array<{
     attributeDefinitionId: string;

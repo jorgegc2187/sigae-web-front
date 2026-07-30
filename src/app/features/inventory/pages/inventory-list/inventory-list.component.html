@@ -210,7 +210,7 @@
               <label class="mb-1.5 block text-sm font-medium text-base-content/70">Buscar</label>
               <app-search-input
                 widthClass="w-full"
-                placeholder="Buscar por nombre, código interno, serie o ubicación..."
+                placeholder="Buscar por nombre, descripción, código interno, serie o ubicación..."
                 [value]="listQuery()"
                 (valueChange)="updateListQuery($event)"
               />
@@ -341,7 +341,14 @@
                     />
                   </td>
                   <td class="px-4 py-3 font-medium text-base-content">{{ asset.code }}</td>
-                  <td class="px-4 py-3 text-base-content/80">{{ asset.name }}</td>
+                  <td class="px-4 py-3 text-base-content/80">
+                    <div>{{ asset.name }}</div>
+                    @if (asset.description?.trim()) {
+                      <div class="mt-1 max-w-xs truncate text-xs text-base-content/55" [attr.title]="asset.description">
+                        {{ asset.description }}
+                      </div>
+                    }
+                  </td>
                   <td class="px-4 py-3 text-base-content/70">{{ asset.categoryName }}</td>
                   <td class="px-4 py-3 text-base-content/70">{{ asset.typeName }}</td>
                   <td class="px-4 py-3 text-base-content/70">{{ asset.locationName }}</td>

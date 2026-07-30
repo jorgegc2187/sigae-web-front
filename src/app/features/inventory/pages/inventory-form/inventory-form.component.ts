@@ -144,6 +144,7 @@ export class InventoryFormComponent implements OnDestroy {
     supplierId: [''],
     condition: this.fb.control<AssetCondition>('Bueno', Validators.required),
     acquisitionDate: [''],
+    description: [''],
     observations: [''],
   });
   private readonly formEvents = toSignal(this.form.events, { initialValue: null });
@@ -473,6 +474,7 @@ export class InventoryFormComponent implements OnDestroy {
       condition: this.assetsService.toApiCondition(value.condition),
       serialNumber: this.isEdit() ? this.existingAsset()?.serial ?? null : null,
       acquisitionDate: value.acquisitionDate || null,
+      description: this.normalizeOptional(value.description),
       notes: this.normalizeOptional(value.observations),
       removedAttachmentIds: this.removedAttachmentIds(),
       attributeValues: this.dynamicAttributes()
@@ -544,6 +546,7 @@ export class InventoryFormComponent implements OnDestroy {
         supplierId: asset.supplierId ?? '',
         condition: asset.condition,
         acquisitionDate: asset.acquisitionDate,
+        description: asset.description ?? '',
         observations: asset.observations ?? '',
       });
       this.form.markAsPristine();

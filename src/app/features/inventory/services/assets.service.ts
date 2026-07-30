@@ -214,6 +214,7 @@ export class AssetsService {
       condition,
       serial: asset.serialNumber,
       acquisitionDate: asset.acquisitionDate ?? '',
+      description: asset.description ?? '',
       observations: asset.notes ?? '',
       attributes: Object.fromEntries(
         asset.attributeValues.map((attribute) => [attribute.attributeName, attribute.value]),
