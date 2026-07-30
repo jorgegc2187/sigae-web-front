@@ -31,6 +31,29 @@ export interface AssetReportRow {
   acquisitionDate: string | null;
 }
 
+export interface PhysicalInventoryReportRow {
+  id: string;
+  code: string;
+  assetDescription: string;
+  location: string;
+  good: boolean;
+  regular: boolean;
+  bad: boolean;
+  brand: string;
+  observations: string;
+  quantity: number;
+}
+
+export interface PhysicalInventoryReport {
+  ugelName: string | null;
+  institutionName: string;
+  title: string;
+  locationSubtitle: string | null;
+  generatedBy: string;
+  generatedAt: string;
+  rows: PhysicalInventoryReportRow[];
+}
+
 export interface LoanReportRow {
   id: string;
   code: string;
@@ -88,6 +111,26 @@ export class ReportsService {
         params: this.buildParams(filters()),
       }),
       { defaultValue: [] },
+    );
+  }
+
+  physicalInventoryResource(filters: Signal<AssetReportFilters>) {
+    return httpResource<PhysicalInventoryReport>(
+      () => ({
+        url: `${this.baseUrl}/assets/physical-inventory`,
+        params: this.buildParams(filters()),
+      }),
+      {
+        defaultValue: {
+          ugelName: null,
+          institutionName: '',
+          title: 'INVENTARIO FÍSICO DE BIENES PATRIMONIALES',
+          locationSubtitle: null,
+          generatedBy: '',
+          generatedAt: '',
+          rows: [],
+        },
+      },
     );
   }
 

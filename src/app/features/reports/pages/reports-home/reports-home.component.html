@@ -120,47 +120,59 @@
           <app-action-button label="Reintentar" icon="refresh" (clicked)="reloadAssetReport()" />
         </div>
       } @else {
+        <div class="space-y-1 border-b border-base-300 px-6 py-5 text-center text-xs font-semibold uppercase tracking-wide text-base-content/70">
+          @if (physicalInventory().ugelName; as ugelName) {
+            <p>{{ ugelName }}</p>
+          }
+          <p>{{ physicalInventory().institutionName }}</p>
+          <p class="text-sm font-bold text-base-content">{{ physicalInventory().title }}</p>
+          @if (physicalInventory().locationSubtitle; as locationSubtitle) {
+            <p>{{ locationSubtitle }}</p>
+          }
+          <p class="pt-2 text-[11px] normal-case font-medium tracking-normal text-base-content/60">
+            Generado por: {{ physicalInventory().generatedBy }} · Fecha: {{ formatDisplayDate(physicalInventory().generatedAt) }}
+          </p>
+        </div>
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[860px] border-collapse text-left">
+          <table class="w-full min-w-[1080px] border-collapse text-left">
           <thead>
-            <tr class="border-b border-base-300 bg-base-200/70 text-xs font-semibold uppercase tracking-wide text-base-content/60">
-              <th class="px-4 py-3">Codigo</th>
-              <th class="px-4 py-3">Descripcion</th>
-              <th class="px-4 py-3">Categoria</th>
-              <th class="px-4 py-3">Ubicacion</th>
-              <th class="px-4 py-3">Estado</th>
-              <th class="px-4 py-3 text-right">Acciones</th>
+            <tr class="border-b border-base-300 bg-base-200/70 text-center text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              <th rowspan="2" class="border-r border-base-300 px-3 py-3">Item</th>
+              <th rowspan="2" class="border-r border-base-300 px-4 py-3 text-left">Descripción del bien</th>
+              <th rowspan="2" class="border-r border-base-300 px-3 py-3">Ubicación</th>
+              <th colspan="3" class="border-r border-base-300 px-3 py-2">Estado</th>
+              <th rowspan="2" class="border-r border-base-300 px-3 py-3">Marca</th>
+              <th rowspan="2" class="border-r border-base-300 px-4 py-3 text-left">Observaciones</th>
+              <th rowspan="2" class="px-3 py-3">Cantidad</th>
+            </tr>
+            <tr class="border-b border-base-300 bg-base-200/70 text-center text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              <th class="px-2 py-2">B</th>
+              <th class="px-2 py-2">R</th>
+              <th class="border-r border-base-300 px-2 py-2">M</th>
             </tr>
           </thead>
           <tbody class="text-sm">
-            @for (asset of visibleAssetRows(); track asset.id) {
+            @for (asset of visibleAssetRows(); track asset.id; let index = $index) {
               <tr class="group border-b border-base-300 last:border-b-0 hover:bg-base-200/20">
-                <td class="px-4 py-3 font-medium text-base-content">{{ asset.code }}</td>
-                <td class="px-4 py-3 text-base-content/70">{{ asset.description }}</td>
-                <td class="px-4 py-3 text-base-content/70">{{ asset.category }}</td>
-                <td class="px-4 py-3 text-base-content/70">{{ asset.location }}</td>
-                <td class="px-4 py-3">
-                  <span
-                    class="inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold"
-                    [class]="getAssetStatusClass(asset.condition)"
-                  >
-                    {{ asset.condition }}
-                  </span>
+                <td class="border-r border-base-300 px-3 py-3 text-center font-medium text-base-content">
+                  {{ (assetCurrentPage() - 1) * assetPageSize + index + 1 }}
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <div class="flex items-center justify-end gap-2">
-                    <app-table-icon-action
-                      icon="visibility"
-                      label="Ver activo"
-                      tone="view"
-                      [routerLink]="['/inventory', asset.id]"
-                    />
-                  </div>
+                <td class="border-r border-base-300 px-4 py-3 text-base-content/75">
+                  <a class="font-medium hover:text-primary hover:underline" [routerLink]="['/inventory', asset.id]">
+                    {{ asset.assetDescription }}
+                  </a>
                 </td>
+                <td class="border-r border-base-300 px-3 py-3 text-center text-base-content/70">{{ asset.location }}</td>
+                <td class="px-2 py-3 text-center font-semibold text-base-content">{{ asset.good ? 'X' : '' }}</td>
+                <td class="px-2 py-3 text-center font-semibold text-base-content">{{ asset.regular ? 'X' : '' }}</td>
+                <td class="border-r border-base-300 px-2 py-3 text-center font-semibold text-base-content">{{ asset.bad ? 'X' : '' }}</td>
+                <td class="border-r border-base-300 px-3 py-3 text-center text-base-content/70">{{ asset.brand }}</td>
+                <td class="border-r border-base-300 px-4 py-3 text-base-content/70">{{ asset.observations }}</td>
+                <td class="px-3 py-3 text-center text-base-content/70">{{ asset.quantity }}</td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="px-6 py-12 text-center">
+                <td colspan="9" class="px-6 py-12 text-center">
                   <div class="flex flex-col items-center gap-3 text-base-content/55">
                     <span class="material-symbols-outlined rounded-full bg-base-200 p-3 text-3xl">inventory_2</span>
                     <p class="text-sm font-medium">No hay activos que coincidan con los filtros aplicados.</p>

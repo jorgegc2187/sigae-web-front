@@ -10,9 +10,10 @@ import { StatusBadgeComponent, StatusBadgeTone } from '../../../../shared/ui/sta
 import { TableIconActionComponent } from '../../../../shared/ui/table-icon-action/table-icon-action.component';
 import {
   AssetReportFilters,
-  AssetReportRow,
   LoanReportFilters,
   LoanReportRow,
+  PhysicalInventoryReport,
+  PhysicalInventoryReportRow,
   ReportExportFormat,
   ReportFilterOption,
   ReportsService,
@@ -84,37 +85,32 @@ export class ReportsHomeComponent {
     };
   });
 
-  readonly assetReportResource = this.reportsService.assetsReportResource(this.assetReportFilters);
-  readonly assetRows = computed<AssetReportRow[]>(() =>
-    this.assetReportResource.hasValue() ? this.assetReportResource.value() : [],
+  readonly physicalInventoryResource = this.reportsService.physicalInventoryResource(this.assetReportFilters);
+  readonly physicalInventory = computed<PhysicalInventoryReport>(() =>
+    this.physicalInventoryResource.hasValue() ? this.physicalInventoryResource.value() : {
+      ugelName: null,
+      institutionName: '',
+      title: 'INVENTARIO FÍSICO DE BIENES PATRIMONIALES',
+      locationSubtitle: null,
+      generatedBy: '',
+      generatedAt: '',
+      rows: [],
+    },
   );
-  readonly assetReportError = computed(() => !!this.assetReportResource.error());
-
-  readonly filteredAssetRows = computed(() => {
-    const categoryId = this.assetCategoryId();
-    const locationId = this.assetLocationId();
-    const dateRange = this.assetDateRange();
-
-    return this.assetRows().filter((row) => {
-      const matchesCategory = categoryId === 'all' || row.categoryId === categoryId;
-      const matchesLocation = locationId === 'all' || row.locationId === locationId;
-      const matchesDate = this.matchesDateRange(row.acquisitionDate, dateRange);
-
-      return matchesCategory && matchesLocation && matchesDate;
-    });
-  });
+  readonly assetRows = computed<PhysicalInventoryReportRow[]>(() => this.physicalInventory().rows);
+  readonly assetReportError = computed(() => !!this.physicalInventoryResource.error());
 
   readonly assetTotalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredAssetRows().length / this.assetPageSize)),
+    Math.max(1, Math.ceil(this.assetRows().length / this.assetPageSize)),
   );
 
   readonly visibleAssetRows = computed(() => {
     const start = (this.assetCurrentPage() - 1) * this.assetPageSize;
-    return this.filteredAssetRows().slice(start, start + this.assetPageSize);
+    return this.assetRows().slice(start, start + this.assetPageSize);
   });
 
   readonly assetResultLabel = computed(() =>
-    this.buildResultLabel(this.filteredAssetRows().length, this.assetCurrentPage(), this.assetPageSize),
+    this.buildResultLabel(this.assetRows().length, this.assetCurrentPage(), this.assetPageSize),
   );
 
   readonly loanReportFilters = computed<LoanReportFilters>(() => {
@@ -256,7 +252,7 @@ export class ReportsHomeComponent {
   }
 
   reloadAssetReport(): void {
-    this.assetReportResource.reload();
+    this.physicalInventoryResource.reload();
   }
 
   reloadLoanReport(): void {
