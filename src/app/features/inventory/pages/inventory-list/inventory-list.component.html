@@ -301,18 +301,6 @@
         </div>
       </section>
 
-      <app-bulk-selection-banner
-        [visible]="shouldShowSelectAllFilteredAssetsBanner()"
-        [visibleSelectedCount]="visibleSelectedAssetsCount()"
-        [totalFilteredCount]="filteredAssets().length"
-        itemLabelSingular="activo"
-        itemLabelPlural="activos"
-        scopeLabel="del inventario"
-        [allFilteredSelected]="isAllFilteredAssetsSelected()"
-        (selectAllRequested)="selectAllFilteredAssets()"
-        (clearRequested)="clearAssetSelection()"
-      />
-
       <section class="overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
         <div class="overflow-x-auto">
           <table class="w-full min-w-[1380px] border-collapse text-left">

@@ -13,6 +13,7 @@ import { SearchInputComponent } from '../../../../shared/ui/search-input/search-
 import { SelectFieldComponent, SelectFieldOption } from '../../../../shared/ui/select-field/select-field.component';
 import { TableIconActionComponent } from '../../../../shared/ui/table-icon-action/table-icon-action.component';
 import { CategoriesService } from '../../../categories/services/categories.service';
+import { LocationsService } from '../../../locations/services/locations.service';
 import { AssetCondition } from '../../models/inventory.model';
 import { AssetsService } from '../../services/assets.service';
 import { openInventoryLabelPrint } from '../../utils/inventory-label-print.util';
@@ -39,6 +40,7 @@ type CreatedAtSortDirection = 'desc' | 'asc';
 export class InventoryListComponent {
   private readonly assetsService = inject(AssetsService);
   private readonly categoriesService = inject(CategoriesService);
+  private readonly locationsService = inject(LocationsService);
   private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -65,7 +67,16 @@ export class InventoryListComponent {
   );
 
   readonly groupedAssetsResource = this.assetsService.listGroupedResource(this.query, this.categoryId);
-  readonly assets = toSignal(this.assetsService.list(), { initialValue: [] });
+  readonly listResource = this.assetsService.listPageResource(
+    this.listQuery,
+    this.listCategoryId,
+    this.listStatus,
+    this.listLocationId,
+    this.listCurrentPage,
+    this.listPageSize,
+    this.listCreatedAtSort,
+  );
+  readonly locations = toSignal(this.locationsService.list(), { initialValue: [] });
   readonly categories = toSignal(this.categoriesService.list(), { initialValue: [] });
   readonly currentView = computed<InventoryView>(() =>
     this.activeView().get('view') === 'grouped' ? 'grouped' : 'list',
@@ -81,11 +92,9 @@ export class InventoryListComponent {
   readonly isEmpty = computed(() => !this.isLoading() && this.groupedAssets().length === 0);
   readonly listLocationOptions = computed<SelectFieldOption[]>(() => [
     { value: 'all', label: 'Todas las ubicaciones' },
-    ...Array.from(
-      new Map(
-        this.assets().map((asset) => [asset.locationId, { value: asset.locationId, label: asset.locationName }]),
-      ).values(),
-    ).sort((left, right) => left.label.localeCompare(right.label, 'es')),
+    ...this.locations()
+      .map((location) => ({ value: location.id, label: location.name }))
+      .sort((left, right) => left.label.localeCompare(right.label, 'es')),
   ]);
   readonly listStatusOptions: SelectFieldOption[] = [
     { value: 'all', label: 'Todos los estados' },
@@ -122,43 +131,22 @@ export class InventoryListComponent {
     && (this.isAllFilteredGroupsSelected()
       || (this.areAllVisibleSelected() && this.groupedAssets().length > this.visibleSelectedGroupsCount())),
   );
-  readonly filteredAssets = computed(() => {
-    const query = this.listQuery().trim().toLowerCase();
-    const categoryId = this.listCategoryId();
-    const status = this.listStatus();
-    const locationId = this.listLocationId();
-
-    const filteredAssets = this.assets().filter((asset) => {
-      const matchesQuery =
-        !query
-        || asset.name.toLowerCase().includes(query)
-        || asset.code.toLowerCase().includes(query)
-        || asset.serial?.toLowerCase().includes(query)
-        || asset.locationName.toLowerCase().includes(query);
-      const matchesCategory = categoryId === 'all' || asset.categoryId === categoryId;
-      const matchesStatus = status === 'all' || asset.condition === status;
-      const matchesLocation = locationId === 'all' || asset.locationId === locationId;
-      return matchesQuery && matchesCategory && matchesStatus && matchesLocation;
-    });
-
-    const direction = this.listCreatedAtSort();
-    return [...filteredAssets].sort((left, right) => {
-      const leftTime = Date.parse(left.createdAt);
-      const rightTime = Date.parse(right.createdAt);
-      const difference = (Number.isNaN(leftTime) ? 0 : leftTime) - (Number.isNaN(rightTime) ? 0 : rightTime);
-      return direction === 'asc' ? difference : -difference;
-    });
+  readonly listPage = computed(() => this.listResource.hasValue() ? this.listResource.value() : {
+    items: [],
+    page: this.listCurrentPage(),
+    size: this.listPageSize,
+    totalElements: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false,
   });
-  readonly listTotalPages = computed(() => Math.max(1, Math.ceil(this.filteredAssets().length / this.listPageSize)));
-  readonly visibleAssets = computed(() => {
-    const start = (this.listCurrentPage() - 1) * this.listPageSize;
-    return this.filteredAssets().slice(start, start + this.listPageSize);
-  });
+  readonly visibleAssets = computed(() => this.listPage().items.map((asset) => this.assetsService.toInventoryAsset(asset)));
+  readonly listTotalPages = computed(() => Math.max(1, this.listPage().totalPages));
   readonly listResultLabel = computed(() => {
-    const total = this.filteredAssets().length;
+    const total = this.listPage().totalElements;
     if (total === 0) return 'Mostrando 0 activos';
-    const start = (this.listCurrentPage() - 1) * this.listPageSize + 1;
-    const end = Math.min(start + this.listPageSize - 1, total);
+    const start = (this.listPage().page - 1) * this.listPage().size + 1;
+    const end = Math.min(start + this.listPage().items.length - 1, total);
     return `Mostrando ${start} a ${end} de ${total} activos`;
   });
   readonly hasSelectedAssets = computed(() => this.selectedAssetIds().length > 0);
@@ -169,7 +157,7 @@ export class InventoryListComponent {
   readonly shouldShowSelectAllFilteredAssetsBanner = computed(() =>
     this.selectedAssetsCount() > 0
     && (this.isAllFilteredAssetsSelected()
-      || (this.areAllVisibleAssetsSelected() && this.filteredAssets().length > this.visibleSelectedAssetsCount())),
+      || (this.areAllVisibleAssetsSelected() && this.listPage().totalElements > this.visibleSelectedAssetsCount())),
   );
 
   constructor() {
@@ -309,7 +297,7 @@ export class InventoryListComponent {
   }
 
   selectAllFilteredAssets(): void {
-    this.selectedAssetIds.set(this.filteredAssets().map((asset) => asset.id));
+    this.selectedAssetIds.set(this.visibleAssets().map((asset) => asset.id));
     this.isAllFilteredAssetsSelected.set(true);
   }
 

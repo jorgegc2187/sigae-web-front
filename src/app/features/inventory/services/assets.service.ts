@@ -11,6 +11,7 @@ import {
   AssetResponse,
   AssetTraceabilityEntry,
   InventoryAsset,
+  PageResponse,
 } from '../models/inventory.model';
 
 interface AssetTraceabilityResponse {
@@ -68,9 +69,43 @@ export class AssetsService {
   }
 
   list() {
-    return this.http.get<AssetResponse[]>(this.baseUrl).pipe(
+    return this.http.get<AssetResponse[]>(`${this.baseUrl}/all`).pipe(
       map((assets) => assets.map((asset) => this.toInventoryAsset(asset))),
     );
+  }
+
+  listPageResource(
+    search: () => string,
+    categoryId: () => string,
+    condition: () => string,
+    locationId: () => string,
+    page: () => number,
+    size: number,
+    sortDirection: () => string,
+  ) {
+    return httpResource<PageResponse<AssetResponse>>(() => {
+      const params = new URLSearchParams({
+        page: String(page()),
+        size: String(size),
+        sortDirection: sortDirection(),
+      });
+      const normalizedSearch = search().trim();
+      if (normalizedSearch) params.set('search', normalizedSearch);
+      if (categoryId() !== 'all') params.set('categoryId', categoryId());
+      if (condition() !== 'all') params.set('condition', condition());
+      if (locationId() !== 'all') params.set('locationId', locationId());
+      return `${this.baseUrl}?${params.toString()}`;
+    }, {
+      defaultValue: {
+        items: [],
+        page: 1,
+        size,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrevious: false,
+      },
+    });
   }
 
   getById(id: string) {
@@ -155,7 +190,7 @@ export class AssetsService {
     return conditions[condition];
   }
 
-  private toInventoryAsset(asset: AssetResponse): InventoryAsset {
+  toInventoryAsset(asset: AssetResponse): InventoryAsset {
     const condition = asset.condition;
     const activeLoanId = asset.activeLoanId ?? undefined;
     const availableForLoan =

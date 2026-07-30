@@ -99,6 +99,16 @@ export interface AssetResponse {
   activeLoanId?: string | null;
 }
 
+export interface PageResponse<T> {
+  items: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 export interface AssetRequest {
   code: string | null;
   name: string;
